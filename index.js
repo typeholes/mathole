@@ -6,11 +6,11 @@ Vue.component('eq-var', {
   },
   template: 
   `
-  <div> 
+  <span> 
     {{ src.displayName }} 
-    <button v-on:click="src.handler">log</button>
-  </div>
+  </span>
   ` 
+//     <button v-on:click="src.handler">log</button>
 })
 
 Vue.component('eq-op', {
@@ -19,27 +19,32 @@ Vue.component('eq-op', {
   },
   template: 
   `
-  <div> 
-    op: {{ src.op }} 
-  </div>
+  <span> (
+    <component v-bind:is="src.left.component" :src="src.left"  ></component>
+    {{ src.op }} 
+    <component v-bind:is="src.right.component" :src="src.right"  ></component>
+    )
+    </span> 
   ` 
 })
 
 
-var eqVars = {}
+var eqRoot = 
+new EqOp(
+  new EqVar("Var 1", "var1", 5),
+  "+",
+  new EqOp(
+    new EqVar("Var 2", "var1", 7),
+    "*",
+    new EqVar("Var 3", "var2", 9),
+  )
+);
 
 var app = new Vue({
   el: '#app',
   data: {
-    eqVars: {},
+    root: eqRoot,
     logEqVar: logEqVar,
   },
 
-}) 
-
-
- Vue.set(app.eqVars, "var1", new EqVar("Var 1", "var1", 5));
-
- Vue.set(app.eqVars, "var2", new EqVar("Var 2", "var2", 7));
-
- Vue.set(app.eqVars, "op1", new EqOp("var1", "var2", "+"));
+}); 

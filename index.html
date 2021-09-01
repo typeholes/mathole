@@ -6,12 +6,7 @@
 <body>
  
 <div id="app">
-  <ul id="eq-list">
-    <li v-for="src in eqVars">
-      <component v-bind:is="src.component" :src="src"  ></component>
-    </li>
-  </ul>
-
+  <component v-bind:is="root.component" :src="root"  ></component>
 </div>
 
 

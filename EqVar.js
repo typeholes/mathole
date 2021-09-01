@@ -4,16 +4,16 @@ class EqVar {
         this.varName=varName;
         this.value=value;
         this.component="eq-var";
-        this.handler=function() { console.log(this.displayName); }
+        this.handler=function() { console.log(displayName); }
     }
 }
 
 class EqOp {
-    constructor( left, right, op ) {
+    constructor( left, op, right ) {
         this.left = left;
         this.right = right;
         this.op = op;
         this.component = "eq-op";
-        this.handler=function() { console.log(this.op); }
+        this.handler=function() { console.log(op); }
     }
 }
