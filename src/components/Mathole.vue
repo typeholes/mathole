@@ -17,7 +17,7 @@ const count = ref(0)
 <template>
 
   <!-- <h1>{{ root }}</h1> -->
-  <Equation :root="root"></Equation>
+  <Equation :root="root" id="equation"></Equation>
 
 </template>
 

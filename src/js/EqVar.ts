@@ -21,7 +21,7 @@ class EqVar  extends EqNode {
 
     eqString() { return this.varName; }
 
-    valString(excludes) { 
+    valString(excludes: [string]) { 
         if ( excludes.includes(this.varName)) {
             return this.varName; 
         } else {

@@ -2,19 +2,21 @@
 import EqNodeView from './EqNodeView.vue';
 import EqOpView  from './EqOpView.vue';
 import EqVarView from  './EqVarView.vue';
+import { inject } from  'vue'
 
 defineProps({
     src: null,
 })
 
+const getView = inject('getView');
 
 </script>
 
 <template>
-  <button v-on:click.self="$bubble('select-term',src)" > (      
-    <component v-bind:is="src.left.resolveView()" :src="src.left" ></component>
+  <button> (      
+    <component v-bind:is="getView(src.left.component)" :src="src.left" ></component>
     {{ src.op }}
-    <component v-bind:is="src.right.resolveView()" :src="src.right" ></component>
+    <component v-bind:is="getView(src.right.component)" :src="src.right" ></component>
     )
     </button>
 </template>

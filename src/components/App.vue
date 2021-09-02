@@ -1,7 +1,7 @@
 <script setup>
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import { ref } from 'vue'
+import { ref, provide } from 'vue'
 import Mathole from './Mathole.vue';
 import EqVar from "../js/EqVar.ts";
 import EqOp from "../js/EqOp.ts";
@@ -25,9 +25,18 @@ new EqOp(
   )
 );
 
-EqNode.viewMap[EqNode.component]=EqNodeView;
-EqNode.viewMap[EqVar.component]=EqVarView;
-EqNode.viewMap[EqOp.component]=EqOpView;
+var viewMaps = {}
+
+function addViewMap(containerId, key, value, maps=viewMaps) {
+  maps[containerId] ||= {};
+  maps[containerId][key]=value;
+}
+
+function getView(containerId, key, maps=viewMaps) { return maps[containerId][key]; }
+
+provide('addViewMap', addViewMap);
+provide('getView', getView);
+
 
 </script>
 

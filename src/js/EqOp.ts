@@ -20,7 +20,9 @@ class EqOp extends EqNode {
 
     eqString() { return '(' + this.left.eqString() + ' ' + this.op + ' ' + this.right.eqString() + ')'; }
 
-    valString(excludes) { return '(' + this.left.valString(excludes) + ' ' + this.op + ' ' + this.right.valString(excludes) + ')'; }
+    valString(excludes: [string]) { return '(' + this.left.valString(excludes) + ' ' + this.op + ' ' + this.right.valString(excludes) + ')'; }
+
+    replaceLeft(left: { left: EqNode; }) { return new EqOp ( left.left, this.op, this.right); }
 
 }
 

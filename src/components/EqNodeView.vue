@@ -7,7 +7,7 @@ defineProps({
 </script>
 
 <template>
-  <div> <H2>EqNode object found</H2></div>
+  <div> Empty </div>
 
 </template>
 

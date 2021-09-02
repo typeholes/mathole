@@ -1,6 +1,5 @@
 export default
-class EqNode {
-    static viewMap =  {};
+class EqNode {    
     static component = 'eq-node-view';
     component: string;
     
@@ -10,9 +9,6 @@ class EqNode {
 
     eqString() { return "eq node"; }
 
-    valString(excludes) { return "eq node val"; } 
+    valString(excludes: [string]) { return "eq node val"; } 
 
-    resolveView() {
-        return EqNode.viewMap[this.component];
-    }
 }
