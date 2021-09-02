@@ -17,6 +17,7 @@ import { provide, inject, ref, toRefs } from 'vue';
 const props = defineProps({
     root: EqNode,
     id: String,
+    acceptEquation: null,
 })
 
 const { root, id } = toRefs(props);
@@ -52,14 +53,11 @@ const getView = makeViewMap(inject, provide, id.value, handleSelection, selected
                 <component :is="getView(root.component)" :src="root" ></component>
             </td>
             <td>
-                <TermViewVue id="term-view"></TermViewVue>
-            </td>
-            <td>
-                <VarViewVue id="var-view"></VarViewVue>
+                <button @click="acceptEquation">Accept Equation</button>
             </td>
         </tr>
         <tr >
-            <td colspan="3">
+            <td colspan="2">
                 <div>
                     selected: {{ selected && selected.eqString() }}
                     <br />

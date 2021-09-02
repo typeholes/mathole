@@ -17,11 +17,13 @@ provide('handleSelection', handleSelection);
 provide('viewMapKey', id);
 provide('getView', getView);
 provide('isSelected', (item,selected)=> {
-    if (item.varName == selectedRef.value.varName) {
+    if ( (item.varName && item.varName === selectedRef.value.varName ) || (item.op && item.op === selectedRef.value.op)) {
         return "selected";
     } else {
         return "";
     }
 });
+
+return getView;
 
 }

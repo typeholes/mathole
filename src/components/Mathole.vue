@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import Equation from './Equation.vue';
+import EquationMaker from './EquationMaker.vue';
 import EqVar from "../js/EqVar.ts";
 import EqOp from "../js/EqOp.ts";
 import EqNode from "../js/EqNode.ts";
@@ -11,13 +11,11 @@ const props = defineProps({
     root: EqNode,
 })
 
-const count = ref(0)
 </script>
 
 <template>
 
-  <!-- <h1>{{ root }}</h1> -->
-  <Equation :root="root" id="equation"></Equation>
+  <EquationMaker></EquationMaker>
 
 </template>
 

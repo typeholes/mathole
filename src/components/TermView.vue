@@ -15,19 +15,23 @@ const props = defineProps({
     id: String
 })
 
+
 const { id } = toRefs(props);
 
 var selected = ref(new EqNode());
 
 const terms = [
-    new EqOp( new EqNode(), "+", new EqVar("Var 2", "var2", 3) ),
-    new EqOp( new EqNode(), "*", new EqVar("Var 3", "var3", 5) ),
-    new EqOp( new EqNode(), "^", new EqVar("Var 4", "var4", 7) ),
+    new EqOp( new EqNode(), "+",  new EqNode() ),
+    new EqOp( new EqNode(), "*",  new EqNode() ),
+    new EqOp( new EqNode(), "^",  new EqNode() ),
 ];
+
+const handleTermVarSelection = inject('handleTermVarSelection');
 
 function handleSelection (e, dummy, l_selected=selected) { 
       if (!l_selected) return;
     l_selected.value = e;
+    handleTermVarSelection(l_selected.value);
 }
 
 makeViewMap(inject, provide, id.value, handleSelection, selected,
