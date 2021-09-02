@@ -26,7 +26,8 @@ const vars = [
 ];
 
 function handleSelection (e, dummy, l_selected=selected) { 
-console.log('var  view selection');
+      if (!l_selected) return;
+    l_selected.value = e;
 }
 
 makeViewMap(inject, provide, id.value, handleSelection, selected, 

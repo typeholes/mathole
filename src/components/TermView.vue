@@ -26,7 +26,8 @@ const terms = [
 ];
 
 function handleSelection (e, dummy, l_selected=selected) { 
-  console.log('term  view selection');
+      if (!l_selected) return;
+    l_selected.value = e;
 }
 
 makeViewMap(inject, provide, id.value, handleSelection, selected,
@@ -42,7 +43,7 @@ makeViewMap(inject, provide, id.value, handleSelection, selected,
 <template>
    <div>    
      <ul v-for="term in terms"> 
-         <li><eq-op-view :src="term"></eq-op-view></li>
+         <li><eq-op-view :src="term" ></eq-op-view></li>
      </ul> 
    </div>
 </template>

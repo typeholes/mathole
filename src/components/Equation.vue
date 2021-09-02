@@ -21,10 +21,9 @@ const props = defineProps({
 
 const { root, id } = toRefs(props);
 
-var selected = ref(new EqNode());
+var selected = ref(new EqNode);
 
 function handleSelection(e, l_root = root, l_selected = selected) {
-    console.log('equation  view selection');
     if (!l_selected) return;
     l_selected.value = e;
     var val = l_root.value;
@@ -51,7 +50,7 @@ makeViewMap(inject, provide, id.value, handleSelection, selected,
     <table border="1">
         <tr>
             <td>
-                <component :is="EqOpView" :src="root"></component>
+                <component :is="EqOpView" :src="root" ></component>
             </td>
             <td>
                 <TermViewVue id="term-view"></TermViewVue>

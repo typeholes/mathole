@@ -13,7 +13,7 @@ defineProps({
 </script>
 
 <template>
-  <button :class="isSelected(src)" @click.self="()=>handleSelection(src)">
+  <button :class="isSelected(src) " @click.self="()=>handleSelection(src)">
     {{ src.displayName }}
   </button>
 
@@ -24,6 +24,6 @@ button {
   background-color: #dee7a7;
 }
 button.selected {
-  background-color: #42b983;
+  background-color: #9342b9;
 }
 </style>

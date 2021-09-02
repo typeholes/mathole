@@ -16,6 +16,12 @@ function getView(componentId) {
 provide('handleSelection', handleSelection);
 provide('viewMapKey', id);
 provide('getView', getView);
-provide('isSelected', (item)=> item == selectedRef.value ? "selected" : "" );
+provide('isSelected', (item,selected)=> {
+    if (item.varName == selectedRef.value.varName) {
+        return "selected";
+    } else {
+        return "";
+    }
+});
 
 }
