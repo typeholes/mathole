@@ -6,22 +6,29 @@ import EqNode from "../js/EqNode.ts";
 import EqNodeView from './EqNodeView.vue';
 import EqOpView  from './EqOpView.vue';
 import EqVarView from  './EqVarView.vue';
+import displayExpr from "../js/mathUtil";
 
-import {provide, ref} from 'vue';
+import {provide, ref, toRefs} from 'vue';
 
-defineProps({
+const props = defineProps({
     root: null,
 })
 
+const { root } = toRefs(props);
+
 var selected = ref(new EqNode());
 
-    function handleSelection (e) { 
-      selected.value = e;       
-//      displayExpr(this.root.eqString(), this.root.valString(e.eqString()), e.eqString()); 
-    }
+
+function handleSelection (e, l_root=root, l_selected=selected) { 
+    selected.value = e;       
+    var val = l_root.value;
+    if (root) displayExpr(val.eqString(), val.valString(e.eqString()), e.eqString()); 
+}
 
 provide('handleSelection', handleSelection);
 provide('selected', selected);
+provide('root','root');
+
 
 </script>
 

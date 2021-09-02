@@ -1,6 +1,8 @@
+import {simplify, parse, derivative} from 'mathjs';
+import { addHandlers, createHovers } from './mathHovers';
+export default displayExpr;
 
-
-math.simplify.rules.push({ l: 'n1*n2/(n1*n3)', r: 'n2/n3' });
+simplify.rules.push({ l: 'n1*n2/(n1*n3)', r: 'n2/n3' });
 
 
 function texExpr(expr) {
@@ -8,14 +10,14 @@ function texExpr(expr) {
   let implicit = 'hide';
 
   return function() { 
-    var node = math.parse(expr);
+    var node = parse(expr);
     return  node.transform(addHandlers).toTex({ parenthesis: parenthesis, implicit: implicit }); 
   };
 }
 
 function texDerivative(expr, selectedVar) {
-  var node = math.parse(expr);
-  return ()=> math.derivative(node, selectedVar).toTex();
+  var node = parse(expr);
+  return ()=> derivative(node, selectedVar).toTex();
 }
 
 function displayExpr(expr, valExpr, selectedVar) {

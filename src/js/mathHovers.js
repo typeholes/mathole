@@ -1,3 +1,5 @@
+export {createHovers, addHandlers};
+
 const createHovers = function () {
     var myEvent = function (node) {
       node.addEventListener("mouseover", function (event) {
