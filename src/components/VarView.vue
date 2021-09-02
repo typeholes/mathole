@@ -7,9 +7,9 @@ import EqNodeView from './EqNodeView.vue';
 import EqOpView  from './EqOpView.vue';
 import EqVarView from  './EqVarView.vue';
 import displayExpr from "../js/mathUtil";
-import { makeViewMap } from "../js/makeViewMap";
 
 import {provide, ref, toRefs, inject} from 'vue';
+import { makeViewMap } from "../js/makeViewMap";
 
 const props = defineProps({    
     id: String
@@ -19,14 +19,14 @@ const { id } = toRefs(props);
 
 var selected = ref(new EqNode());
 
-const terms = [
-    new EqOp( new EqNode(), "+", new EqVar("Var 2", "var2", 3) ),
-    new EqOp( new EqNode(), "*", new EqVar("Var 3", "var3", 5) ),
-    new EqOp( new EqNode(), "^", new EqVar("Var 4", "var4", 7) ),
+const vars = [
+    new EqVar("Var 2", "var2", 3),
+    new EqVar("Var 3", "var3", 5),
+    new EqVar("Var 4", "var4", 7),
 ];
 
 function handleSelection (e, l_root=root, l_selected=selected) { 
- 
+
 }
 
 makeViewMap(inject, provide, id.value, handleSelection, 
@@ -35,14 +35,12 @@ makeViewMap(inject, provide, id.value, handleSelection,
     [EqOp.component,EqOpView],
 );
 
-
-
 </script>
 
 <template>
    <div>    
-     <ul v-for="term in terms"> 
-         <li><eq-op-view :src="term"></eq-op-view></li>
+     <ul v-for="_var in vars"> 
+         <li><eq-var-view :src="_var"></eq-var-view></li>
      </ul> 
    </div>
 </template>

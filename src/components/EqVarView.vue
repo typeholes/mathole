@@ -11,7 +11,7 @@ defineProps({
 </script>
 
 <template>
-  <button v-on:click.self="handleSelection(src)">
+  <button>
     {{ src.displayName }}
   </button>
 

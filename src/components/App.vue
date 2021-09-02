@@ -34,8 +34,8 @@ function addViewMap(containerId, key, value, maps=viewMaps) {
 
 function getView(containerId, key, maps=viewMaps) { return maps[containerId][key]; }
 
-provide('addViewMap', addViewMap);
-provide('getView', getView);
+provide('appAddViewMap', addViewMap);
+provide('appGetView', getView);
 
 
 </script>

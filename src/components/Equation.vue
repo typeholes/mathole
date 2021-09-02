@@ -8,9 +8,11 @@ import EqOpView from './EqOpView.vue';
 import EqVarView from './EqVarView.vue';
 import displayExpr from "../js/mathUtil";
 import TermViewVue from "./TermView.vue";
+import VarViewVue from "./VarView.vue";
+import { makeViewMap } from "../js/makeViewMap";
 
 import { provide, inject, ref, toRefs } from 'vue';
-import { string } from "mathjs";
+
 
 const props = defineProps({
     root: EqNode,
@@ -27,18 +29,12 @@ function handleSelection(e, l_root = root, l_selected = selected) {
     if (root) displayExpr(val.eqString(), val.valString(e.eqString()), e.eqString());
 }
 
-const appGetView = inject('getView');
-const appAddViewMap = inject('addViewMap');
+makeViewMap(inject, provide, id.value, handleSelection, 
+    [EqNode.component,EqNodeView], 
+    [EqVar.component,EqVarView], 
+    [EqOp.component,EqOpView],
+);
 
-appAddViewMap(id.value, EqNode.component,EqNodeView);
-appAddViewMap(id.value, EqVar.component,EqVarView);
-appAddViewMap(id.value, EqOp.component,EqOpView);
-
-function getView(componentId) { return appGetView(id.value, componentId); }
-
-provide('handleSelection', handleSelection);
-provide('viewMapKey', id);
-provide('getView', getView);
 
 
 </script>
@@ -50,7 +46,10 @@ provide('getView', getView);
                 <component :is="EqOpView" :src="root"></component>
             </td>
             <td>
-                <TermViewVue></TermViewVue>
+                <TermViewVue id="term-view"></TermViewVue>
+            </td>
+            <td>
+                <VarViewVue id="var-view"></VarViewVue>
             </td>
         </tr>
         <tr >
