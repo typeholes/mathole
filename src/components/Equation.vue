@@ -13,9 +13,8 @@ import { makeViewMap } from "../js/makeViewMap";
 
 import { provide, inject, ref, toRefs } from 'vue';
 
-
-const props = defineProps({
-    root: EqNode,
+const props = defineProps({    
+    root: null,
     id: String,
 })
 
@@ -26,7 +25,7 @@ var selected = ref(new EqNode);
 function handleSelection(e, l_root = root, l_selected = selected) {
     if (!l_selected) return;
     l_selected.value = e;
-    var val = l_root.value;
+    var val = l_root.value;    
     if (val) {
         if (e) {
             displayExpr(val.eqString(), val.valString(e.eqString()), e.eqString());

@@ -1,21 +1,54 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, shallowRef, provide, readonly } from 'vue'
 import EquationMaker from './EquationMaker.vue';
-import EqVar from "../js/EqVar.ts";
-import EqOp from "../js/EqOp.ts";
-import EqNode from "../js/EqNode.ts";
+import Game from './Game.vue';
+import EqVar from '../js/EqVar';
 
 
 const props = defineProps({
-    msg: String,
-    root: EqNode,
 })
+
+const mode = shallowRef(EquationMaker);
+
+function setMode(newMode) {
+  mode.value = newMode;
+}
+
+const varCount = ref(0);
+const varList = ref([new EqVar('Time', 't', 0, false)]);
+
+function addVar() { 
+    console.log(['add var', varList.value]);
+    varCount.value++;
+    var num = varCount.value.toString();
+    varList.value.push(new EqVar('Var ' + num, 'var' + num, varCount.value ));
+}
+
+provide('addVar',addVar);
+provide('varList', varList);
+provide('timeVar', readonly(ref(varList.value[0])));
+
+window.setInterval(()=>varList.value[0].value++, 500);
 
 </script>
 
 <template>
-
-  <EquationMaker></EquationMaker>
+  <table width="100%" border="1">
+    <tr>
+      <td>
+        <button @click="setMode(EquationMaker)">Equation</button>
+        <button @click="setMode(Game)">Game</button>
+      </td>
+    </tr>
+    <tr>
+      <td >
+        <keep-alive>
+          <component :is="mode"></component>        
+        </keep-alive>
+      </td>
+    </tr>
+  </table>
+  
 
 </template>
 

@@ -7,7 +7,7 @@ import EqVar from '../js/EqVar';
 import Equation from './Equation.vue';
 import TargetEquation from './TargetEquation.vue';
 
-const root = ref(new EqVar('t','t',0));
+const root = ref(inject('timeVar').value.clone());
 
 const root2 = ref ( new  EqOp( new EqVar('a','a',1), '+', new EqVar('b','b',2)));
 

@@ -41,7 +41,7 @@ provide('appGetView', getView);
 </script>
 
 <template>
-<Mathole msg="hi" :root="eqRoot"></Mathole>
+<Mathole></Mathole>
 </template>
 
 <style>

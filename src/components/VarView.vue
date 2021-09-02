@@ -19,18 +19,8 @@ const { id } = toRefs(props);
 
 var selected = ref(new EqNode());
 
-const vars = ref([
-    
-]);
-
-const varCount = ref(0);
-
-function addVar(l_vars = vars) { 
-    console.log(['add var', vars]);
-    varCount.value++;
-    var num = varCount.value.toString();
-    vars.value.push(new EqVar('Var ' + num, 'var' + num, varCount.value ));
-}
+const varList = inject('varList');
+const addVar = inject('addVar');
 
 const handleTermVarSelection = inject('handleTermVarSelection');
 
@@ -51,7 +41,7 @@ makeViewMap(inject, provide, id.value, handleSelection, selected,
 <template>
    <div>    
        <button @click="addVar">Add Var</button>
-     <ul v-for="_var in vars"> 
+     <ul v-for="_var in varList"> 
          <li><eq-var-view :src="_var"></eq-var-view></li>
      </ul> 
    </div>

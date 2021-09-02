@@ -10,13 +10,15 @@ class EqVar  extends EqNode {
     varName: string;
     value: number;
     component: string;
+    buyable: boolean;
 
-    constructor(displayName: string, varName: string, value: number) {
+    constructor(displayName: string, varName: string, value: number, buyable: boolean = true) {
         super();
         this.displayName=displayName;
         this.varName=varName;
         this.value=value;        
         this.component = EqVar.component;
+        this.buyable = buyable;
     }
 
     eqString() { return this.varName; }
@@ -27,5 +29,9 @@ class EqVar  extends EqNode {
         } else {
             return this.value.toString();
         }
+    }
+
+    clone() {
+        return new EqVar(this.displayName, this.varName, this.value, this.buyable);
     }
 }
