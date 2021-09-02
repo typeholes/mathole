@@ -37,14 +37,17 @@ function displayExpr(expr, valExpr, selectedVar) {
       toTex: texDerivative(valExpr, selectedVar),      
     },
   ];
-
+  
+  
   const partPromises = parts.map( (part) => { 
     var el = document.getElementById(part.id);
     var tex = part.toTex();
     return MathJax.tex2chtmlPromise(tex, { em: 64, ex: 16, display: false, scale: 2 }).then(
     nodeHtml => {
-      el.innerHTML = '';
-      el.appendChild(nodeHtml);
+      if (el) {
+        el.innerHTML = '';
+        el.appendChild(nodeHtml);
+      }
     });
   });
 
@@ -53,6 +56,7 @@ function displayExpr(expr, valExpr, selectedVar) {
 
     Promise.all(partPromises).then(MathJax.typesetPromise()).then(createHovers);
 
+  
 
 
 }

@@ -24,12 +24,20 @@ const { root, id } = toRefs(props);
 var selected = ref(new EqNode());
 
 function handleSelection(e, l_root = root, l_selected = selected) {
-    selected.value = e;
+    console.log('equation  view selection');
+    if (!l_selected) return;
+    l_selected.value = e;
     var val = l_root.value;
-    if (root) displayExpr(val.eqString(), val.valString(e.eqString()), e.eqString());
+    if (val) {
+        if (e) {
+            displayExpr(val.eqString(), val.valString(e.eqString()), e.eqString());
+        } else {
+            displayExpr(val.eqString(), val.valString(""), "t");
+        }
+    } 
 }
 
-makeViewMap(inject, provide, id.value, handleSelection, 
+makeViewMap(inject, provide, id.value, handleSelection, selected, 
     [EqNode.component,EqNodeView], 
     [EqVar.component,EqVarView], 
     [EqOp.component,EqOpView],
@@ -55,7 +63,7 @@ makeViewMap(inject, provide, id.value, handleSelection,
         <tr >
             <td colspan="3">
                 <div>
-                    selected: {{ selected.eqString() }}
+                    selected: {{ selected && selected.eqString() }}
                     <br />
                     <!-- <div> selected: {{ selected }} <br> -->
                     Pretty:

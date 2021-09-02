@@ -1,4 +1,4 @@
-export function makeViewMap(inject, provide, id, handleSelection, ...entries) {
+export function makeViewMap(inject, provide, id, handleSelection, selectedRef, ...entries) {
 
 const appGetView = inject('appGetView');
 const appAddViewMap = inject('appAddViewMap');
@@ -16,5 +16,6 @@ function getView(componentId) {
 provide('handleSelection', handleSelection);
 provide('viewMapKey', id);
 provide('getView', getView);
+provide('isSelected', (item)=> item == selectedRef.value ? "selected" : "" );
 
 }

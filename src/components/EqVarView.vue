@@ -2,7 +2,9 @@
 
 import { inject} from 'vue';
 
-const  handleSelection = inject('handleSelection');
+const handleSelection = inject('handleSelection');
+const isSelected = inject('isSelected');
+
 
 defineProps({
     src: null,
@@ -11,14 +13,17 @@ defineProps({
 </script>
 
 <template>
-  <button>
+  <button :class="isSelected(src)" @click.self="()=>handleSelection(src)">
     {{ src.displayName }}
   </button>
 
 </template>
 
 <style scoped>
-a {
-  color: #42b983;
+button {
+  background-color: #dee7a7;
+}
+button.selected {
+  background-color: #42b983;
 }
 </style>

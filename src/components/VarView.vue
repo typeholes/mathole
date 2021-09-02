@@ -25,11 +25,11 @@ const vars = [
     new EqVar("Var 4", "var4", 7),
 ];
 
-function handleSelection (e, l_root=root, l_selected=selected) { 
-
+function handleSelection (e, dummy, l_selected=selected) { 
+console.log('var  view selection');
 }
 
-makeViewMap(inject, provide, id.value, handleSelection, 
+makeViewMap(inject, provide, id.value, handleSelection, selected, 
     [EqNode.component,EqNodeView], 
     [EqVar.component,EqVarView], 
     [EqOp.component,EqOpView],
