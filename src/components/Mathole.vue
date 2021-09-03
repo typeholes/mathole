@@ -6,6 +6,8 @@ import EqVar from '../js/EqVar';
 
 import { ST } from '../js/ST';
 
+
+
 const props = defineProps({
 })
 
@@ -29,11 +31,13 @@ provide('addVar',addVar);
 provide('varList', varList);
 provide('timeVar', readonly(ref(varList.value[0])));
 
-const { count } = ST.useState( 'count' );
+const { count, _count2 } = ST.useState( 'count', '_count2' );
 
 window.setInterval(()=>varList.value[0].value++, 500);
 
-window.setInterval(count.increment, 500);
+window.setInterval(count._increment, 500);
+window.setInterval(_count2.double, 5000);
+
 
 </script>
 
@@ -45,6 +49,8 @@ window.setInterval(count.increment, 500);
         <button @click="setMode(Game)">Game</button>
         <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button>
         {{ count.ref }}
+        {{ _count2.ref }}
+        <button @click="ST.saveAll">save</button>
       </td>
     </tr>
     <tr>

@@ -1,16 +1,26 @@
-import { createStore, useStore } from 'vuex'
+import { createStore, storeKey, useStore } from 'vuex'
 import { computed } from 'vue';
-import { VuexPersistence } from 'vuex-persist';
+import { VuexPersistence,  } from 'vuex-persist';
 
 
 export class ST {
   static defs : { name: {init: any, mutations: {}}} | {} = {};
   static _store: any ;
+  static vuexPersistence: VuexPersistence<any>;
 
   static addDef(name, init, mutations) {    
+
+    // add a save method if there are any mutations that are filtered
+    if (Object.keys(mutations).find( (name) => name.startsWith("_"))) { 
+      mutations['#save'] = (state) => { 
+        return state[name] = state[name] ; 
+      }
+    }
+
     this.defs[name] = {};
     this.defs[name].init=init;
     this.defs[name].mutations = mutations;        
+
 
 
     return ST;
@@ -21,13 +31,24 @@ export class ST {
 
     const vuexLocal = new VuexPersistence({
       storage: window.localStorage,
+      reducer: (state) => { 
+        var keep = Object.keys(state)
+        .filter(key => !key.startsWith("_"))
+        .reduce((obj, key) => {
+          obj[key] = state[key];
+          return obj;
+        }, {});
+        return keep;
+      },
       filter: (mutation) => {
-        return true;
+        return !mutation.type.match('^.*\._');
       }
     });
+    ST.vuexPersistence=vuexLocal;
 
     var inits = {};
     var mutations = {}
+    
     Object.keys(ST.defs).forEach( (name) => {  
       const descr = ST.defs[name];
       inits[name]=descr.init;
@@ -65,6 +86,19 @@ export class ST {
   
     return ret;
   }
+
+  static saveAll() {
+    Object.keys(ST.defs).forEach( (name =>{
+      var mutations = ST.defs[name].mutations;
+      var save = Object.keys(mutations).find( (mut) => mut == '#save');
+      if (save) {
+        ST._store.commit(name + '.' + save);
+      }
+    
+    })
+    );
+  }
 }
+
 
 

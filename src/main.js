@@ -8,11 +8,11 @@ import { ST } from './js/ST';
 
 
 ST.addDef( 'count', 0 ,{
-  increment: (state) => { state.count++; },
+  _increment: (state) => { return state.count++; },
 });
 
-ST.addDef( 'count2', 1 ,{
-double: (state) => { state.count2*=2; },
+ST.addDef( '_count2', 1 ,{
+double: (state) => { return state._count2*=2; },
 });
 
 const MyPlugin = {
