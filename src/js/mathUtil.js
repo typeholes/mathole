@@ -20,20 +20,20 @@ function texDerivative(expr, selectedVar) {
   return ()=> derivative(node, selectedVar).toTex();
 }
 
-function displayExpr(expr, valExpr, selectedVar) {
+function displayExpr(expr, valExpr, selectedVar, elementIdPrefix="") {
 
 
   const parts = [
-    { id: 'pretty',
+    { id: elementIdPrefix + 'pretty',
       toTex: texExpr(expr),
     },
-    { id: 'pretty-val',
+    { id: elementIdPrefix + 'pretty-val',
       toTex: texExpr(valExpr),
     },
-    { id: 'derivative',
+    { id: elementIdPrefix + 'derivative',
       toTex: texDerivative(expr, selectedVar),      
     },
-    { id: 'derivative-val',
+    { id: elementIdPrefix + 'derivative-val',
       toTex: texDerivative(valExpr, selectedVar),      
     },
   ];

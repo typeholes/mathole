@@ -30,7 +30,7 @@ function handleSelection(e, l_root = root, l_selected = selected) {
     var val = l_root.value;
     if (val) {
         if (e) {
-            displayExpr(val.eqString(), val.valString(e.eqString()), e.eqString());
+            displayExpr(val.eqString(), val.valString(e.eqString()), e.eqString(),'target-');
         } else {
             displayExpr(val.eqString(), val.valString(""), "t");
         }
@@ -63,12 +63,12 @@ const getView = makeViewMap(inject, provide, id.value, handleSelection, selected
                     <br />
                     <!-- <div> selected: {{ selected }} <br> -->
                     Pretty:
-                    <div id="pretty"></div>
+                    <div id="target-pretty"></div>
                     <br />Pretty Val:
-                    <div id="pretty-val"></div>
+                    <div id="target-pretty-val"></div>
                     <br />Derivative:
-                    <div id="derivative"></div>Derivative Val:
-                    <div id="derivative-val"></div>
+                    <div id="target-derivative"></div>Derivative Val:
+                    <div id="target-derivative-val"></div>
                 </div>
             </td>
         </tr>

@@ -1,9 +1,10 @@
 <script setup>
-import { ref, shallowRef, provide, readonly } from 'vue'
+import { ref, shallowRef, provide, readonly, computed } from 'vue'
 import EquationMaker from './EquationMaker.vue';
 import Game from './Game.vue';
 import EqVar from '../js/EqVar';
 
+import { useStore } from 'vuex'
 
 const props = defineProps({
 })
@@ -28,7 +29,13 @@ provide('addVar',addVar);
 provide('varList', varList);
 provide('timeVar', readonly(ref(varList.value[0])));
 
+const store = useStore();
+const count = computed(() => store.state.count);
+const increment = () => store.commit('increment');
+
 window.setInterval(()=>varList.value[0].value++, 500);
+
+window.setInterval(increment, 500);
 
 </script>
 
@@ -38,6 +45,8 @@ window.setInterval(()=>varList.value[0].value++, 500);
       <td>
         <button @click="setMode(EquationMaker)">Equation</button>
         <button @click="setMode(Game)">Game</button>
+        <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button>
+        {{ count }}
       </td>
     </tr>
     <tr>
@@ -54,6 +63,6 @@ window.setInterval(()=>varList.value[0].value++, 500);
 
 <style scoped>
 a {
-  color: #42b983;
+  color: #000000;
 }
 </style>
