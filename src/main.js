@@ -1,26 +1,19 @@
 import { createApp } from 'vue'
 import App from './components/App.vue'
-import { createStore } from 'vuex'
-import { VuexPersistence } from 'vuex-persist';
 
-const vuexLocal = new VuexPersistence({
-  storage: window.localStorage,
+
+import { ST } from './js/ST';
+
+
+
+
+ST.addDef( 'count', 0 ,{
+  increment: (state) => { state.count++; },
 });
 
-// Create a new store instance.
-const store = createStore({
-  state () {
-    return {
-      count: 0
-    }
-  },
-  mutations: {
-    increment (state) {
-      state.count++
-    }
-  },
-  plugins: [vuexLocal.plugin],
-})
+ST.addDef( 'count2', 1 ,{
+double: (state) => { state.count2*=2; },
+});
 
 const MyPlugin = {
     install(app, options) {
@@ -35,7 +28,8 @@ const MyPlugin = {
     },
   };
 
+
 let app = createApp(App);
 app.use(MyPlugin);    
-app.use(store);
+app.use(ST.init());
 app.mount('#app')

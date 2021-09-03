@@ -4,7 +4,7 @@ import EquationMaker from './EquationMaker.vue';
 import Game from './Game.vue';
 import EqVar from '../js/EqVar';
 
-import { useStore } from 'vuex'
+import { ST } from '../js/ST';
 
 const props = defineProps({
 })
@@ -29,13 +29,11 @@ provide('addVar',addVar);
 provide('varList', varList);
 provide('timeVar', readonly(ref(varList.value[0])));
 
-const store = useStore();
-const count = computed(() => store.state.count);
-const increment = () => store.commit('increment');
+const { count } = ST.useState( 'count' );
 
 window.setInterval(()=>varList.value[0].value++, 500);
 
-window.setInterval(increment, 500);
+window.setInterval(count.increment, 500);
 
 </script>
 
@@ -46,7 +44,7 @@ window.setInterval(increment, 500);
         <button @click="setMode(EquationMaker)">Equation</button>
         <button @click="setMode(Game)">Game</button>
         <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button>
-        {{ count }}
+        {{ count.ref }}
       </td>
     </tr>
     <tr>
