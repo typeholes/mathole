@@ -1,50 +1,44 @@
 <script setup>
 
 import { inject, provide, ref} from 'vue';
-import EqNode from '../js/EqNode';
-import EqOp from '../js/EqOp';
-import EqVar from '../js/EqVar';
+import * as Eq  from '../js/Eq';
+
 import Equation from './Equation.vue';
 import TargetEquation from './TargetEquation.vue';
 
-const root = ref(inject('timeVar').value.clone());
+import { ST } from '../js/ST';
 
-const root2 = ref ( new  EqOp( new EqVar('a','a',1), '+', new EqVar('b','b',2)));
-
-const selectedTerm = ref(new EqNode);
-
-const selectedVar = ref(new EqNode);
+const { equation, targetEquation, _selectedOp, _selectedVar } = 
+    ST.useState( 'equation', 'targetEquation', '_selectedOp', '_selectedVar');
 
 function combineSelected() {
-    if (selectedTerm.value.component != EqOp.component || selectedVar.value.component != EqVar.component) {
+    if (selectedTerm.value.component != Eq.EqOp__type || selectedVar.value.component != Eq.EqVar__type) {
         return root.value;
     }
-    return new EqOp( root.value, selectedTerm.value.op, selectedVar.value);
+    return Eq.newEqOp( root.value, selectedTerm.value.op, selectedVar.value);
 }
 
 function handleTermVarSelection(selected) {
     if (!selected) return;
-    if (selected.component == EqOp.component) {
-        selectedTerm.value = selected;
+    if (selected.component == Eq.EqOp__type) {
+        selectedTerm.set(selected);
     }
-    if (selected.component == EqVar.component) {
-        selectedVar.value = selected;
+    if (selected.component == Eq.EqVar__type) {
+        selectedVar.set(selected);
     }
-    root2.value = combineSelected();
+    targetEquation.set(combineSelected());
 }
 
-provide('handleTermVarSelection',handleTermVarSelection);
-
 function acceptEquation() { 
-    root.value = combineSelected();
+    equation.set( targetEquation.value ) ;
 }
 
 </script>
 
 <template>
   <div>
-      <Equation :root="root" id="equation"></Equation>
-      <TargetEquation :root="root2" id="equation-target" :accept-equation="()=>acceptEquation()"></TargetEquation>
+      <Equation id="equation"></Equation>
+      <TargetEquation id="equation-target" ></TargetEquation>
   </div>
 </template>
 

@@ -1,46 +1,38 @@
 <script setup>
 
-import EqVar from "../js/EqVar.ts";
-import EqOp from "../js/EqOp.ts";
-import EqNode from "../js/EqNode.ts";
+import * as Eq  from '../js/Eq';
+
 import EqNodeView from './EqNodeView.vue';
 import EqOpView from './EqOpView.vue';
 import EqVarView from './EqVarView.vue';
 import displayExpr from "../js/mathUtil";
-import TermViewVue from "./TermView.vue";
-import VarViewVue from "./VarView.vue";
+
 import { makeViewMap } from "../js/makeViewMap";
 
 import { provide, inject, ref, toRefs } from 'vue';
 
+import { ST } from '../js/ST';
 
 const props = defineProps({
-    root: EqNode,
     id: String,
-    acceptEquation: null,
 })
 
-const { root, id } = toRefs(props);
+const { id } = toRefs(props);
 
-var selected = ref(new EqNode);
+const { equation, targetEquation, _selectedVar, _selectedOp } = ST.useState ( 'equation', 'targetEquation', '_selectedVar', '_selectedOp' );
 
-function handleSelection(e, l_root = root, l_selected = selected) {
-    if (!l_selected) return;
-    l_selected.value = e;
-    var val = l_root.value;
-    if (val) {
-        if (e) {
-            displayExpr(val.eqString(), val.valString(e.eqString()), e.eqString(),'target-');
-        } else {
-            displayExpr(val.eqString(), val.valString(""), "t");
-        }
-    } 
+function combineEquation() {
+    if (! (_selectedVar.value()['varName'] && _selectedOp.value()['op'])) return equation.value();
+    if (equation.value() != targetEquation.value()) return targetEquation.value();        
+    var newEq = Eq.newEqOp(equation.value(), _selectedOp.value().op, _selectedVar.value());
+    targetEquation.set( newEq);
+    return Eq.newEq;
 }
 
-const getView = makeViewMap(inject, provide, id.value, handleSelection, selected, 
-    [EqNode.component,EqNodeView], 
-    [EqVar.component,EqVarView], 
-    [EqOp.component,EqOpView],
+const getView = makeViewMap(inject, provide, id.value, _selectedVar.value, 
+    [Eq.EqEmpty__type,EqNodeView], 
+    [Eq.EqVar__type,EqVarView], 
+    [Eq.EqOp__type,EqOpView],
 );
 
 
@@ -50,16 +42,16 @@ const getView = makeViewMap(inject, provide, id.value, handleSelection, selected
     <table border="1">
         <tr>
             <td>
-                <component :is="getView(root.component)" :src="root" ></component>
+                <component :is="getView(targetEquation.value().component)" :src="combineEquation()" ></component>
             </td>
             <td>
-                <button @click="acceptEquation">Accept Equation</button>
+                <button @click="equation.setToTarget">Accept Equation</button>
             </td>
         </tr>
         <tr >
             <td colspan="2">
                 <div>
-                    selected: {{ selected && selected.eqString() }}
+                    selected: {{ _selectedVar.value()  }}
                     <br />
                     <!-- <div> selected: {{ selected }} <br> -->
                     Pretty:

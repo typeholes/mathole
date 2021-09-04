@@ -1,15 +1,16 @@
 <script setup>
 
-import EqVar from "../js/EqVar.ts";
-import EqOp from "../js/EqOp.ts";
-import EqNode from "../js/EqNode.ts";
+import * as Eq  from '../js/Eq';
+
 import EqNodeView from './EqNodeView.vue';
 import EqOpView  from './EqOpView.vue';
 import EqVarView from  './EqVarView.vue';
 import displayExpr from "../js/mathUtil";
 
-import {provide, ref, toRefs, inject} from 'vue';
+import {  inject, provide, ref, toRefs} from 'vue';
 import { makeViewMap } from "../js/makeViewMap";
+
+import { ST } from "../js/ST"
 
 const props = defineProps({    
     id: String
@@ -17,31 +18,22 @@ const props = defineProps({
 
 const { id } = toRefs(props);
 
-var selected = ref(new EqNode());
+var selected = ref(Eq.newEqEmpty());
 
-const varList = inject('varList');
-const addVar = inject('addVar');
+const { varList } = ST.useState( 'varList' );
 
-const handleTermVarSelection = inject('handleTermVarSelection');
-
-function handleSelection (e, dummy, l_selected=selected) { 
-      if (!l_selected) return;
-    l_selected.value = e;
-    handleTermVarSelection(l_selected.value);
-}
-
-makeViewMap(inject, provide, id.value, handleSelection, selected, 
-    [EqNode.component,EqNodeView], 
-    [EqVar.component,EqVarView], 
-    [EqOp.component,EqOpView],
+makeViewMap(inject, provide, id.value, selected, 
+    [Eq.EqEmpty__type,EqNodeView], 
+    [Eq.EqVar__type,EqVarView], 
+    [Eq.EqOp__type,EqOpView],
 );
 
 </script>
 
 <template>
    <div>    
-       <button @click="addVar">Add Var</button>
-     <ul v-for="_var in varList"> 
+       <button @click="varList.addVar">Add Var</button>
+     <ul v-for="_var in varList.value()"> 
          <li><eq-var-view :src="_var"></eq-var-view></li>
      </ul> 
    </div>

@@ -1,22 +1,24 @@
 <script setup>
-import EqNodeView from './EqNodeView.vue';
-import EqOpView  from './EqOpView.vue';
-import EqVarView from  './EqVarView.vue';
+import * as Eq  from '../js/Eq';
+
 import { inject } from  'vue'
-import EqNode from '../js/EqNode';
+
+
+
+import { ST } from '../js/ST';
 
 defineProps({
     src: null,
 })
 
 const getView = inject('getView');
-const handleSelection = inject('handleSelection');
-const isSelected = inject('isSelected');
+
+const { _selectedOp } = ST.useState ('_selectedOp');
 
 </script>
 
 <template>
-  <button :class="isSelected(src) " @click.self="()=>handleSelection(src)">      
+  <button :class="_selectedOp.isSelected(src) " @click.self="()=>_selectedOp.set(src)">      
     <component v-bind:is="getView(src.left.component)" :src="src.left" ></component>
     {{ src.op }}
     <component v-bind:is="getView(src.right.component)" :src="src.right" ></component>

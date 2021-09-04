@@ -1,9 +1,9 @@
 <script setup>
 
 import { inject} from 'vue';
+import { ST } from '../js/ST';
 
-const handleSelection = inject('handleSelection');
-const isSelected = inject('isSelected');
+const { _selectedVar } = ST.useState( '_selectedVar' );
 
 
 defineProps({
@@ -13,7 +13,7 @@ defineProps({
 </script>
 
 <template>
-  <button :class="isSelected(src) " @click.self="()=>handleSelection(src)">
+  <button :class="_selectedVar.isSelected(src)"  @click.self="()=>_selectedVar.set(src)">
     {{ src.displayName }}
   </button>
 

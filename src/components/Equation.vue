@@ -1,44 +1,31 @@
 <script setup>
 
-import EqVar from "../js/EqVar.ts";
-import EqOp from "../js/EqOp.ts";
-import EqNode from "../js/EqNode.ts";
+import * as Eq  from '../js/Eq';
+
 import EqNodeView from './EqNodeView.vue';
 import EqOpView from './EqOpView.vue';
 import EqVarView from './EqVarView.vue';
 import displayExpr from "../js/mathUtil";
-import TermViewVue from "./TermView.vue";
-import VarViewVue from "./VarView.vue";
+import TermView from "./TermView.vue";
+import VarView from "./VarView.vue";
 import { makeViewMap } from "../js/makeViewMap";
 
 import { provide, inject, ref, toRefs } from 'vue';
 
+import { ST } from '../js/ST';
+
 const props = defineProps({    
-    root: null,
     id: String,
 })
 
-const { root, id } = toRefs(props);
+const { id } = toRefs(props);
 
-var selected = ref(new EqNode);
+const { equation, _selectedVar } = ST.useState( 'equation', '_selectedVar' );
 
-function handleSelection(e, l_root = root, l_selected = selected) {
-    if (!l_selected) return;
-    l_selected.value = e;
-    var val = l_root.value;    
-    if (val) {
-        if (e) {
-            displayExpr(val.eqString(), val.valString(e.eqString()), e.eqString());
-        } else {
-            displayExpr(val.eqString(), val.valString(""), "t");
-        }
-    } 
-}
-
-const getView = makeViewMap(inject, provide, id.value, handleSelection, selected, 
-    [EqNode.component,EqNodeView], 
-    [EqVar.component,EqVarView], 
-    [EqOp.component,EqOpView],
+const getView = makeViewMap(inject, provide, id.value, _selectedVar.value(), 
+    [Eq.EqEmpty__type,EqNodeView], 
+    [Eq.EqVar__type,EqVarView], 
+    [Eq.EqOp__type,EqOpView],
 );
 
 
@@ -48,19 +35,19 @@ const getView = makeViewMap(inject, provide, id.value, handleSelection, selected
     <table border="1">
         <tr>
             <td>
-                <component :is="getView(root.component)" :src="root" ></component>
+                <component :is="getView(equation.value().component)" :src="equation.value()" ></component>
             </td>
             <td>
-                <TermViewVue id="term-view"></TermViewVue>
+                <TermView id="term-view"></TermView>
             </td>
             <td>
-                <VarViewVue id="var-view"></VarViewVue>
+                <VarView id="var-view"></VarView>
             </td>
         </tr>
         <tr >
             <td colspan="3">
                 <div>
-                    selected: {{ selected && selected.eqString() }}
+                    selected: {{ _selectedVar.value()/*.eqString()*/ }}
                     <br />
                     <!-- <div> selected: {{ selected }} <br> -->
                     Pretty:

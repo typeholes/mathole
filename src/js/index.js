@@ -1,22 +1,22 @@
 export {eqRoot};
 export default {};
 
-import {EqOp, EqVar} from "./EqVar";
+import * as Eq  from './js/Eq';
 
-var eqRoot = 
-new EqOp(
-  new EqVar("Var 1", "var1", 5),
-  "+",
-  new EqOp(
-    new EqVar("Var 2", "var2", 7),
-    "*",
-    new EqOp(
-      new EqVar("Var 3", "var3", 9),
-      "^",
-      new EqVar("Var 4", "var4", 11),
-    )
-  )
-);
+// var eqRoot = 
+// Eq.newEqOp(
+//   Eq.newEqVar("Var 1", "var1", 5),
+//   "+",
+//   Eq.newEqOp(
+//     Eq.newEqVar("Var 2", "var2", 7),
+//     "*",
+//     Eq.newEqOp(
+//       Eq.newEqVar("Var 3", "var3", 9),
+//       "^",
+//       Eq.newEqVar("Var 4", "var4", 11),
+//     )
+//   )
+// );
 
 // Vue.use((Vue) => {
 //   Vue.prototype.$bubble = function $bubble(eventName, ...args) {
