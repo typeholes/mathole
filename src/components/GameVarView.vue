@@ -1,20 +1,23 @@
 <script setup>
 
-import { inject} from 'vue';
-
+import { toRefs } from '@vue/reactivity';
+import { ST } from '../js/ST';
 
 defineProps({
-    src: null,
+    idx: null,
 })
+
+
+const { varList } = ST.useState( 'varList' );
 
 </script>
 
 <template>
     <div>
-        {{ src.displayName }}: {{ src.value }} {{ src.buyable }}
-        <button @click="src.value++" v-if="src.buyable">
+        {{ varList.value()[idx].displayName }}: {{ varList.value()[idx].value }} {{ varList.value()[idx].buyable }}
+        <button @click="varList.incrementValue(idx)" v-if="varList.value()[idx].buyable">
             buy
-        </button>
+        </button> <br>
     </div>
 </template>
 

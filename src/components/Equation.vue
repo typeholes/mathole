@@ -5,7 +5,6 @@ import * as Eq  from '../js/Eq';
 import EqNodeView from './EqNodeView.vue';
 import EqOpView from './EqOpView.vue';
 import EqVarView from './EqVarView.vue';
-import displayExpr from "../js/mathUtil";
 import TermView from "./TermView.vue";
 import VarView from "./VarView.vue";
 import { makeViewMap } from "../js/makeViewMap";

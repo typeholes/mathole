@@ -2,14 +2,15 @@
 
 import { inject, provide, ref} from 'vue';
 import GameVarView from './GameVarView.vue';
+import { ST } from '../js/ST';
 
-const varList = inject('varList');
+const { varList } = ST.useState( 'varList' ); 
 
 </script>
 
 <template>
-  <div v-for="_var in varList">
-      <GameVarView :src="_var"></GameVarView>
+  <div v-for="(_, idx) in varList.value()">
+      <GameVarView :idx="idx"></GameVarView>
   </div>
 </template>
 

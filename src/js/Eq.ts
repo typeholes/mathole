@@ -3,10 +3,14 @@
 export type EqEmpty = { __type: string }
 export const EqEmpty__type = 'EqEmpty';
 
+// need to move at least the mutable properties out of the type and into a list of seperate objects in the vuex state
+// may be best to move everything but index and __type
+
 export type EqVar = { 
+    index: number,
     displayName: string;
     varName: string;
-    value: number;
+    value: number; // Mutable, so always get from varList[index] as local value may not be in sync.
     __type: string;
     buyable: boolean;
 }
@@ -27,9 +31,9 @@ export function newEqEmpty() {
     };
 }
 
-export function newEqVar(displayName: string, varName: string, value: number, buyable: boolean = true) {
+export function newEqVar(index: number, displayName: string, varName: string, value: number, buyable: boolean = true) {
     return { __type: EqVar__type,
-        displayName: displayName, varName: varName, value: value, buyable: buyable
+        index: index, displayName: displayName, varName: varName, value: value, buyable: buyable
     }
 }
 
@@ -49,5 +53,15 @@ export function eqString(node : EqNode) : string  {
     return foo[node.__type](node);
 }
     
+export function valString(node : EqNode, varList: EqVar[], excludes: String[]) : string  { 
+    var foo = { 
+        [EqEmpty__type]: (node: EqEmpty) => '0',
+        [EqVar__type]: (node: EqVar) => excludes.includes(node.varName) ? node.varName : varList[node.index].value.toString(),
+        [EqOp__type]: (node: EqOp) => valString(node.left, varList, excludes) + ' ' + node.op + ' ' + valString(node.right, varList, excludes),        
+    };
+    if (!foo[node.__type]) { return "Not Found: " + node; }
+    return foo[node.__type](node);
+}
+
 
 
