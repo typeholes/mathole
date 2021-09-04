@@ -29,7 +29,7 @@ import * as Eq  from './js/Eq';
 //   };
 // });
 
-// Vue.component('equation', {
+// Vue.__type('equation', {
 //   props: { root: {}
 //   },
 //   data: function(){ return {
@@ -44,7 +44,7 @@ import * as Eq  from './js/Eq';
 //   template:
 //   `
 //   <div>    
-//     <component v-bind:is="root.component" :src="root" v-on:select-term="handleSelection" ></component>
+//     <component v-bind:is="root.__type" :src="root" v-on:select-term="handleSelection" ></component>
 //     <div> selected: {{ selected.eqString() }} <br>
 //       Pretty: <div id="pretty"></div> <br>
 //       Pretty Val: <div id="pretty-val"></div> <br>
@@ -56,7 +56,7 @@ import * as Eq  from './js/Eq';
 
 // });
 
-// Vue.component('eq-var', {
+// Vue.__type('eq-var', {
 //   props: {
 //     src:{},
 //   },
@@ -68,7 +68,7 @@ import * as Eq  from './js/Eq';
 //   ` 
 //   })
 
-// Vue.component('eq-op', {
+// Vue.__type('eq-op', {
 //   props: {
 //     src:{},
 //   },
@@ -78,9 +78,9 @@ import * as Eq  from './js/Eq';
 //   template: 
 //   `
 //   <button v-on:click.self="$bubble('select-term',src)" > (
-//     <component v-bind:is="src.left.component" :src="src.left" ></component>
+//     <component v-bind:is="src.left.__type" :src="src.left" ></component>
 //     {{ src.op }} 
-//     <component v-bind:is="src.right.component" :src="src.right" ></component>
+//     <component v-bind:is="src.right.__type" :src="src.right" ></component>
 //     )
 //     </button> 
 //   ` 

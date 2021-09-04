@@ -5,7 +5,6 @@ import * as Eq  from '../js/Eq';
 import EqNodeView from './EqNodeView.vue';
 import EqOpView from './EqOpView.vue';
 import EqVarView from './EqVarView.vue';
-import displayExpr from "../js/mathUtil";
 
 import { makeViewMap } from "../js/makeViewMap";
 
@@ -26,7 +25,7 @@ function combineEquation() {
     if (equation.value() != targetEquation.value()) return targetEquation.value();        
     var newEq = Eq.newEqOp(equation.value(), _selectedOp.value().op, _selectedVar.value());
     targetEquation.set( newEq);
-    return Eq.newEq;
+    return newEq;
 }
 
 const getView = makeViewMap(inject, provide, id.value, _selectedVar.value, 
@@ -42,7 +41,9 @@ const getView = makeViewMap(inject, provide, id.value, _selectedVar.value,
     <table border="1">
         <tr>
             <td>
-                <component :is="getView(targetEquation.value().component)" :src="combineEquation()" ></component>
+                <!-- TODO: untangle this gnarly state manipulation.  We should not change state on display and the logic should be moved out of the view -->
+                <component :is="combineEquation() && getView(targetEquation.value().__type)" :src="targetEquation.value()" ></component>
+                <!-- <component :is="getView(combineEquation().__type)" :src="combineEquation()" ></component> -->
             </td>
             <td>
                 <button @click="equation.setToTarget">Accept Equation</button>
@@ -51,7 +52,7 @@ const getView = makeViewMap(inject, provide, id.value, _selectedVar.value,
         <tr >
             <td colspan="2">
                 <div>
-                    selected: {{ _selectedVar.value()  }}
+                    selected: {{ Eq.eqString(_selectedVar.value())  }}
                     <br />
                     <!-- <div> selected: {{ selected }} <br> -->
                     Pretty:

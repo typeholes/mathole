@@ -15,7 +15,11 @@ ST.addDef('timeVar', timeVar, {
 
 ST.addDef('equation', timeVar, {
   set: (state, equation) => { return state.equation = equation; },
-  setToTarget: (state) => { state._selectedOp = dummyNode; state._selectedVar = dummyNode; return state.equation = state.targetEquation; },
+  setToTarget: (state) => { 
+    state._selectedOp = dummyNode; 
+    state._selectedVar = dummyNode; 
+    return state.equation = state.targetEquation; 
+  },
 });
 
 ST.addDef('targetEquation', timeVar, {

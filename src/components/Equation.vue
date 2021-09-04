@@ -35,7 +35,7 @@ const getView = makeViewMap(inject, provide, id.value, _selectedVar.value(),
     <table border="1">
         <tr>
             <td>
-                <component :is="getView(equation.value().component)" :src="equation.value()" ></component>
+                <component :is="getView(equation.value().__type)" :src="equation.value()" ></component>
             </td>
             <td>
                 <TermView id="term-view"></TermView>
@@ -47,7 +47,7 @@ const getView = makeViewMap(inject, provide, id.value, _selectedVar.value(),
         <tr >
             <td colspan="3">
                 <div>
-                    selected: {{ _selectedVar.value()/*.eqString()*/ }}
+                    selected: {{ Eq.eqString(equation.value()) }}
                     <br />
                     <!-- <div> selected: {{ selected }} <br> -->
                     Pretty:

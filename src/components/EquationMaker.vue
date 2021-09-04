@@ -12,7 +12,7 @@ const { equation, targetEquation, _selectedOp, _selectedVar } =
     ST.useState( 'equation', 'targetEquation', '_selectedOp', '_selectedVar');
 
 function combineSelected() {
-    if (selectedTerm.value.component != Eq.EqOp__type || selectedVar.value.component != Eq.EqVar__type) {
+    if (selectedTerm.value.__type != Eq.EqOp__type || selectedVar.value.__type != Eq.EqVar__type) {
         return root.value;
     }
     return Eq.newEqOp( root.value, selectedTerm.value.op, selectedVar.value);
@@ -20,10 +20,10 @@ function combineSelected() {
 
 function handleTermVarSelection(selected) {
     if (!selected) return;
-    if (selected.component == Eq.EqOp__type) {
+    if (selected.__type == Eq.EqOp__type) {
         selectedTerm.set(selected);
     }
-    if (selected.component == Eq.EqVar__type) {
+    if (selected.__type == Eq.EqVar__type) {
         selectedVar.set(selected);
     }
     targetEquation.set(combineSelected());

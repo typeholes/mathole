@@ -14,7 +14,7 @@ defineProps({
 
 <template>
   <button :class="_selectedVar.isSelected(src)"  @click.self="()=>_selectedVar.set(src)">
-    {{ src.displayName }}
+    {{ src && src.displayName }}    
   </button>
 
 </template>

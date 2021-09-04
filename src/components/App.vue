@@ -16,7 +16,9 @@ function addViewMap(containerId, key, value, maps=viewMaps) {
   maps[containerId][key]=value;
 }
 
-function getView(containerId, key, maps=viewMaps) { return maps[containerId][key]; }
+function getView(containerId, key, maps=viewMaps) {
+   return maps[containerId][key]; 
+}
 
 provide('appAddViewMap', addViewMap);
 provide('appGetView', getView);

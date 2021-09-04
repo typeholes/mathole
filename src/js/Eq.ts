@@ -41,10 +41,11 @@ export function newEqOp(left: EqNode, op:  string, right: EqNode) {
 
 export function eqString(node : EqNode) : string  { 
     var foo = { 
-        EqEmpty__type: (node: EqEmpty) => 'empty',
-        EqVar__type: (node: EqVar) => node.varName,
-        EqOp__type: (node: EqOp) => eqString(node.left) + ' ' + node.op + ' ' + eqString(node.right)
+        [EqEmpty__type]: (node: EqEmpty) => 'empty',
+        [EqVar__type]: (node: EqVar) => node.varName,
+        [EqOp__type]: (node: EqOp) => eqString(node.left) + ' ' + node.op + ' ' + eqString(node.right),        
     };
+    if (!foo[node.__type]) { return "Not Found: " + node; }
     return foo[node.__type](node);
 }
     

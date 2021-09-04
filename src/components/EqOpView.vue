@@ -18,10 +18,10 @@ const { _selectedOp } = ST.useState ('_selectedOp');
 </script>
 
 <template>
-  <button :class="_selectedOp.isSelected(src) " @click.self="()=>_selectedOp.set(src)">      
-    <component v-bind:is="getView(src.left.component)" :src="src.left" ></component>
+  <button :class="_selectedOp.isSelected(src) " @click.self="()=>_selectedOp.set(src)">          
+    <component v-bind:is="getView(src.left.__type)" :src="src.left" ></component>
     {{ src.op }}
-    <component v-bind:is="getView(src.right.component)" :src="src.right" ></component>
+    <component v-bind:is="getView(src.right.__type)" :src="src.right" ></component>
     </button>
 </template>
 
