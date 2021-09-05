@@ -92,7 +92,7 @@ ST.addDef('varMap', {t: timeGameVar}, {
     state.constant = state.score;
 //    state.constant = 0;
     state.score = 0;
-    state.varMap.t.value=0;
+    state.varMap.t.cntBought=0;
     state.varMap[varName].cntBought++;        
   }
   }, {
