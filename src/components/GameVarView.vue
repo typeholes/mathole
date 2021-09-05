@@ -14,11 +14,10 @@ const { varMap } = ST.useState( 'varMap' );
 </script>
 
 <template>
-    <div :v-if="varMap.value()[varName] && varMap.value()[varName].visible">
-    {{ varName }}
-        {{ varMap.value()[varName].displayName }}: {{ Math.round(GameVar.getValue(varMap.value()[varName])*100)/100 }} {{ varMap.value()[varName].buyable }}
-        <button @click="varMap.incrementValue(varName)" v-if="varMap.value()[varName].buyable">
-            buy
+    <div :v-if="varMap.value()[varName] && varMap.value()[varName].visible">    
+        {{ varMap.value()[varName].displayName }}: {{ Math.round(GameVar.getValue(varMap.value()[varName])*100)/100 }} 
+        <button @click="varMap.buy(varName)" v-if="varMap.value()[varName].buyable">
+            Cost: {{ GameVar.getCost(varMap.value()[varName]) }}
         </button> <br>
     </div>
 </template>

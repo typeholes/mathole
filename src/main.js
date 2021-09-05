@@ -10,7 +10,7 @@ import { displayExpr, evalEquation } from "./js/mathUtil";
 import { ST } from './js/ST';
 
 const timeEqVar = Eq.newEqVar('t');
-const timeGameVar = GameVar.newGameVar('Time', 0, false, true, GameVar.fId, GameVar.fId)
+const timeGameVar = GameVar.newGameVar('Time', 0, false, true, GameVar.fId, [], GameVar.fId, [])
 const dummyNode = Eq.newEqEmpty();
 
 
@@ -84,16 +84,20 @@ ST.addDef('varMap', {t: timeGameVar}, {
   addVar: (state) => {
     const cnt = Object.keys(state.varMap).length + 1;
     var varName = 'var'+cnt;
-    const newGameVar = GameVar.newGameVar(varName, 0, true, true, GameVar.fId, GameVar.fId);
+    const newGameVar = GameVar.newGameVar(varName, 0, true, true, GameVar.fId, [], GameVar.fId, []);
     state.varMap[varName]= newGameVar;
     return newGameVar;
   },
-  incrementValue: (state, varName) => {
-    state.constant = state.score;
-//    state.constant = 0;
-    state.score = 0;
-    state.varMap.t.cntBought=0;
-    state.varMap[varName].cntBought++;        
+  buy: (state, varName) => {
+    var varObj  = state.varMap[varName];
+    var cost = GameVar.getCost(varObj);
+    if (state.score >= cost) {
+      state.constant = state.score - cost;
+  //    state.constant = 0;
+      state.score = 0;
+      state.varMap.t.cntBought=0;
+      state.varMap[varName].cntBought++;        
+    }
   }
   }, {
 
