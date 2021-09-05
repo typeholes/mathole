@@ -1,13 +1,22 @@
-import {simplify, parse, derivative} from 'mathjs';
+import {simplify, parse, derivative, compile} from 'mathjs';
+import * as Eq from './Eq';
 import { addHandlers, createHovers } from './mathHovers';
+
 export default displayExpr;
+export { displayExpr, evalEquation };
+
 
 simplify.rules.push({ l: 'n1*n2/(n1*n3)', r: 'n2/n3' });
 
+function evalEquation(equation, varList) {
+  var scope = {}
+  varList.forEach( (v) => scope[v.varName] = v.value );
+  return compile(Eq.eqString(equation)).evaluate(scope);
+}
 
 function texExpr(expr) {
   let parenthesis = 'keep';
-  let implicit = 'hide';
+  let implicit = 'hide';  
 
   return function() { 
     var node = parse(expr);
@@ -17,7 +26,7 @@ function texExpr(expr) {
 
 function texDerivative(expr, selectedVar) {
   var node = parse(expr);
-  return ()=> derivative(node, selectedVar).toTex();
+  return ()=> derivative(node, selectedVar).toTex();  
 }
 
 function displayExpr(expr, valExpr, selectedVar, elementIdPrefix="") {

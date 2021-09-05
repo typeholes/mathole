@@ -5,6 +5,8 @@ import { ref, provide } from 'vue'
 import Mathole from './Mathole.vue';
 import * as Eq  from '../js/Eq';
 
+import { ST } from '../js/ST';
+
 import EqNodeView from './EqNodeView.vue';
 import EqOpView  from './EqOpView.vue';
 import EqVarView from  './EqVarView.vue';
@@ -23,6 +25,9 @@ function getView(containerId, key, maps=viewMaps) {
 provide('appAddViewMap', addViewMap);
 provide('appGetView', getView);
 
+var { lastTime } = ST.useState( 'lastTime' );
+
+var ticker = window.setInterval( lastTime.tick, 500 );
 
 </script>
 

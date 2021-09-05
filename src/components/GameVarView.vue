@@ -14,7 +14,7 @@ const { varList } = ST.useState( 'varList' );
 
 <template>
     <div>
-        {{ varList.value()[idx].displayName }}: {{ varList.value()[idx].value }} {{ varList.value()[idx].buyable }}
+        {{ varList.value()[idx].displayName }}: {{ Math.round(varList.value()[idx].value*100)/100 }} {{ varList.value()[idx].buyable }}
         <button @click="varList.incrementValue(idx)" v-if="varList.value()[idx].buyable">
             buy
         </button> <br>

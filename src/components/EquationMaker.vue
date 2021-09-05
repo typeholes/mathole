@@ -1,6 +1,6 @@
 <script setup>
 
-import { inject, provide, ref} from 'vue';
+import { inject, provide, ref, onActivated} from 'vue';
 import * as Eq  from '../js/Eq';
 
 import Equation from './Equation.vue';
@@ -33,7 +33,14 @@ function acceptEquation() {
     equation.set( targetEquation.value ) ;
 }
 
+        function mounted()  {
+        this.$nextTick(function () { 
+            _selectedVar.displayEquations() 
+            })
+        }
+
 </script>
+
 
 <template>
   <div>

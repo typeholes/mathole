@@ -4,13 +4,13 @@ import  { computed }  from 'vue';
 import { VuexPersistence,  } from 'vuex-persist';
 
 export class ST {
-  static defs : { name: {init: any, mutations: {}, methods: {}}} | {} = {};
+  static defs : { name: {init: any, mutations: {}, methods: {}}, onReset: (a,b)=>void} | {} = {};
   static _store: any ;
   static exportString: string = "";
   static vuexPersistence: VuexPersistence<any>;
 
 
-  static addDef(name, init, mutations = {}, methods = {}) {    
+  static addDef(name, init, mutations = {}, methods = {}, onReset) {    
 
     // add a save method if there are any mutations that are filtered
     if (Object.keys(mutations).find( (name) => name.startsWith("_"))) { 
@@ -23,6 +23,7 @@ export class ST {
     this.defs[name].init=init;
     this.defs[name].mutations = mutations;        
     this.defs[name].methods = methods;
+    this.defs[name].onReset = onReset;
 
 
     return ST;
@@ -68,6 +69,8 @@ export class ST {
       Object.keys(ST.defs).forEach( (name) => {  
         const descr = ST.defs[name];
         state[name] = descr.init;
+        var fn = ST.defs[name].onReset;
+        if (fn) fn(state[name], state);
       });
     };    
   

@@ -3,13 +3,28 @@ import App from './components/App.vue'
 
 import * as Eq  from './js/Eq';
 
-import displayExpr from "./js/mathUtil";
+import { displayExpr, evalEquation } from "./js/mathUtil";
 
 import { ST } from './js/ST';
 
 const timeVar = Eq.newEqVar(0, 'Time', 't', 0, false);
 
 const dummyNode = Eq.newEqEmpty();
+
+
+ST.addDef('lastTime', Date.now(), {
+  tick: (state) => {
+    var newTime = Date.now();
+    var diff = newTime - state.lastTime;
+    state.lastTime = newTime;
+    state.varList[0].value += diff/10000,880;
+    state.score = evalEquation(state.equation, state.varList);
+  }
+});
+
+ST.addDef('score', 0, {
+
+});
 
 ST.addDef('timeVar', timeVar, {
   _increment: (state) => { return state.timeVar.value++; },
@@ -57,6 +72,7 @@ ST.addDef('_selectedVar', Eq.newEqEmpty(), {
     return state._selectedVar = _var; 
   },
   clear: (state)=> { state._selectedOp = dummyNode; },
+  displayEquations: (state) => displayEquationStrings(state._selectedVar, state),
 }, {
   isSelected: (value, checkAgainst) => value == checkAgainst ? "selected" : "",
 });
@@ -71,7 +87,11 @@ ST.addDef('varList', [timeVar], {
   incrementValue: (state, idx) => {
     state.varList[idx].value++;
   }
-});
+  }, {
+
+  },
+  (varList) => varList[0].value=0
+);
 
 ST.addDef( 'count', 0 ,{
   _increment: (state) => { return state.count++; },
