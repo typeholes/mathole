@@ -20,7 +20,7 @@ const { id } = toRefs(props);
 
 var selected = ref(Eq.newEqEmpty());
 
-const { varList } = ST.useState( 'varList' );
+const { varMap } = ST.useState( 'varMap' );
 
 makeViewMap(inject, provide, id.value, selected, 
     [Eq.EqEmpty__type,EqNodeView], 
@@ -32,9 +32,9 @@ makeViewMap(inject, provide, id.value, selected,
 
 <template>
    <div>    
-       <button @click="varList.addVar">Add Var</button>
-     <ul v-for="_var in varList.value()"> 
-         <li><eq-var-view :src="_var"></eq-var-view></li>
+       <button @click="varMap.addVar">Add Var</button>
+     <ul v-for="(_, varName) in varMap.value()"> 
+         <li><eq-var-view :src="{varName}"></eq-var-view></li>
      </ul> 
    </div>
 </template>

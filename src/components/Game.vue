@@ -4,15 +4,16 @@ import { inject, provide, ref} from 'vue';
 import GameVarView from './GameVarView.vue';
 import { ST } from '../js/ST';
 
-const { varList, score } = ST.useState( 'varList', 'score' ); 
+const { varMap, score, constant } = ST.useState( 'varMap', 'score', 'constant' ); 
 
 </script>
 
 <template>
   <div>
-    <h1> Score: {{ score }} </h1>
-  <div v-for="(_, idx) in varList.value()">
-      <GameVarView :idx="idx"></GameVarView>
+    <h1> Score: {{ score.value() }} </h1>
+    constant: {{ constant }}
+  <div v-for="(_, varName) in varMap.value()">
+      <GameVarView :varName="varName"></GameVarView>
   </div>
   </div>
 </template>

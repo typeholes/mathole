@@ -17,10 +17,10 @@ function setMode(newMode) {
 }
 
 
-const { timeVar, count, _count2 } = ST.useState( 'timeVar', 'count', '_count2' );
+const { lastTime, count, _count2 } = ST.useState( 'lastTime', 'count', '_count2' );
 
 
-window.setInterval(()=>timeVar._increment, 500);
+window.setInterval(()=>lastTime.tick, 500);
 
 window.setInterval(count._increment, 500);
 window.setInterval(_count2.double, 5000);

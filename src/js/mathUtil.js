@@ -1,5 +1,7 @@
 import {simplify, parse, derivative, compile} from 'mathjs';
 import * as Eq from './Eq';
+import * as GameVar from './GameVar';
+
 import { addHandlers, createHovers } from './mathHovers';
 
 export default displayExpr;
@@ -8,10 +10,11 @@ export { displayExpr, evalEquation };
 
 simplify.rules.push({ l: 'n1*n2/(n1*n3)', r: 'n2/n3' });
 
-function evalEquation(equation, varList) {
-  var scope = {}
-  varList.forEach( (v) => scope[v.varName] = v.value );
-  return compile(Eq.eqString(equation)).evaluate(scope);
+function evalEquation(equation, varMap, constant) {
+  var scope = { constant: constant }
+  Object.keys(varMap).forEach( (varName) => scope[varName] = GameVar.getValue(varMap[varName]) );
+//  console.log(scope);
+  return compile('constant + ' + Eq.eqString(equation)).evaluate(scope);
 }
 
 function texExpr(expr) {

@@ -10,11 +10,13 @@ defineProps({
     src: null,
 })
 
+const { varMap } = ST.useState( 'varMap' );
+
 </script>
 
-<template>
+<template>  
   <button :class="_selectedVar.isSelected(src)"  @click.self="()=>_selectedVar.set(src)">
-    {{ src && src.displayName }}    
+    {{ src && varMap.value()[src.varName] && varMap.value()[src.varName].displayName }}    
   </button>
 
 </template>

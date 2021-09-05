@@ -23,7 +23,7 @@ const { equation, targetEquation, _selectedVar, _selectedOp } = ST.useState ( 'e
 function combineEquation() {
     if (! (_selectedVar.value()['varName'] && _selectedOp.value()['op'])) return equation.value();
     if (equation.value() != targetEquation.value()) return targetEquation.value();        
-    var newEq = Eq.newEqOp(equation.value(), _selectedOp.value().op, _selectedVar.value());
+    var newEq = Eq.newEqOp(equation.value(), _selectedOp.value().op, Eq.newEqVar(_selectedVar.value().varName));
     targetEquation.set( newEq);
     return newEq;
 }

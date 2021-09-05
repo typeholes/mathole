@@ -3,12 +3,14 @@ import App from './components/App.vue'
 
 import * as Eq  from './js/Eq';
 
+import * as GameVar from './js/GameVar'
+
 import { displayExpr, evalEquation } from "./js/mathUtil";
 
 import { ST } from './js/ST';
 
-const timeVar = Eq.newEqVar(0, 'Time', 't', 0, false);
-
+const timeEqVar = Eq.newEqVar('t');
+const timeGameVar = GameVar.newGameVar('Time', 0, false, true, GameVar.fId, GameVar.fId)
 const dummyNode = Eq.newEqEmpty();
 
 
@@ -17,8 +19,8 @@ ST.addDef('lastTime', Date.now(), {
     var newTime = Date.now();
     var diff = newTime - state.lastTime;
     state.lastTime = newTime;
-    state.varList[0].value += diff/10000,880;
-    state.score = evalEquation(state.equation, state.varList);
+    state.varMap['t'].cntBought += diff/10000;
+    state.score = evalEquation(state.equation, state.varMap, state.constant);
   }
 });
 
@@ -26,22 +28,18 @@ ST.addDef('score', 0, {
 
 });
 
-ST.addDef('timeVar', timeVar, {
-  _increment: (state) => { return state.timeVar.value++; },
-})
-
-ST.addDef('equation', timeVar, {
+ST.addDef('equation', timeEqVar, {
   set: (state, equation) => { return state.equation = equation; },
   setToTarget: (state) => { 
     state._selectedOp = dummyNode; 
-    state._selectedVar = dummyNode;   
+    state._selectedVar = "";   
     state.equation = state.targetEquation; 
     displayEquationStrings(state._selectedVar, state);
     return state.equation;
   },
 });
 
-ST.addDef('targetEquation', timeVar, {
+ST.addDef('targetEquation', timeEqVar, {
   set: (state, targetEquation) => { return state.targetEquation = targetEquation; },
 });
 
@@ -53,6 +51,8 @@ ST.addDef('termList', [
 ], {
 
 });
+
+ST.addDef('constant', 0, {});
 
 ST.addDef('_selectedOp', Eq.newEqEmpty(), {
   set: (state, op) => { 
@@ -74,23 +74,31 @@ ST.addDef('_selectedVar', Eq.newEqEmpty(), {
   clear: (state)=> { state._selectedOp = dummyNode; },
   displayEquations: (state) => displayEquationStrings(state._selectedVar, state),
 }, {
-  isSelected: (value, checkAgainst) => value == checkAgainst ? "selected" : "",
+  isSelected: (value, checkAgainst) => {
+//    console.log( value, checkAgainst ); debugger;
+    return value.varName == checkAgainst.varName ? "selected" : ""
+  },
 });
 
-ST.addDef('varList', [timeVar], {
+ST.addDef('varMap', {t: timeGameVar}, {
   addVar: (state) => {
-    const cnt = state.varList.length + 1;
-    const newVar = Eq.newEqVar(cnt-1, 'Var ' + cnt, 'var'+cnt, cnt);
-    state.varList.push( newVar);
-    return newVar;
+    const cnt = Object.keys(state.varMap).length + 1;
+    var varName = 'var'+cnt;
+    const newGameVar = GameVar.newGameVar(varName, 0, true, true, GameVar.fId, GameVar.fId);
+    state.varMap[varName]= newGameVar;
+    return newGameVar;
   },
-  incrementValue: (state, idx) => {
-    state.varList[idx].value++;
+  incrementValue: (state, varName) => {
+    state.constant = state.score;
+//    state.constant = 0;
+    state.score = 0;
+    state.varMap.t.value=0;
+    state.varMap[varName].cntBought++;        
   }
   }, {
 
   },
-  (varList) => varList[0].value=0
+  (varMap) => varMap.t.cntBought=0
 );
 
 ST.addDef( 'count', 0 ,{
@@ -108,9 +116,9 @@ app.mount('#app')
 function displayEquationStrings(_var, state) {
   var varName = _var.varName;
   var str = Eq.eqString(state.equation);
-  var valStr = Eq.valString(state.equation, state.varList, [varName]);
+  var valStr = Eq.valString(state.equation, state.varMap, [varName]);
   var targetStr = Eq.eqString(state.targetEquation);
-  var targetValStr = Eq.valString(state.targetEquation, state.varList, [varName]);
+  var targetValStr = Eq.valString(state.targetEquation, state.varMap, [varName]);
   displayExpr(str, valStr, varName || 't', "");
   displayExpr(targetStr, targetValStr, varName || 't', "target-");
 }

@@ -2,20 +2,22 @@
 
 import { toRefs } from '@vue/reactivity';
 import { ST } from '../js/ST';
+import * as GameVar from '../js/GameVar';
 
 defineProps({
-    idx: null,
+    varName: null,
 })
 
 
-const { varList } = ST.useState( 'varList' );
+const { varMap } = ST.useState( 'varMap' );
 
 </script>
 
 <template>
-    <div>
-        {{ varList.value()[idx].displayName }}: {{ Math.round(varList.value()[idx].value*100)/100 }} {{ varList.value()[idx].buyable }}
-        <button @click="varList.incrementValue(idx)" v-if="varList.value()[idx].buyable">
+    <div :v-if="varMap.value()[varName] && varMap.value()[varName].visible">
+    {{ varName }}
+        {{ varMap.value()[varName].displayName }}: {{ Math.round(GameVar.getValue(varMap.value()[varName])*100)/100 }} {{ varMap.value()[varName].buyable }}
+        <button @click="varMap.incrementValue(varName)" v-if="varMap.value()[varName].buyable">
             buy
         </button> <br>
     </div>
