@@ -27,7 +27,7 @@ provide('appGetView', getView);
 
 var { lastTime } = ST.useState( 'lastTime' );
 
-var ticker = window.setInterval( lastTime.tick, 500 );
+//var ticker = window.setInterval( lastTime.tick, 500 );
 
 </script>
 

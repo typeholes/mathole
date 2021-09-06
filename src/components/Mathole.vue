@@ -2,6 +2,8 @@
 import { ref, shallowRef, provide, readonly, computed } from 'vue'
 import EquationMaker from './EquationMaker.vue';
 import Game from './Game.vue';
+import VarEditor from './VarEditor.vue';
+
 
 import { ST } from '../js/ST';
 
@@ -20,10 +22,10 @@ function setMode(newMode) {
 const { lastTime, count, _count2 } = ST.useState( 'lastTime', 'count', '_count2' );
 
 
-window.setInterval(()=>lastTime.tick, 500);
+// window.setInterval(()=>lastTime.tick, 500);
 
-window.setInterval(count._increment, 500);
-window.setInterval(_count2.double, 5000);
+// window.setInterval(count._increment, 500);
+// window.setInterval(_count2.double, 5000);
 
 
 </script>
@@ -34,6 +36,7 @@ window.setInterval(_count2.double, 5000);
       <td>
         <button @click="setMode(EquationMaker)">Equation</button>
         <button @click="setMode(Game)">Game</button>
+        <button @click="setMode(VarEditor)">VarEditor</button>
         <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button>
         {{ count.ref }}
         {{ _count2.ref }}

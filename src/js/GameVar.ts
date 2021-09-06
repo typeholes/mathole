@@ -1,14 +1,12 @@
-import { atomicMassDependencies } from "mathjs";
-
 export type GameVar = { 
     __type: string;
     displayName: string;
     cntBought: number; 
     buyable: boolean;
     visible: boolean;
-    cost: string;
+    costFn: string;
     costArgs: [any],
-    value: string,  
+    valueFn: string,  
     valueArgs: [any],
 }
 export const GameVar__type = 'GameVar';
@@ -18,24 +16,24 @@ export function newGameVar(
     cntBought: number,
     buyable: boolean,
     visible: boolean,
-    cost: string,
+    costFn: string,
     costArgs: [any],
-    value: string,  
+    valueFn: string,  
     valueArgs: [any],  
 ) {
     return {
-        displayName, cntBought, buyable, visible, cost, costArgs, value, valueArgs
+        displayName, cntBought, buyable, visible, costFn: costFn, costArgs, valueFn: valueFn, valueArgs
     }
 }
 
 export function getValue(gameVar: GameVar) {
 //    console.log( gameVar.value);
-    return fnMap[gameVar.value](gameVar.cntBought, ...gameVar.valueArgs);
+    return fnMap[gameVar.valueFn](gameVar.cntBought, ...gameVar.valueArgs);
 }
 
 export function getCost(gameVar: GameVar) {
     //    console.log( gameVar.value);
-        return fnMap[gameVar.cost](gameVar.cntBought, ...gameVar.costArgs);
+        return fnMap[gameVar.costFn](gameVar.cntBought, ...gameVar.costArgs);
     }
 
 // constant for fnMap keys 

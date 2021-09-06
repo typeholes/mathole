@@ -81,9 +81,9 @@ ST.addDef('_selectedVar', Eq.newEqEmpty(), {
 });
 
 ST.addDef('varMap', {t: timeGameVar}, {
-  addVar: (state) => {
+  addVar: (state,name) => {
     const cnt = Object.keys(state.varMap).length + 1;
-    var varName = 'var'+cnt;
+    var varName = name || 'var'+cnt;
     const newGameVar = GameVar.newGameVar(varName, 0, true, true, GameVar.fId, [], GameVar.fId, []);
     state.varMap[varName]= newGameVar;
     return newGameVar;
@@ -98,7 +98,23 @@ ST.addDef('varMap', {t: timeGameVar}, {
       state.varMap.t.cntBought=0;
       state.varMap[varName].cntBought++;        
     }
-  }
+  },
+  setVarField(state, args) {
+    state.varMap[args.varName][args.name]=args.value;
+  },
+  setCostFn(state, args) {
+    state.varMap[args.varName].cost=args.costFn;
+  },
+  setDisplayName(state, args) {
+    state.varMap[args.varName].displayName=args.displayName;
+  },
+  setBuyable(state,args) {
+    state.varMap[args.varName].buyable=args.buyable;
+  },
+  setVisible(state,args) {
+    state.varMap[args.varName].visible=args.visible;
+  },
+    
   }, {
 
   },

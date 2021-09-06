@@ -100,8 +100,10 @@ export class ST {
       ret[name].value = ()=> dat.value;
   
       Object.keys(ST.defs[name]['mutations']).forEach ( (methodName) => {
-        ret[name][methodName] = (...args)=> {
-          store.commit(name + '.' + methodName, ...args);
+        ret[name][methodName] = (args)=> {
+          isObject(args) 
+             ? store.commit({type: name + '.' + methodName, ...args})
+             : store.commit(name + '.' + methodName, args);
         }
       });
       Object.keys(ST.defs[name]['methods']).forEach ( (methodName) => {
@@ -140,3 +142,7 @@ export class ST {
 
 
 
+
+function isObject(obj) {
+  return ({}).toString.apply(obj) === '[object Object]';
+}
