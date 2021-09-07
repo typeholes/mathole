@@ -1,14 +1,42 @@
-import {simplify, parse, derivative, compile} from 'mathjs';
+import {simplify, derivative, compile, parser as mkParser} from 'mathjs';
 import * as Eq from './Eq';
 import * as GameVar from './GameVar';
 
 import { addHandlers, createHovers } from './mathHovers';
 
 export default displayExpr;
-export { displayExpr, evalEquation };
+export { displayExpr, evalEquation, runDefinition, runString };
 
 
 simplify.rules.push({ l: 'n1*n2/(n1*n3)', r: 'n2/n3' });
+
+const parser = mkParser();
+
+function runDefinition(str) { 
+  var result = 'Valid';
+  var fn = null;
+  try {
+    fn = parser.evaluate(str); 
+  } catch(err) {
+    result = err;
+  }
+  return {result,fn};
+}
+
+function runString(str) { 
+  debugger;
+  var result = 'Not Run';
+  try {
+    result = parser.evaluate(str); 
+  } catch(err) {
+    result = err;
+  }
+  return result;
+}
+
+function setVariable(varName, value) {
+  parser.set(varName,value);
+}
 
 function evalEquation(equation, varMap, constant) {
   var scope = { constant: constant }
@@ -22,13 +50,13 @@ function texExpr(expr) {
   let implicit = 'hide';  
 
   return function() { 
-    var node = parse(expr);
+    var node = parser.parse(expr);
     return  node.transform(addHandlers).toTex({ parenthesis: parenthesis, implicit: implicit }); 
   };
 }
 
 function texDerivative(expr, selectedVar) {
-  var node = parse(expr);
+  var node = parser.parse(expr);
   return ()=> derivative(node, selectedVar).toTex();  
 }
 

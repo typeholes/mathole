@@ -5,12 +5,14 @@ import * as Eq  from './js/Eq';
 
 import * as GameVar from './js/GameVar'
 
+import * as FunctionDef from './js/FunctionDef';
+
 import { displayExpr, evalEquation } from "./js/mathUtil";
 
 import { ST } from './js/ST';
 
 const timeEqVar = Eq.newEqVar('t');
-const timeGameVar = GameVar.newGameVar('Time', 0, false, true, GameVar.fId, [], GameVar.fId, [])
+const timeGameVar = GameVar.newGameVar('t', 'Time', 0, false, true, GameVar.fId, [], GameVar.fId, [])
 const dummyNode = Eq.newEqEmpty();
 
 
@@ -84,7 +86,7 @@ ST.addDef('varMap', {t: timeGameVar}, {
   addVar: (state,name) => {
     const cnt = Object.keys(state.varMap).length + 1;
     var varName = name || 'var'+cnt;
-    const newGameVar = GameVar.newGameVar(varName, 0, true, true, GameVar.fId, [], GameVar.fId, []);
+    const newGameVar = GameVar.newGameVar(varName, varName, 0, true, true, GameVar.fId, [], GameVar.fId, []);
     state.varMap[varName]= newGameVar;
     return newGameVar;
   },
@@ -102,18 +104,6 @@ ST.addDef('varMap', {t: timeGameVar}, {
   setVarField(state, args) {
     state.varMap[args.varName][args.name]=args.value;
   },
-  setCostFn(state, args) {
-    state.varMap[args.varName].cost=args.costFn;
-  },
-  setDisplayName(state, args) {
-    state.varMap[args.varName].displayName=args.displayName;
-  },
-  setBuyable(state,args) {
-    state.varMap[args.varName].buyable=args.buyable;
-  },
-  setVisible(state,args) {
-    state.varMap[args.varName].visible=args.visible;
-  },
     
   }, {
 
@@ -128,6 +118,24 @@ ST.addDef( 'count', 0 ,{
 ST.addDef( '_count2', 1 ,{
 double: (state) => { return state._count2*=2; },
 });
+
+
+ST.addDef('functionDefMap', { sin: FunctionDef.newFunctionDef('sin', true, ['a'],'')}, {
+  addDef: (state,name) => {        
+    const newDef = FunctionDef.newFunctionDef(name, true, ['a','b'], '');
+    state.functionDefMap[name]= newDef;
+    return newDef;
+  },
+  setField(state, args) {
+    state.functionDefMap[args.defName][args.fieldName]=args.value;
+  },
+    
+  }, {
+
+  },
+  
+);
+
 
 let app = createApp(App);
 app.use(ST.init());

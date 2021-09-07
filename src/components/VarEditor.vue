@@ -6,7 +6,7 @@ import * as GameVar from '../js/GameVar';
 
 import { ST } from '../js/ST';
 
-const { varMap } = ST.useState( 'varMap' ); 
+const { varMap, functionDefMap } = ST.useState( 'varMap', 'functionDefMap' ); 
 
 var selectedVarName = ref("t");
 var varObj = ref(varMap.value()['t']);
@@ -18,11 +18,25 @@ function selectVar(event) {
     varObj.value  = varMap.value()[selectedVarName.value];
 }
 
+function runVarFunction(name) {
+    const gameVar = varMap.value()[selectedVarName.value];
+    if (!gameVar) { return 0; }
+    var ret = "";
+    try {
+        ret =  name == 'valueMathFunction' ? GameVar.getValue(gameVar) : GameVar.getCost(gameVar) ;
+    } 
+    catch(err) {ret = err }
+    return ret;
+}
+
+
 function getField(name) {
     const gameVar = varMap.value()[selectedVarName.value];
     const ret = gameVar && gameVar[name]; 
+    if (typeof ret === 'function') return 'function';
     return ret;
 }
+
 
 function getArray(name) {
     const gameVar = varMap.value()[selectedVarName.value];
@@ -33,6 +47,14 @@ function getArray(name) {
 function update(event, name, src='value') {
     var value = event.target[src];
     varMap.setVarField( {varName: selectedVarName.value, name: name, value: value});        
+    // clear the actual functions when the function names change so they will get rebuilt
+    // probably should be on the action
+    if (name == 'costFn') {
+        varMap.setVarField( {varName: selectedVarName.value, name: 'costMathFunction', value: null});        
+    }
+    if (name == 'valueFn') {
+        varMap.setVarField( {varName: selectedVarName.value, name: 'valueMathFunction', value: null});        
+    }    
 }
 
 function updateArray(event, name, src='value') {
@@ -65,10 +87,11 @@ function addNewVar() {
         DisplayName <input type="text" :value="getField('displayName')" @change="update($event, 'displayName')">
         buyable <input type="checkbox" :checked="getField('buyable')" @change="update($event, 'buyable', 'checked')">
         visible <input type="checkbox" :checked="getField('visible')" @change="update($event, 'visible', 'checked')">
-        <br>cost function <select :value="getField('costFn')" @change="update($event, 'costFn')" ><option v-for=" (_, fn) in GameVar.fnMap" :value="fn"> {{fn}} </option></select>
-        args <input type="text" :value="getArray('costArgs')" @change="updateArray($event, 'costArgs')">
-        <br>value function <select :value="getField('valueFn')" @change="update($event, 'valueFn')" ><option v-for=" (_, fn) in GameVar.fnMap" :value="fn"> {{fn}} </option></select>
-        args <input type="text" :value="getArray('valueArgs')" @change="updateArray($event, 'valueArgs')">        
+        Count bought <input type="text" :value="getField('cntBought')" @change="update($event, 'cntBought')">
+        <br>cost function <select :value="getField('costFn')" @change="update($event, 'costFn')" ><option v-for=" (_, fn) in functionDefMap.value()" :value="fn"> {{fn}} </option></select>
+        args <input type="text" :value="getArray('costArgs')" @change="updateArray($event, 'costArgs')"> {{ getField('costMathFunction') }} {{ runVarFunction('costMathFunction') }}
+        <br>value function <select :value="getField('valueFn')" @change="update($event, 'valueFn')" ><option v-for=" (_, fn) in functionDefMap.value()" :value="fn"> {{fn}} </option></select>
+        args <input type="text" :value="getArray('valueArgs')" @change="updateArray($event, 'valueArgs')"> {{ getField('valueMathFunction') }} {{ runVarFunction('valueMathFunction') }}       
     </div>
   </div>
 </template>

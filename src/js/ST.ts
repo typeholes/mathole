@@ -130,11 +130,12 @@ export class ST {
   }
 
   static export() {
-    ST.exportString = JSON.stringify(ST._store._state.data);
+    ST.exportString = JSON.stringify(ST._store._state.data, null, 3);
   }
 
   static import() {
    // ST._store._state.data = JSON.parse(ST.exportString);
+   debugger;
    ST._store.replaceState(JSON.parse(ST.exportString));
   }
 
