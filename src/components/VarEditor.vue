@@ -49,10 +49,10 @@ function update(event, name, src='value') {
     varMap.setVarField( {varName: selectedVarName.value, name: name, value: value});        
     // clear the actual functions when the function names change so they will get rebuilt
     // probably should be on the action
-    if (name == 'costFn') {
+    if (name == 'costFn' || name == 'costArgs') {
         varMap.setVarField( {varName: selectedVarName.value, name: 'costMathFunction', value: null});        
     }
-    if (name == 'valueFn') {
+    if (name == 'valueFn'|| name == 'valueArgs') {
         varMap.setVarField( {varName: selectedVarName.value, name: 'valueMathFunction', value: null});        
     }    
 }

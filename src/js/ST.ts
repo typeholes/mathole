@@ -135,7 +135,6 @@ export class ST {
 
   static import() {
    // ST._store._state.data = JSON.parse(ST.exportString);
-   debugger;
    ST._store.replaceState(JSON.parse(ST.exportString));
   }
 

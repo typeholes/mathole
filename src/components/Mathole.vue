@@ -1,5 +1,6 @@
+
 <script setup>
-import { ref, shallowRef, provide, readonly, computed } from 'vue'
+import { ref, shallowRef, provide, readonly, computed, onErrorCaptured, onMounted } from 'vue'
 import EquationMaker from './EquationMaker.vue';
 import Game from './Game.vue';
 import VarEditor from './VarEditor.vue';
@@ -8,6 +9,8 @@ import FunctionDefEditor from './FunctionDefEditor.vue';
 
 import { ST } from '../js/ST';
 import * as FunctionDef from '../js/FunctionDef';
+import { setVariable } from '../js/mathUtil';
+
 
 
 
@@ -20,9 +23,30 @@ function setMode(newMode) {
   mode.value = newMode;
 }
 
-const { functionDefMap } = ST.useState( 'functionDefMap' );
 
-const { lastTime, count, _count2 } = ST.useState( 'lastTime', 'count', '_count2' );
+
+const { functionDefMap, varMap } = ST.useState( 'functionDefMap', 'varMap' );
+
+const { lastTime, count, _count2, _errorMessage } = ST.useState( 'lastTime', 'count', '_count2', '_errorMessage' );
+
+onMounted( ()=> { 
+  console.log('mounted ' + lastTime.value() );
+  Object.values(functionDefMap.value()).forEach( (def)=> FunctionDef.runDefinition(def));
+  Object.values(varMap.value()).forEach( (gameVar)=> 
+    setVariable(gameVar.name, gameVar.cntBought)
+    );
+}
+);
+
+
+onErrorCaptured( (err) => {
+      console.log('captured error');
+//      debugger;
+      console.log(err);
+      _errorMessage.set(err);
+      return false;
+});
+
 
 async function doImport() {
   const getJsonUpload = () =>
@@ -53,6 +77,9 @@ async function doImport() {
   ST.exportString = jsonFiles[0];
   ST.import();
   Object.values(functionDefMap.value()).forEach( (def)=> FunctionDef.runDefinition(def));
+  Object.values(varMap.value()).forEach( (gameVar)=> 
+    setVariable(gameVar.name, gameVar.cntBought)
+    );
 }
 
 function doExport() {
@@ -79,7 +106,7 @@ function doExport() {
   ST.export();
   download('mathole.json',ST.exportString);
 }
-// window.setInterval(()=>lastTime.tick, 500);
+ window.setInterval(lastTime.tick, 500);
 
 // window.setInterval(count._increment, 500);
 // window.setInterval(_count2.double, 5000);
@@ -101,7 +128,7 @@ function doExport() {
         <button @click="ST.saveAll">save</button>
         <button @click="doExport">export</button>
         <button @click="doImport">import</button>
-        <button @click="ST.reset">reset</button>
+        <button @click="ST.reset">reset</button>        
       </td>
     </tr>
     <tr>
@@ -109,6 +136,11 @@ function doExport() {
         <keep-alive>
           <component :is="mode"></component>        
         </keep-alive>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="error">{{ _errorMessage.value() }}</span>
       </td>
     </tr>
   </table>
@@ -119,5 +151,9 @@ function doExport() {
 <style scoped>
 a {
   color: #000000;
+}
+
+span.error {
+  color: #c70404
 }
 </style>

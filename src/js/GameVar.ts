@@ -38,7 +38,7 @@ export function getValue(gameVar: GameVar) {
 //    console.log( gameVar.value);
     if(!gameVar) return null;
     newFunction(gameVar, 'value');
-    return typeof gameVar.valueMathFunction === 'function' ? gameVar.valueMathFunction(gameVar.cntBought, ...gameVar.valueArgs) : 0;
+    return typeof gameVar.valueMathFunction === 'function' ? gameVar.valueMathFunction(gameVar.cntBought) : 0;
 }
 
 function newFunction(gameVar: GameVar, fnType: string) {
@@ -46,12 +46,13 @@ function newFunction(gameVar: GameVar, fnType: string) {
         var args = gameVar[fnType + 'Args'];
         var argStr = "";
         var cnt= 0;
-        args.forEach( () => {
-            cnt++;
-            argStr += ", arg" + cnt;
-        })
-
-        const str = gameVar.name + '_' + fnType + '(cnt' + argStr + ')=' + gameVar[fnType + 'Fn'] + '(cnt' + argStr + ')';
+        if (args.length>0) { argStr = ", " + args.join(','); }
+        // args.forEach( () => {
+        //     cnt++;
+        //     argStr += ", arg" + cnt;
+        // })
+        
+        const str = gameVar.name + '_' + fnType + '(cnt)=' + gameVar[fnType + 'Fn'] + '(cnt' + argStr + ')';
         console.log(str);
         var result = runDefinition(str);
         gameVar[fnType + 'MathFunction'] = result.result == "Valid" ? result.fn : result.result;
@@ -62,7 +63,7 @@ export function getCost(gameVar: GameVar) {
     //    console.log( gameVar.value);
     if(!gameVar) return null;
     newFunction(gameVar, 'cost');
-    return typeof gameVar.costMathFunction === 'function' ? gameVar.costMathFunction(gameVar.cntBought, ...gameVar.costArgs) : 0;
+    return typeof gameVar.costMathFunction === 'function' ? gameVar.costMathFunction(gameVar.cntBought) : 0;
 }
 
 // constant for fnMap keys 

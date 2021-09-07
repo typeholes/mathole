@@ -9,20 +9,30 @@ import * as FunctionDef from './js/FunctionDef';
 
 import { displayExpr, evalEquation } from "./js/mathUtil";
 
+import { setVariable } from './js/mathUtil';
+
 import { ST } from './js/ST';
 
 const timeEqVar = Eq.newEqVar('t');
 const timeGameVar = GameVar.newGameVar('t', 'Time', 0, false, true, GameVar.fId, [], GameVar.fId, [])
 const dummyNode = Eq.newEqEmpty();
 
+ST.addDef('_errorMessage', "", {
+  set: (state,message) => {
+    state._errorMessage = message;
+  }
+});
 
 ST.addDef('lastTime', Date.now(), {
   tick: (state) => {
+    try {
     var newTime = Date.now();
     var diff = newTime - state.lastTime;
     state.lastTime = newTime;
+    if (typeof state.varMap['t'].cntBought !== 'number') {state.varMap['t'].cntBought = Number.parseFloat(state.varMap['t'].cntBought)}
     state.varMap['t'].cntBought += diff/10000;
     state.score = evalEquation(state.equation, state.varMap, state.constant);
+    } catch(err) {console.log(err)}
   }
 });
 
@@ -77,7 +87,6 @@ ST.addDef('_selectedVar', Eq.newEqEmpty(), {
   displayEquations: (state) => displayEquationStrings(state._selectedVar, state),
 }, {
   isSelected: (value, checkAgainst) => {
-//    console.log( value, checkAgainst ); debugger;
     return value.varName == checkAgainst.varName ? "selected" : ""
   },
 });
@@ -99,10 +108,12 @@ ST.addDef('varMap', {t: timeGameVar}, {
       state.score = 0;
       state.varMap.t.cntBought=0;
       state.varMap[varName].cntBought++;        
+      setVariable(varName, state.varMap[varName].cntBought);
     }
   },
   setVarField(state, args) {
     state.varMap[args.varName][args.name]=args.value;
+    if (args.name == 'cntBought') { setVariable(args.varName, args.value); }
   },
     
   }, {
@@ -120,7 +131,11 @@ double: (state) => { return state._count2*=2; },
 });
 
 
-ST.addDef('functionDefMap', { sin: FunctionDef.newFunctionDef('sin', true, ['a'],'')}, {
+ST.addDef('functionDefMap', { 
+    sin: FunctionDef.newFunctionDef('sin', true, ['a'],''),
+    id: FunctionDef.newFunctionDef('id', false, ['a'], 'a'),
+    times: FunctionDef.newFunctionDef('times', false, ['a','b'], 'a*b'),
+  }, {
   addDef: (state,name) => {        
     const newDef = FunctionDef.newFunctionDef(name, true, ['a','b'], '');
     state.functionDefMap[name]= newDef;
