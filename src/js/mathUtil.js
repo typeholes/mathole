@@ -8,7 +8,7 @@ import * as GameVar from './GameVar';
 import { addHandlers, createHovers } from './mathHovers';
 
 export default displayExpr;
-export { displayExpr, evalEquation, runDefinition, runString, setVariable, addFunction, M, expand, formatGraphExpr };
+export { displayExpr, evalEquation, runDefinition, runString, setVariable, addFunction, M, expand, formatGraphExpr, getDerivative };
 
 
 //simplify.rules.push({ l: 'n1*n2/(n1*n3)', r: 'n2/n3' });
