@@ -34,7 +34,8 @@ export function newGameVar(
     }
 }
 
-export function getValue(gameVar: GameVar) {
+// extra args aren't used, but hopefully things I pass will let vue know they are dependent
+export function getValue(gameVar: GameVar, ...args) {
 //    console.log( gameVar.value);
     if(!gameVar) return null;
     newFunction(gameVar, 'value');

@@ -1,5 +1,9 @@
-import { createApp } from 'vue'
+
+window.global = global;
+
+import { createApp, computed } from 'vue'
 import App from './components/App.vue'
+
 
 import * as Eq  from './js/Eq';
 
@@ -13,7 +17,8 @@ import { setVariable } from './js/mathUtil';
 
 import { ST } from './js/ST';
 
-const timeEqVar = Eq.newEqVar('t');
+import { initialState } from './initialState';
+
 const timeGameVar = GameVar.newGameVar('t', 'Time', 0, false, true, GameVar.fId, [], GameVar.fId, [])
 const dummyNode = Eq.newEqEmpty();
 
@@ -40,7 +45,7 @@ ST.addDef('score', 0, {
 
 });
 
-ST.addDef('equation', timeEqVar, {
+ST.addDef('equation', initialState.equation, {
   set: (state, equation) => { return state.equation = equation; },
   setToTarget: (state) => { 
     state._selectedOp = dummyNode; 
@@ -51,7 +56,7 @@ ST.addDef('equation', timeEqVar, {
   },
 });
 
-ST.addDef('targetEquation', timeEqVar, {
+ST.addDef('targetEquation', initialState.equation, {
   set: (state, targetEquation) => { return state.targetEquation = targetEquation; },
 });
 
@@ -91,7 +96,7 @@ ST.addDef('_selectedVar', Eq.newEqEmpty(), {
   },
 });
 
-ST.addDef('varMap', {t: timeGameVar}, {
+ST.addDef('varMap', initialState.varMap, {
   addVar: (state,name) => {
     const cnt = Object.keys(state.varMap).length + 1;
     var varName = name || 'var'+cnt;
@@ -106,7 +111,7 @@ ST.addDef('varMap', {t: timeGameVar}, {
       state.constant = state.score - cost;
   //    state.constant = 0;
       state.score = 0;
-      state.varMap.t.cntBought=0;
+      state.varMap.t.cntBought=.001;
       state.varMap[varName].cntBought++;        
       setVariable(varName, state.varMap[varName].cntBought);
     }
@@ -115,8 +120,12 @@ ST.addDef('varMap', {t: timeGameVar}, {
     state.varMap[args.varName][args.name]=args.value;
     if (args.name == 'cntBought') { setVariable(args.varName, args.value); }
   },
-    
+
   }, {
+
+    getVarValue( map, varName, dummy) {    
+      return GameVar.getValue(map[varName]);
+  }
 
   },
   (varMap) => varMap.t.cntBought=0
@@ -131,11 +140,7 @@ double: (state) => { return state._count2*=2; },
 });
 
 
-ST.addDef('functionDefMap', { 
-    sin: FunctionDef.newFunctionDef('sin', true, ['a'],''),
-    id: FunctionDef.newFunctionDef('id', false, ['a'], 'a'),
-    times: FunctionDef.newFunctionDef('times', false, ['a','b'], 'a*b'),
-  }, {
+ST.addDef('functionDefMap', initialState.functionDefMap, {
   addDef: (state,name) => {        
     const newDef = FunctionDef.newFunctionDef(name, true, ['a','b'], '');
     state.functionDefMap[name]= newDef;

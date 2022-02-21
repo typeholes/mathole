@@ -1,11 +1,14 @@
 <script setup>
 
+import { planckConstantDependencies } from 'mathjs';
 import { inject, provide, ref} from 'vue';
 import * as FunctionDef from '../js/FunctionDef';
 
-import { runString } from '../js/mathUtil';
+import { addFunction, runString } from '../js/mathUtil';
 
 import { ST } from '../js/ST';
+
+import { plot } from '../js/plot';
 
 const { functionDefMap } = ST.useState( 'functionDefMap' ); 
 
@@ -17,12 +20,21 @@ const definitionResult = ref('Not Run');
 
 const testString = ref(' ');
 
+const testGraphExpr = ref('x');
+
 const testResult = ref(' ');
 
 function runTest(event) {
    testString.value = event.target.value;
    testResult.value = runString(testString.value);
 }
+
+
+function runTestGraph(event) {
+   testGraphExpr.value = event.target.value;
+   plot( '#test-graph-expr', testGraphExpr.value);
+}
+
 
 function selectDef(event) {
     selectedDefName.value=event.target.value;    
@@ -41,6 +53,8 @@ function getArray(name) {
 }
 
 function tryDefinition(name) {
+  addFunction( selectedDefName.value, getField('args'), getField('def'));
+
   const def = functionDefMap.value()[selectedDefName.value];
   const result = FunctionDef.runDefinition(def);
   definitionResult.value = result;
@@ -80,12 +94,16 @@ function addNewDef() {
     </select>
     <div >
         builtin <input type="checkbox" :checked="getField('builtin')" @change="update($event, 'builtin', 'checked')"><br>
-        definition <input type="text" :value="getField('def')" @change="update($event, 'def')"><br>
+        definition <input type="text" size="50" :value="getField('def')" @change="update($event, 'def')"><br>
         args <input type="text" :value="getArray('args')" @change="updateArray($event, 'args')"><br>
         {{ definitionResult }}<br><br>
         Test Expression <input type="text" :value="testString" @change="runTest($event)"><br>
         {{ testResult }} <br>
-        <!-- <br>
+
+        Graph  <input type="text"  :value="testGraphExpr" @change="runTestGraph($event)"><br>
+        <div id='test-graph-expr' class="graphDiv"></div>
+
+<!-- <br>
         definition <input type="text" :value="getField('def')" @change="update($event, 'def')">
         builtin <input type="checkbox" :checked="getField('builtin')" @change="update($event, 'builtin', 'checked')">
         visible <input type="checkbox" :checked="getField('visible')" @change="update($event, 'visible', 'checked')">

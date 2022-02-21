@@ -1,4 +1,4 @@
-import { runDefinition as mathRunDefinition } from "./mathUtil";
+import { runDefinition as mathRunDefinition, addFunction } from "./mathUtil";
 export type FunctionDef = {
     name: string,
     builtin: boolean,
@@ -7,8 +7,16 @@ export type FunctionDef = {
 }
 
 export function newFunctionDef(name: string, builtin: boolean, args: string[], def: string) : FunctionDef {
+    if (!builtin) {
+        addFunction( name, args, def);
+    }
     return { name, builtin, args, def };
 }
+
+export function fromBuiltin(name: string) {
+    return { [name]: newFunctionDef(name, true, ['x'], '') };
+}
+
 
 export function defString(def: FunctionDef) : string {
     if (def.builtin) return "";

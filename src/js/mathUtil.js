@@ -1,4 +1,4 @@
-import {simplify, derivative, compile, parser as mkParser, parse as mathParse} from 'mathjs';
+import {simplify, derivative, compile, parser as mkParser, parse as mathParse, exp} from 'mathjs';
 
 import * as M from 'mathjs';
 
@@ -8,7 +8,7 @@ import * as GameVar from './GameVar';
 import { addHandlers, createHovers } from './mathHovers';
 
 export default displayExpr;
-export { displayExpr, evalEquation, runDefinition, runString, setVariable, addFunction, M, expand };
+export { displayExpr, evalEquation, runDefinition, runString, setVariable, addFunction, M, expand, formatGraphExpr };
 
 
 //simplify.rules.push({ l: 'n1*n2/(n1*n3)', r: 'n2/n3' });
@@ -36,7 +36,26 @@ function getDerivative(expr, by) {
   return derived;
 }
 
+function formatGraphExpr(expr) {
+  var src = typeof expr === 'object' ? src : M.parse(expr);
+  var expanded = expand(src);
+
+  console.log(expanded);
+
+  var str =  expanded.toString();
+  console.log(str);
+
+  return str;
+}
+
+
 function expand(node, localScope={}) {    
+
+  if (node.content) { // Parenthesis 
+    node.content = expand(node.content, localScope);
+    return node;
+  }
+
   if (node.op) {  // OperatorNode2
     node.args = node.args.map( (a)=> 
       expand(a, localScope) 
@@ -46,26 +65,47 @@ function expand(node, localScope={}) {
 
   if (node.fn) { // FunctionNode2 
     var def = functionDefs[node.fn.name];
-    if (typeof def == 'undefined') { return node; }
-    var bodyNode = M.parse(def.body);
-    var bodyScope = {};
-    for(var i=0;i<def.args.length;i++) {
-      var argName = def.args[i];
-      var argValue = node.args[i];
-      bodyScope[argName] = expand(argValue, { ...localScope, ...bodyScope });
+    if (typeof def == 'undefined') { 
+      node.args = node.args.map( (a)=> 
+      expand(a, localScope) 
+      );     
+  
+      return node; 
+    } else {
+      var bodyNode = M.parse(def.body);
+      var bodyScope = {};
+      for(var i=0;i<def.args.length;i++) {
+        var argName = def.args[i];
+        var argValue = node.args[i];
+        bodyScope[argName] = expand(argValue, { ...localScope, ...bodyScope });
+      }
+      var newNode=expand(bodyNode, { ...localScope, ...bodyScope });
+      return newNode;    
     }
-    var newNode=expand(bodyNode, { ...localScope, ...bodyScope });
-    return newNode;    
-
     // todo: expand function def.
     return node;
   }
 
   if (node.name) { // SymbolNode2    
     const value = localScope[node.name] || parser.get(node.name);
-    if (typeof value == 'undefined') { return node; }
-    if (typeof value == 'object') { return value; }
+    if (typeof value == 'undefined') { 
+      try {
+        const result = node.evaluate();
+        if ( typeof result === 'number') {
+          return M.parse(result);
+        } else {
+          return node;
+        }
+      } catch(err) {
+        return node;
+      }
+    }
+    if (typeof value == 'object') { 
+      return value;     
+    }
+
     return M.parse(value);
+    
   }
 
   if (node.value) { // ConstantNode2 
