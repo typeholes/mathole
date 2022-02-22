@@ -3,18 +3,20 @@ export type FunctionDef = {
     name: string,
     builtin: boolean,
     args: string[],
+    argValues: string[],
     def: string,
 }
 
-export function newFunctionDef(name: string, builtin: boolean, args: string[], def: string) : FunctionDef {
+export function newFunctionDef(name: string, builtin: boolean, args: string[], argValues: string[], def: string) : FunctionDef {
+    let vals = argValues || args.map( (x)=>'1');
     if (!builtin) {
-        addFunction( name, args, def);
+        addFunction( name, args, vals, def);
     }
-    return { name, builtin, args, def };
+    return { name, builtin, args, argValues: vals, def };
 }
 
 export function fromBuiltin(name: string) {
-    return { [name]: newFunctionDef(name, true, ['x'], '') };
+    return { [name]: newFunctionDef(name, true, ['x'], ['x'], '') };
 }
 
 

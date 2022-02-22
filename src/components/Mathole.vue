@@ -27,7 +27,7 @@ function setMode(newMode) {
 
 const { functionDefMap, varMap } = ST.useState( 'functionDefMap', 'varMap' );
 
-const { lastTime, count, _count2, _errorMessage } = ST.useState( 'lastTime', 'count', '_count2', '_errorMessage' );
+const { lastTime, _errorMessage } = ST.useState( 'lastTime', '_errorMessage' );
 
 onMounted( ()=> { 
   console.log('mounted ' + lastTime.value() );
@@ -108,8 +108,6 @@ function doExport() {
 }
  window.setInterval(lastTime.tick, 500);
 
-// window.setInterval(count._increment, 500);
-// window.setInterval(_count2.double, 5000);
 
 
 </script>
@@ -123,8 +121,6 @@ function doExport() {
         <button @click="setMode(VarEditor)">VarEditor</button>
         <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button>
         <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button>
-        {{ count.ref }}
-        {{ _count2.ref }}
         <button @click="ST.saveAll">save</button>
         <button @click="doExport">export</button>
         <button @click="doImport">import</button>

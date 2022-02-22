@@ -131,18 +131,10 @@ ST.addDef('varMap', initialState.varMap, {
   (varMap) => varMap.t.cntBought=0
 );
 
-ST.addDef( 'count', 0 ,{
-  _increment: (state) => { return state.count++; },
-});
-
-ST.addDef( '_count2', 1 ,{
-double: (state) => { return state._count2*=2; },
-});
-
 
 ST.addDef('functionDefMap', initialState.functionDefMap, {
   addDef: (state,name) => {        
-    const newDef = FunctionDef.newFunctionDef(name, true, ['a','b'], '');
+    const newDef = FunctionDef.newFunctionDef(name, true, ['a','b'], ['x',2], '');
     state.functionDefMap[name]= newDef;
     return newDef;
   },

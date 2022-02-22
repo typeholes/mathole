@@ -1,10 +1,8 @@
 <script setup>
 
-import { planckConstantDependencies } from 'mathjs';
-import { inject, provide, ref} from 'vue';
-import * as FunctionDef from '../js/FunctionDef';
+import { ref} from 'vue';
 
-import { addFunction, runString } from '../js/mathUtil';
+import { runString, displayFunction } from '../js/mathUtil';
 
 import { ST } from '../js/ST';
 
@@ -14,30 +12,33 @@ const { functionDefMap } = ST.useState( 'functionDefMap' );
 
 var selectedDefName = ref("sin");
 
-const newDefName = ref(' ');
-
-const definitionResult = ref('Not Run');
-
-const testString = ref(' ');
-
-const testGraphExpr = ref('x');
-
 const testResult = ref(' ');
 
-function runTest(event) {
-   testString.value = event.target.value;
-   testResult.value = runString(testString.value);
+
+function *zip (...iterables){
+    let iterators = iterables.map(i => i[Symbol.iterator]() )
+    while (true) {
+        let results = iterators.map(iter => iter.next() )
+        if (results.some(res => res.done) ) return
+        else yield results.map(res => res.value )
+    }
 }
 
 
-function runTestGraph(event) {
-   testGraphExpr.value = event.target.value;
-   plot( '#test-graph-expr', testGraphExpr.value);
-}
+function display() {
+  const argNames = getField('args');
+  const values = getField('argValues');
+  const args = Object.fromEntries(zip( argNames, values));
+  const allSet = values.every( (x) => typeof x !== 'undefined' );
 
+  if (allSet) {
+    displayFunction(selectedDefName.value,'fn-', '#test-graph-expr', args);  
+  }
+}
 
 function selectDef(event) {
-    selectedDefName.value=event.target.value;    
+  selectedDefName.value=event.target.value;  
+  display();
 }
 
 function getField(name) {
@@ -46,71 +47,61 @@ function getField(name) {
     return ret;
 }
 
-function getArray(name) {
-    const functionDef = functionDefMap.value()[selectedDefName.value];
-    const ret = functionDef && functionDef[name]; 
-    return JSON.stringify(ret);
+function getArgValue(idx) {
+  let values =  getField('argValues');
+  if (typeof values === 'undefined') {
+    values = getField('args').map( ()=>'1');
+    functionDefMap.setField('argValues', values);
+  } 
+
+  let value = values[idx];
+
+  if (typeof value === 'undefined') {
+    setArgValue( {value: '1'}, idx);
+    return '1';
+  }
+
+  return value;
+
 }
 
-function tryDefinition(name) {
-  addFunction( selectedDefName.value, getField('args'), getField('def'));
+function setArgValue( event, idx) {
+  var value = event.target.value.trim();
+  let field = getField('argValues');
+  field[idx] = value;
+  functionDefMap.setField( {defName: selectedDefName.value, fieldName: 'argValues', value: field});        
+  display();
 
-  const def = functionDefMap.value()[selectedDefName.value];
-  const result = FunctionDef.runDefinition(def);
-  definitionResult.value = result;
-  return result;
-}
-
-function update(event, name, src='value') {
-    var value = event.target[src];
-    functionDefMap.setField( {defName: selectedDefName.value, fieldName: name, value: value});        
-    tryDefinition();
-}
-
-function updateArray(event, name, src='value') {
-    var value = event.target[src];
-    var json = JSON.parse(value);
-    functionDefMap.setField( {defName: selectedDefName.value, fieldName: name, value: json});        
-    tryDefinition();
-}
-
-function addNewDef() {
-    if (!newDefName.value) return;
-    const name = newDefName.value.trim();
-    if (!name) return;
-    functionDefMap.addDef(name);
-    selectedDefName.value = name;
 }
 
 </script>
 
 <template>
   <div>
-    <input type="text" v-model="newDefName">
-    <br> new name: {{ newDefName }}<br>
-    <button @click="addNewDef">Add Function Definition</button><br>
     <select  :value="selectedDefName" @change="selectDef">
     <option v-for="(_, defName) in functionDefMap.value()" :value="defName"> {{ defName }} </option>
     </select>
     <div >
-        builtin <input type="checkbox" :checked="getField('builtin')" @change="update($event, 'builtin', 'checked')"><br>
-        definition <input type="text" size="50" :value="getField('def')" @change="update($event, 'def')"><br>
-        args <input type="text" :value="getArray('args')" @change="updateArray($event, 'args')"><br>
-        {{ definitionResult }}<br><br>
-        Test Expression <input type="text" :value="testString" @change="runTest($event)"><br>
-        {{ testResult }} <br>
 
-        Graph  <input type="text"  :value="testGraphExpr" @change="runTestGraph($event)"><br>
+                      <div>
+                    <!-- <div> selected: {{ selected }} <br> -->
+                    Pretty:
+                    <div id="fn-pretty"></div>
+                    <br />Pretty Val:
+                    <div id="fn-pretty-val"></div>
+                    <br />Derivative:
+                    <div id="fn-derivative"></div>Derivative Val:
+                    <div id="fn-derivative-val"></div>
+                </div>
+
+
+        args
+     <ul v-for="(arg, idx) in getField('args')"> 
+         <li> {{ arg }} <input type="text" :value="getArgValue(idx)" @change="setArgValue($event, idx)"> </li>
+     </ul> 
+        Result: {{ testResult }} <br>
         <div id='test-graph-expr' class="graphDiv"></div>
 
-<!-- <br>
-        definition <input type="text" :value="getField('def')" @change="update($event, 'def')">
-        builtin <input type="checkbox" :checked="getField('builtin')" @change="update($event, 'builtin', 'checked')">
-        visible <input type="checkbox" :checked="getField('visible')" @change="update($event, 'visible', 'checked')">
-        <br>cost function <select :value="getField('costFn')" @change="update($event, 'costFn')" ><option v-for=" (_, fn) in GameVar.fnMap" :value="fn"> {{fn}} </option></select>
-        args <input type="text" :value="getArray('args')" @change="updateArray($event, 'args')">
-        <br>value function <select :value="getField('valueFn')" @change="update($event, 'valueFn')" ><option v-for=" (_, fn) in GameVar.fnMap" :value="fn"> {{fn}} </option></select>
-        args <input type="text" :value="getArray('valueArgs')" @change="updateArray($event, 'valueArgs')">         -->
     </div>
   </div>
 </template>
