@@ -1,21 +1,16 @@
-import * as Eq  from './js/Eq';
-
 import * as GameVar from './js/GameVar'
 
 import * as FunctionDef from './js/FunctionDef';
 
-const timeEqVar = Eq.newEqVar('t');
-const marketValueEqVar = Eq.newEqVar('marketValue');
-
 const timeGameVar = GameVar.newGameVar('t', 'Time', 0, false, true, 'id', [], 'id', [])
+const scoreGameVar = GameVar.newGameVar('score', 'Score', 0, false, false, 'id', [], 'id', [])
 const smootherGameVar = GameVar.newGameVar('smoother', 'Market Stability', .001, true, true, 'id', [], 'times', [.001])
 const marketValueGameVar = GameVar.newGameVar('marketValue', 'Market Value', 0, false, true, 'id', [], 'calcMarketValue', [])
-const dummyNode = Eq.newEqEmpty();
 
 export const initialState = {
-    equation: marketValueEqVar,
     varMap: {
         t: timeGameVar,
+        score: scoreGameVar,
         smoother: smootherGameVar,
         marketValue: marketValueGameVar,
     },
@@ -34,21 +29,3 @@ export const initialState = {
         calcMarketValue: FunctionDef.newFunctionDef('calcMarketValue', false, ['x'], ['x'], 'curvedSawtooth(t)'),
     },
 }
-
-//zig zag to sin
-// f(x) = 1-2 * acos((1-z) * sin(2 * pi * x))/pi
-
-// square wave to sin
-//g(x)=2 * atan( sin(2 * pi * x)/z)/pi
-
-// sawtooth to flat
-//h(x) = (1+f((2 * x - 1)/4) * g(x/2))/2
-
-// ceil to diagonal
-//x-h(x)
-
-// no clue what to call this
-//j(a,b)=log(a^{2}+b^{2})
-
-// curved sawtooth to log
-//j(x^z,h(x))

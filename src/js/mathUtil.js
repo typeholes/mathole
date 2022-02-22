@@ -2,14 +2,13 @@ import {simplify, derivative, compile, parser as mkParser, parse as mathParse, e
 
 import * as M from 'mathjs';
 
-import * as Eq from './Eq';
 import * as GameVar from './GameVar';
 
 import { addHandlers, createHovers } from './mathHovers';
 import { plot } from './plot';
 
 export default displayExpr;
-export { displayExpr, evalEquation, runDefinition, runString, setVariable, addFunction, M, expand, formatGraphExpr, getDerivative, displayFunction };
+export { displayExpr,  runDefinition, runString, setVariable, addFunction, M, expand, formatGraphExpr, getDerivative, displayFunction };
 
 
 //simplify.rules.push({ l: 'n1*n2/(n1*n3)', r: 'n2/n3' });
@@ -134,13 +133,6 @@ function runString(str) {
     result = err;
   }
   return result;
-}
-
-function evalEquation(equation, varMap, constant) {
-  var scope = { constant: constant }
-  Object.keys(varMap).forEach( (varName) => scope[varName] = GameVar.getValue(varMap[varName]) );
-//  console.log(scope);
-  return compile('constant + ' + Eq.eqString(equation)).evaluate(scope);
 }
 
 function texExpr(expr, doExpand, replaceConstants, args={}) {

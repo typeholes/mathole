@@ -3,13 +3,9 @@
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
 import { ref, provide } from 'vue'
 import Mathole from './Mathole.vue';
-import * as Eq  from '../js/Eq';
 
 import { ST } from '../js/ST';
 
-import EqNodeView from './EqNodeView.vue';
-import EqOpView  from './EqOpView.vue';
-import EqVarView from  './EqVarView.vue';
 
 var viewMaps = {}
 

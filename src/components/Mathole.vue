@@ -1,7 +1,7 @@
 
 <script setup>
-import { ref, shallowRef, provide, readonly, computed, onErrorCaptured, onMounted } from 'vue'
-import EquationMaker from './EquationMaker.vue';
+import { shallowRef,  onErrorCaptured, onMounted } from 'vue'
+
 import Game from './Game.vue';
 import VarEditor from './VarEditor.vue';
 import FunctionDefEditor from './FunctionDefEditor.vue';
@@ -17,7 +17,7 @@ import { setVariable } from '../js/mathUtil';
 const props = defineProps({
 })
 
-const mode = shallowRef(EquationMaker);
+const mode = shallowRef(VarEditor);
 
 function setMode(newMode) {
   mode.value = newMode;
@@ -116,7 +116,6 @@ function doExport() {
   <table width="100%" border="1">
     <tr>
       <td>
-        <button @click="setMode(EquationMaker)">Equation</button>
         <button @click="setMode(Game)">Game</button>
         <button @click="setMode(VarEditor)">VarEditor</button>
         <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button>

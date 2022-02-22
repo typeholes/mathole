@@ -1,20 +1,29 @@
 <script setup>
 
-import { inject, provide, ref} from 'vue';
 import GameVarView from './GameVarView.vue';
 import { ST } from '../js/ST';
 
-const { varMap, score, constant } = ST.useState( 'varMap', 'score', 'constant' ); 
+import { getValue } from '../js/GameVar';
+
+const { varMap} = ST.useState( 'varMap'); 
+
+
+
+function getScore() {
+  const scoreVar = varMap.value()['score'];
+  return getValue(scoreVar);
+}
 
 </script>
 
 <template>
   <div>
-    <h1> Score: {{ score.value() }} </h1>
-    constant: {{ constant }}
+    <h1> Score: {{ getScore()}} </h1>
+
   <div v-for="(_, varName) in varMap.value()">
       <GameVarView :varName="varName"></GameVarView>
   </div>
+
   </div>
 </template>
 
