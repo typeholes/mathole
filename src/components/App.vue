@@ -4,9 +4,6 @@
 import { ref, provide } from 'vue'
 import Mathole from './Mathole.vue';
 
-import { ST } from '../js/ST';
-
-
 var viewMaps = {}
 
 function addViewMap(containerId, key, value, maps=viewMaps) {
@@ -20,10 +17,6 @@ function getView(containerId, key, maps=viewMaps) {
 
 provide('appAddViewMap', addViewMap);
 provide('appGetView', getView);
-
-var { lastTime } = ST.useState( 'lastTime' );
-
-//var ticker = window.setInterval( lastTime.tick, 500 );
 
 </script>
 

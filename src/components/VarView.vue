@@ -5,12 +5,11 @@ import * as Eq  from '../js/Eq';
 import EqNodeView from './EqNodeView.vue';
 import EqOpView  from './EqOpView.vue';
 import EqVarView from  './EqVarView.vue';
-import displayExpr from "../js/mathUtil";
+
 
 import {  inject, provide, ref, toRefs} from 'vue';
 import { makeViewMap } from "../js/makeViewMap";
-
-import { ST } from "../js/ST"
+import { uiVars } from '../GameState';
 
 const props = defineProps({    
     id: String
@@ -20,7 +19,7 @@ const { id } = toRefs(props);
 
 var selected = ref(Eq.newEqEmpty());
 
-const { varMap } = ST.useState( 'varMap' );
+const varMap = ref ( uiVars );
 
 makeViewMap(inject, provide, id.value, selected, 
     [Eq.EqEmpty__type,EqNodeView], 

@@ -3,12 +3,7 @@
 
 import functionPlot from "function-plot";
 
-import { formatGraphExpr, getDerivative } from "./mathUtil";
-
-export function plot(target, expr) {
-
-
-const graphExpr = formatGraphExpr(expr);
+export function plot(target: string, expr: string, derivativeExpr: string) {
 
 functionPlot({
     target: target,
@@ -18,9 +13,9 @@ functionPlot({
     yAxis: { domain: [-1, 9] },
     grid: true,
     data: [
-      { fn: getDerivative(graphExpr,'x').toString(), color: 'yellow' },
-      { fn: getDerivative(graphExpr,'x').toString(), color: 'green', graphType: 'polyline' },
-      { fn: graphExpr, color: 'purple' },
+      // { fn: derivativeExpr, color: 'yellow' },
+      // { fn: derivativeExpr, color: 'green', graphType: 'polyline' },
+      { fn: expr, color: 'purple', graphType: 'polyline' },
     ],
     tip: {
       renderer: function (x: number, y: number, index: number) {

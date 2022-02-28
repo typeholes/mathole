@@ -1,79 +1,79 @@
 <script setup>
 
-import { inject, provide, ref} from 'vue';
-import GameVarView from './GameVarView.vue';
-import * as GameVar from '../js/GameVar';
+// import { inject, provide, ref} from 'vue';
+// import GameVarView from './GameVarView.vue';
+// import * as GameVar from '../js/GameVar';
+// import { uiVars } from '../GameState';
 
-import { ST } from '../js/ST';
+// const varMap = ref ( uiVars );
 
-const { varMap, functionDefMap } = ST.useState( 'varMap', 'functionDefMap' ); 
+// var selectedVarName = ref("t");
+// var varObj = ref(varMap.t);
 
-var selectedVarName = ref("t");
-var varObj = ref(varMap.value()['t']);
+// const newVarName = ref(' ');
 
-const newVarName = ref(' ');
+// function selectVar(event) {
+//     selectedVarName.value=event.target.value;
+//     varObj.value  = varMap[selectedVarName.value];
+// }
 
-function selectVar(event) {
-    selectedVarName.value=event.target.value;
-    varObj.value  = varMap.value()[selectedVarName.value];
-}
-
-function runVarFunction(name) {
-    const gameVar = varMap.value()[selectedVarName.value];
-    if (!gameVar) { return 0; }
-    var ret = "";
-    try {
-        ret =  name == 'valueMathFunction' ? GameVar.getValue(gameVar) : GameVar.getCost(gameVar) ;
-    } 
-    catch(err) {ret = err }
-    return ret;
-}
-
-
-function getField(name) {
-    const gameVar = varMap.value()[selectedVarName.value];
-    const ret = gameVar && gameVar[name]; 
-    if (typeof ret === 'function') return 'function';
-    return ret;
-}
+// function runVarFunction(name) {
+//     const gameVar = varMap[selectedVarName.value];
+//     if (!gameVar) { return 0; }
+//     var ret = "";
+//     try {
+//         ret =  name == 'valueMathFunction' ? GameVar.getValue(gameVar, varMap) : GameVar.getCost(gameVar, varMap) ;
+//     } 
+//     catch(err) {ret = err }
+//     return ret;
+// }
 
 
-function getArray(name) {
-    const gameVar = varMap.value()[selectedVarName.value];
-    const ret = gameVar && gameVar[name]; 
-    return JSON.stringify(ret);
-}
+// function getField(name) {
+//     const gameVar = varMap[selectedVarName.value];
+//     const ret = gameVar && gameVar[name]; 
+//     if (typeof ret === 'function') return 'function';
+//     return ret;
+// }
 
-function update(event, name, src='value') {
-    var value = event.target[src];
-    varMap.setVarField( {varName: selectedVarName.value, name: name, value: value});        
-    // clear the actual functions when the function names change so they will get rebuilt
-    // probably should be on the action
-    if (name == 'costFn' || name == 'costArgs') {
-        varMap.setVarField( {varName: selectedVarName.value, name: 'costMathFunction', value: null});        
-    }
-    if (name == 'valueFn'|| name == 'valueArgs') {
-        varMap.setVarField( {varName: selectedVarName.value, name: 'valueMathFunction', value: null});        
-    }    
-}
 
-function updateArray(event, name, src='value') {
-    var value = event.target[src];
-    var json = JSON.parse(value);
-    varMap.setVarField( {varName: selectedVarName.value, name: name, value: json});        
-}
+// function getArray(name) {
+//     const gameVar = varMap.value()[selectedVarName.value];
+//     const ret = gameVar && gameVar[name]; 
+//     return JSON.stringify(ret);
+// }
 
-function addNewVar() {
-    if (!newVarName.value) return;
-    const name = newVarName.value.trim();
-    if (!name) return;
-    varMap.addVar(newVarName.value);
-}
+// function update(event, name, src='value') {
+//     var value = event.target[src];
+//     varMap.setVarField( {varName: selectedVarName.value, name: name, value: value});        
+//     // clear the actual functions when the function names change so they will get rebuilt
+//     // probably should be on the action
+//     if (name == 'costFn' || name == 'costArgs') {
+//         varMap.setVarField( {varName: selectedVarName.value, name: 'costMathFunction', value: null});        
+//     }
+//     if (name == 'valueFn'|| name == 'valueArgs') {
+//         varMap.setVarField( {varName: selectedVarName.value, name: 'valueMathFunction', value: null});        
+//     }    
+// }
+
+// function updateArray(event, name, src='value') {
+//     var value = event.target[src];
+//     var json = JSON.parse(value);
+//     varMap.setVarField( {varName: selectedVarName.value, name: name, value: json});        
+// }
+
+// function addNewVar() {
+//     if (!newVarName.value) return;
+//     const name = newVarName.value.trim();
+//     if (!name) return;
+//     varMap.addVar(newVarName.value);
+// }
 
 </script>
 
 <template>
-  <div>
+
+<!--   <div>
     <input type="text" v-model="newVarName">
     <br> new name: {{ newVarName }}<br>
     <button @click="addNewVar">Add Var</button><br>
@@ -81,8 +81,8 @@ function addNewVar() {
     <option v-for="(_, varName) in varMap.value()" :value="varName"> {{ varName }} </option>
     </select>
     <div >
-        <!-- selected: {{  selectedVarName }}<br> -->
-        <!-- {{ varObj }} -->
+
+
         <br>
         DisplayName <input type="text" :value="getField('displayName')" @change="update($event, 'displayName')">
         buyable <input type="checkbox" :checked="getField('buyable')" @change="update($event, 'buyable', 'checked')">
@@ -94,7 +94,7 @@ function addNewVar() {
         args <input type="text" :value="getArray('valueArgs')" @change="updateArray($event, 'valueArgs')"> {{ getField('valueMathFunction') }} {{ runVarFunction('valueMathFunction') }}       
     </div>
   </div>
-</template>
+ --></template>
 
 <style scoped>
 button {

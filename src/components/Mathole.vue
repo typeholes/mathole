@@ -1,17 +1,30 @@
 
 <script setup>
-import { shallowRef,  onErrorCaptured, onMounted } from 'vue'
+import { shallowRef, onMounted } from 'vue'
 
 import Game from './Game.vue';
 import VarEditor from './VarEditor.vue';
 import FunctionDefEditor from './FunctionDefEditor.vue';
 
+import { GameState } from '../GameState';
 
-import { ST } from '../js/ST';
-import * as FunctionDef from '../js/FunctionDef';
-import { setVariable } from '../js/mathUtil';
+import { ref } from 'vue';
+
+import { displayFunction } from '../js/mathUtil';
 
 
+const _varMap = ref( 
+  GameState.init
+  (  ref( {} )
+  , (m,n) => m.value[n] = { cost:0, value: 0}
+  , (m,n) => m.value[n].cost
+  , (m,n, cost) => m.value[n].cost = cost
+  , (m,n) => m.value[n].value
+  , (m,n, value) => m.value[n].value = value
+  )
+);
+
+const gameState = GameState.getInstance();
 
 
 const props = defineProps({
@@ -23,97 +36,93 @@ function setMode(newMode) {
   mode.value = newMode;
 }
 
+const deltaDisplay = ref(0);
 
-
-const { functionDefMap, varMap } = ST.useState( 'functionDefMap', 'varMap' );
-
-const { lastTime, _errorMessage } = ST.useState( 'lastTime', '_errorMessage' );
+let priorTime = 0;
+function loop(elapsedTime) {
+  const delta = elapsedTime - priorTime
+  if (gameState.canTick && delta >= 500) {
+    gameState.tick(delta/10000);
+    priorTime = elapsedTime;
+    deltaDisplay.value = Math.floor(delta);
+//      displayFunction(FunctionDefManager.get('curvedSawtooth'),'', '#test-graph-expr', {});  
+  } 
+  window.requestAnimationFrame(loop);
+}
 
 onMounted( ()=> { 
-  console.log('mounted ' + lastTime.value() );
-  Object.values(functionDefMap.value()).forEach( (def)=> FunctionDef.runDefinition(def));
-  Object.values(varMap.value()).forEach( (gameVar)=> 
-    setVariable(gameVar.name, gameVar.cntBought)
-    );
+  console.log('mounted ' );
+  window.requestAnimationFrame( loop);
 }
 );
 
 
-onErrorCaptured( (err) => {
-      console.log('captured error');
-//      debugger;
-      console.log(err);
-      _errorMessage.set(err);
-      return false;
-});
-
-
 async function doImport() {
-  const getJsonUpload = () =>
-    new Promise(resolve => {
-      const inputFileElement = document.createElement('input')
-      inputFileElement.setAttribute('type', 'file')
-      inputFileElement.setAttribute('multiple', 'false')
-      inputFileElement.setAttribute('accept', '.json')
+  // const getJsonUpload = () =>
+  //   new Promise(resolve => {
+  //     const inputFileElement = document.createElement('input')
+  //     inputFileElement.setAttribute('type', 'file')
+  //     inputFileElement.setAttribute('multiple', 'false')
+  //     inputFileElement.setAttribute('accept', '.json')
       
-      inputFileElement.addEventListener(
-        'change',
-        async (event) => {
-          const { files } = event.target
-          if (!files) {
-            return
-          }
+  //     inputFileElement.addEventListener(
+  //       'change',
+  //       async (event) => {
+  //         const { files } = event.target
+  //         if (!files) {
+  //           return
+  //         }
 
-          const filePromises = [...files].map(file => file.text())
+  //         const filePromises = [...files].map(file => file.text())
 
-          resolve(await Promise.all(filePromises))
-        },
-        false,
-      )
-      inputFileElement.click()
-    })
+  //         resolve(await Promise.all(filePromises))
+  //       },
+  //       false,
+  //     )
+  //     inputFileElement.click()
+  //   })
   
-      const jsonFiles = await getJsonUpload();
-  ST.exportString = jsonFiles[0];
-  ST.import();
-  Object.values(functionDefMap.value()).forEach( (def)=> FunctionDef.runDefinition(def));
-  Object.values(varMap.value()).forEach( (gameVar)=> 
-    setVariable(gameVar.name, gameVar.cntBought)
-    );
+  //     const jsonFiles = await getJsonUpload();
+  // ST.exportString = jsonFiles[0];
+  // ST.import();
+  // Object.values(functionDefMap.value()).forEach( (def)=> FunctionDef.runDefinition(def));
+  // Object.values(varMap.value()).forEach( (gameVar)=> 
+  //   setVariable(gameVar.name, gameVar.cntBought)
+  //   );
 }
 
 function doExport() {
-  function download(file, text) {
+  // function download(file, text) {
               
-                //creating an invisible element
-                var element = document.createElement('a');
-                element.setAttribute('href', 
-                'data:text/plain;charset=utf-8, '
-                + encodeURIComponent(text));
-                element.setAttribute('download', file);
+  //               //creating an invisible element
+  //               var element = document.createElement('a');
+  //               element.setAttribute('href', 
+  //               'data:text/plain;charset=utf-8, '
+  //               + encodeURIComponent(text));
+  //               element.setAttribute('download', file);
               
-                // Above code is equivalent to
-                // <a href="path of file" download="file name">
+  //               // Above code is equivalent to
+  //               // <a href="path of file" download="file name">
               
-                document.body.appendChild(element);
+  //               document.body.appendChild(element);
               
-                //onClick property
-                element.click();
+  //               //onClick property
+  //               element.click();
               
-                document.body.removeChild(element);
-            }
+  //               document.body.removeChild(element);
+  //           }
 
-  ST.export();
-  download('mathole.json',ST.exportString);
+  // ST.export();
+  // download('mathole.json',ST.exportString);
+
 }
- window.setInterval(lastTime.tick, 500);
-
 
 
 </script>
 
 <template>
-  <table width="100%" border="1">
+todo
+   <table width="100%" border="1">
     <tr>
       <td>
         <button @click="setMode(Game)">Game</button>
@@ -135,11 +144,11 @@ function doExport() {
     </tr>
     <tr>
       <td>
-        <span class="error">{{ _errorMessage.value() }}</span>
+  <!--      <span class="error">{{ _errorMessage.value() }}</span> -->
       </td>
     </tr>
   </table>
-  
+ 
 
 </template>
 

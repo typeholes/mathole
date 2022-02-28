@@ -4,87 +4,74 @@ import { ref} from 'vue';
 
 import { runString, displayFunction } from '../js/mathUtil';
 
-import { ST } from '../js/ST';
 
 import { plot } from '../js/plot';
 
-const { functionDefMap } = ST.useState( 'functionDefMap' ); 
+// var selectedDefName = ref("sin");
 
-var selectedDefName = ref("sin");
+// const testResult = ref(' ');
 
-const testResult = ref(' ');
+// function display() {
+//   const argNames = getField('args');
+//   const values = getField('argValues');
+//   const args = Object.fromEntries(zip( argNames, values));
+//   const allSet = values.every( (x) => typeof x !== 'undefined' );
 
+//   if (allSet) {
+//     displayFunction(selectedDefName.value,'fn-', '#test-graph-expr', args);  
+//   }
+// }
 
-function *zip (...iterables){
-    let iterators = iterables.map(i => i[Symbol.iterator]() )
-    while (true) {
-        let results = iterators.map(iter => iter.next() )
-        if (results.some(res => res.done) ) return
-        else yield results.map(res => res.value )
-    }
-}
+// function selectDef(event) {
+//   selectedDefName.value=event.target.value;  
+//   display();
+// }
 
+// function getField(name) {
+//     const functionDef = functionDefMap.value()[selectedDefName.value];
+//     const ret = functionDef && functionDef[name]; 
+//     return ret;
+// }
 
-function display() {
-  const argNames = getField('args');
-  const values = getField('argValues');
-  const args = Object.fromEntries(zip( argNames, values));
-  const allSet = values.every( (x) => typeof x !== 'undefined' );
+// function getArgValue(idx) {
+//   let values =  getField('argValues');
+//   if (typeof values === 'undefined') {
+//     values = getField('args').map( ()=>'1');
+//     functionDefMap.setField('argValues', values);
+//   } 
 
-  if (allSet) {
-    displayFunction(selectedDefName.value,'fn-', '#test-graph-expr', args);  
-  }
-}
+//   let value = values[idx];
 
-function selectDef(event) {
-  selectedDefName.value=event.target.value;  
-  display();
-}
+//   if (typeof value === 'undefined') {
+//     setArgValue( {value: '1'}, idx);
+//     return '1';
+//   }
 
-function getField(name) {
-    const functionDef = functionDefMap.value()[selectedDefName.value];
-    const ret = functionDef && functionDef[name]; 
-    return ret;
-}
+//   return value;
 
-function getArgValue(idx) {
-  let values =  getField('argValues');
-  if (typeof values === 'undefined') {
-    values = getField('args').map( ()=>'1');
-    functionDefMap.setField('argValues', values);
-  } 
+// }
 
-  let value = values[idx];
+// function setArgValue( event, idx) {
+//   var value = event.target.value.trim();
+//   let field = getField('argValues');
+//   field[idx] = value;
+//   functionDefMap.setField( {defName: selectedDefName.value, fieldName: 'argValues', value: field});        
+//   display();
 
-  if (typeof value === 'undefined') {
-    setArgValue( {value: '1'}, idx);
-    return '1';
-  }
-
-  return value;
-
-}
-
-function setArgValue( event, idx) {
-  var value = event.target.value.trim();
-  let field = getField('argValues');
-  field[idx] = value;
-  functionDefMap.setField( {defName: selectedDefName.value, fieldName: 'argValues', value: field});        
-  display();
-
-}
+// }
 
 </script>
 
 <template>
-  <div>
+   todo
+<!--   <div>
     <select  :value="selectedDefName" @change="selectDef">
     <option v-for="(_, defName) in functionDefMap.value()" :value="defName"> {{ defName }} </option>
     </select>
     <div >
 
                       <div>
-                    <!-- <div> selected: {{ selected }} <br> -->
+
                     Pretty:
                     <div id="fn-pretty"></div>
                     <br />Pretty Val:
@@ -103,7 +90,7 @@ function setArgValue( event, idx) {
         <div id='test-graph-expr' class="graphDiv"></div>
 
     </div>
-  </div>
+  </div> -->
 </template>
 
 <style scoped>

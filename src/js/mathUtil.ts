@@ -1,56 +1,35 @@
-import {simplify, derivative, compile, parser as mkParser, parse as mathParse, exp} from 'mathjs';
+
 
 import * as M from 'mathjs';
-
-import * as GameVar from './GameVar';
+import { typeset } from './typeset';
 
 import { addHandlers, createHovers } from './mathHovers';
 import { plot } from './plot';
 
-export default displayExpr;
-export { displayExpr,  runDefinition, runString, setVariable, addFunction, M, expand, formatGraphExpr, getDerivative, displayFunction };
+import {FunctionDef, FunctionDefManager} from './FunctionDef';
 
+export default displayExpr;
+export { displayExpr,  runDefinition, runString, setVariable, M, expand, getDerivative, displayFunction, updateVar };
+
+export type argMap = { [index: string]: string | number};
 
 //simplify.rules.push({ l: 'n1*n2/(n1*n3)', r: 'n2/n3' });
 
-const parser = mkParser();
+export const parser = M.parser();
 
-function setVariable(varName, value) {
+function setVariable(varName: string, value: string | number) {
   parser.set(varName, value);
 }
 
-var functionDefs = {}
-function addFunction(name, args, argValues, body) {
-  functionDefs[name] = { name, args, argValues, body, valid: false}
-  var fnString = name + '(' + args.join(',') + ')=' + body;
-  var { result, fn } = runDefinition(fnString);
-  functionDefs[name].valid = result=='Valid';    
-  return {result, fn};
-}
-
-
-function getDerivative(expr, by, args={}) {
-  var src = typeof expr === 'object' ? src : M.parse(expr);
-  var expanded = expand(src, true, args);
+function getDerivative(node: M.MathNode, by: string, args: argMap = {}) : M.MathNode {
+  var expanded: M.MathNode = expand(node, true, args);
   var derived = M.derivative(expanded, by);
   return derived;
 }
 
-function formatGraphExpr(expr) {
-  var src = typeof expr === 'object' ? src : M.parse(expr);
-  var expanded = expand(src, true);
+function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap = {}) {    
 
-  console.log(expanded);
-
-  var str =  expanded.toString();
-  console.log(str);
-
-  return str;
-}
-
-function expand(node, replaceConstants, localScope={}) {    
-
-  if (node.content) { // Parenthesis 
+  if ( node.content) { // Parenthesis 
     node.content = expand(node.content, replaceConstants, localScope);
     return node;
   }
@@ -62,7 +41,7 @@ function expand(node, replaceConstants, localScope={}) {
   }
 
   if (node.fn) { // FunctionNode2 
-    var def = functionDefs[node.fn.name];
+    let def = FunctionDefManager.get(node.fn);
     if (typeof def == 'undefined') { 
       node.args = node.args.map( (a)=> 
       expand(a, replaceConstants, localScope) 
@@ -72,8 +51,8 @@ function expand(node, replaceConstants, localScope={}) {
     } else {
       var bodyNode = M.parse(def.body);
       var bodyScope = {};
-      for(var i=0;i<def.args.length;i++) {
-        var argName = def.args[i];
+      for(var i=0;i<def.argNames.length;i++) {
+        var argName = def.argNames[i];
         var argValue = node.args[i];
         bodyScope[argName] = expand(argValue, replaceConstants, { ...localScope, ...bodyScope });
       }
@@ -90,7 +69,7 @@ function expand(node, replaceConstants, localScope={}) {
       try {
         const result = node.evaluate();
         if ( typeof result === 'number') {
-          return M.parse(result);
+          return M.parse(result.toString()); // TODO: can I construct the ConstantNode directly?
         } else {
           return node;
         }
@@ -111,6 +90,10 @@ function expand(node, replaceConstants, localScope={}) {
     return node;
   }
 
+}
+
+function updateVar(name: string, value: string | number) {
+  parser.set(name, value); 
 }
 
 function runDefinition(str) { 
@@ -157,16 +140,18 @@ function texDerivative(expr, selectedVar, args={}) {
 
 }
 
-function displayFunction(name, elementIdPrefix="", graphId="", args={}) {
+function displayFunction(functionDef: FunctionDef, elementIdPrefix="", graphId="", args={}) {
 
   if ( typeof elementIdPrefix !== 'undefined' && elementIdPrefix !== "") {
-    displayExpr( functionDefs[name].body, 'x', elementIdPrefix, args);
+    displayExpr( functionDef.body, 'x', elementIdPrefix, args);
   }
 
-  const expr = functionDefs[name].body;
+  const expr = functionDef.body;
   const expanded = expand(M.parse(expr), true, args);
-  plot(graphId, expanded.toString()); 
-  }
+  // plot(graphId, expanded.toString(), getDerivative(expanded, 'x', args).toString()); 
+  plot(graphId, expanded.toString(), "TODO"); 
+    
+}   
 
 function displayExpr(expr, selectedVar, elementIdPrefix="", args={}) {
 
@@ -187,24 +172,12 @@ function displayExpr(expr, selectedVar, elementIdPrefix="", args={}) {
   ];
   
   
-  const partPromises = parts.map( (part) => { 
-    var el = document.getElementById(part.id);
-    var tex = part.toTex();
-    return MathJax.tex2chtmlPromise(tex, { em: 64, ex: 16, display: false, scale: 2 }).then(
-    nodeHtml => {
-      if (el) {
-        el.innerHTML = '';
-        el.appendChild(nodeHtml);
-      }
-    });
-  });
 
-  
-    MathJax.typesetClear();
-
-    Promise.all(partPromises).then(MathJax.typesetPromise()).then(createHovers);
+  typeset(parts);
 
   
 
 
 }
+
+

@@ -1,29 +1,35 @@
 <script setup>
 
 import GameVarView from './GameVarView.vue';
-import { ST } from '../js/ST';
-
-import { getValue } from '../js/GameVar';
-
-const { varMap} = ST.useState( 'varMap'); 
+import { GameState } from '../GameState';
 
 
+const gameState = GameState.getInstance();
 
-function getScore() {
-  const scoreVar = varMap.value()['score'];
-  return getValue(scoreVar);
+function getValue(name) {
+  const val = gameState.getValue(name);
+
+  return Math.floor(val*100)/100;
+
 }
 
+function setScore() {
+  GameState.setVariable('score','444');
+}
 </script>
 
 <template>
   <div>
-    <h1> Score: {{ getScore()}} </h1>
 
-  <div v-for="(_, varName) in varMap.value()">
-      <GameVarView :varName="varName"></GameVarView>
+    <!-- <h1> Time: {{ getValue('t') }} </h1> -->
+    <h1> Score: {{getValue('score') }} </h1>
+
+  <div v-for="(varName) in gameState.getNames()">
+    <GameVarView :varName="varName"></GameVarView>
   </div>
 
+  <div id='test-graph-expr' class="graphDiv"></div>
+  
   </div>
 </template>
 

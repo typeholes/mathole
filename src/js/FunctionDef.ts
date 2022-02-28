@@ -1,34 +1,56 @@
-import { runDefinition as mathRunDefinition, addFunction } from "./mathUtil";
-export type FunctionDef = {
-    name: string,
-    builtin: boolean,
-    args: string[],
-    argValues: string[],
-    def: string,
-}
+import { runDefinition as mathRunDefinition, runString } from "./mathUtil";
 
-export function newFunctionDef(name: string, builtin: boolean, args: string[], argValues: string[], def: string) : FunctionDef {
-    let vals = argValues || args.map( (x)=>'1');
-    if (!builtin) {
-        addFunction( name, args, vals, def);
+import { GameVarManager } from "./GameVar";
+
+export type argMap = {[index: string]: string | number};
+
+export class FunctionDef {
+    readonly name: string;
+    readonly argNames: string[];
+    readonly body: string;
+    private readonly _fn;
+
+    constructor(name: string, argNames: string[], def: string) {
+        this.name = name;
+        this.argNames = argNames;
+        this.body = def;
+        
+        this._fn = mathRunDefinition(this.defString()).fn;
     }
-    return { name, builtin, args, argValues: vals, def };
+
+    argvalues(args: argMap) : (string|number)[] {
+        return this.argNames.map( name => runString(args[name]));
+    }
+
+    private defString() : string {
+        return this.name + '(' + this.argNames.join(',') + ') = ' + this.body;
+    }
+
+
+    run(args: argMap) : number {    
+        return this._fn(...this.argvalues(args));
+    }
+    
 }
 
-export function fromBuiltin(name: string) {
-    return { [name]: newFunctionDef(name, true, ['x'], ['x'], '') };
+export class FunctionDefManager {
+    private static readonly _instance: FunctionDefManager = new FunctionDefManager();
+
+    private map: {[any: string]: FunctionDef} = {};
+
+    static add(fn: FunctionDef) {
+        FunctionDefManager._instance.map[fn.name] = fn;
+    }
+    
+    static get(name: string) : FunctionDef {
+        return FunctionDefManager._instance.map[name];
+    }
+
+    static create(name: string, argNames: string[], def: string) : FunctionDef {
+        const fn = new FunctionDef(name, argNames, def);
+        FunctionDefManager.add(fn);
+        return fn;
+    }
 }
 
-
-export function defString(def: FunctionDef) : string {
-    if (def.builtin) return "";
-    return def.name + '(' + def.args.join(',') + ') = ' + def.def;
-}
-
-
-export function runDefinition(def: FunctionDef) : string {    
-    if (!def || def.builtin || def.args.length < 1 || !(def.def).trim() ) return;
-    const result = mathRunDefinition(defString(def)).result;
-    return result;
-  }
 
