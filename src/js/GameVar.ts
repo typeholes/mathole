@@ -12,7 +12,7 @@ export abstract class GameVar {
     readonly name: string;
     readonly displayName: string;
     readonly visible: boolean;
-    readonly fn: FunctionDef;
+    fn: FunctionDef;
     readonly args: argMap;
 
     get value( ) : number {
@@ -60,6 +60,20 @@ export class GameCalculation extends GameVar  {
 export class GameBuyable extends GameVar {
 
     private _cntBought = 0; 
+    private _totalBought = 0;
+    currency: string;
+
+    constructor(
+        name: string,
+        displayName: string,
+        visible: boolean,
+        fn: FunctionDef,
+        args: argMap,
+        currency: string
+    ) {
+        super(name, displayName, visible, fn, args);
+        this.currency = currency;
+    }
 
     get cost () {
        return super.value;
@@ -69,8 +83,17 @@ export class GameBuyable extends GameVar {
         return this._cntBought;
     }
 
+    get totalBought() {
+        return this._totalBought;
+    }
+
     buy(): void {
         this._cntBought++;
+        this._totalBought++;
+    }
+
+    spend(cnt: number): void {
+        this._cntBought -= cnt;
     }
 }
 
@@ -105,6 +128,35 @@ export class GameVarManager<T> {
         this.add(GameTime.instance);
     }
 
+    getUIValue(gameVar: GameVar) : number {
+        return this.valueGetter(this.uiState, gameVar.name);
+    }
+
+    setUIValue(gameVar: GameVar, makeDirty: "dirty"|"clean" = "clean") : void {
+        const value = gameVar.value;
+        const varName = gameVar.name;
+        this.valueSetter(this.uiState, varName, value);
+        setMathVariable(varName, value);
+
+        if (gameVar instanceof GameBuyable) {
+            this.valueSetter( this.uiState, gameVar.name + '_total', gameVar.totalBought);
+            setMathVariable(varName + '_total', gameVar.totalBought);
+        }
+        if (makeDirty === "dirty") {
+            this._dirty.push(varName);
+        }
+    }
+
+    getUICost(gameVar: GameVar) : number {
+        return this.costGetter(this.uiState, gameVar.name);
+    }
+
+    setUICost(gameVar: GameVar) : void {
+        if ( gameVar instanceof GameBuyable) {
+            this.costSetter(this.uiState, gameVar.name, gameVar.cost);
+        }
+    }
+
     newCalculation(
         name: string,
         displayName: string,
@@ -123,23 +175,34 @@ export class GameVarManager<T> {
         displayName: string,
         visible: boolean,
         fn: FunctionDef,
-        args: argMap
+        args: argMap, 
+        currency: string
     ) : GameBuyable {
+        this.varAdder(this.uiState, name + '_total');
    
-        const ret = new GameBuyable(name, displayName, visible, fn, args) ;
+        const ret = new GameBuyable(name, displayName, visible, fn, args, currency) ;
         this.add(ret);
+        this.setUIValue(ret);
+        this.setUICost(ret);
+
+        const currencyVar = this._items[currency];
+        if (currencyVar instanceof GameCalculation) {
+             currencyVar.fn = FunctionDefManager.adjust(currencyVar.fn, name + '_' + currency, (body) =>
+                body + ' - ' + fn.callStr(args).replace(name, name + '_total') + ' + ' +  fn.callStrEvaluatedArgs(args)
+                );
+        }
+        this.setUIValue(currencyVar, 'dirty');
         return ret;
     }
 
     add(g: GameVar) {
         this.varAdder(this.uiState, g.name);
-        
-        this._dependencies[g.name]=[];
+
+        this._dependencies[g.name] = [];
         this._calculateDependencies(g);
         this._order.push( g.name );
         this._items[g.name] = g;
-        this._dirty.push(g.name);
-        setMathVariable(g.name, 0);
+        this.setUIValue(g, "dirty");
     }
 
     get(name: string) {
@@ -157,7 +220,6 @@ export class GameVarManager<T> {
 
     private _calculateDependencies(tgt: GameVar) : void {
         for( const name in this._items) {
-    //        const g = this._items[name]; 
             if (tgt.dependsOn(name)) {
                 this._dependencies[name].push(tgt.name);
             }     
@@ -169,19 +231,16 @@ export class GameVarManager<T> {
   
         const t = (this._items.t as GameTime);
         t.time += elapsedTime;
-        setMathVariable('t', t.time);
         this.valueSetter(this.uiState, 't', t.time);
         this._dirty.push('t');
                
         const ran: string[] = [];
 
-  
-
         this._order.forEach( (name) => {
             if (this._dirty.includes(name)) {
-                const val = this._items[name].value;
-                this.valueSetter(this.uiState, name, val);
-                setMathVariable(name, val);
+                const dirtyVar = this._items[name];
+                
+                this.setUIValue(dirtyVar);
 
                 removeValuefromArray(this._dirty, name);
 
@@ -196,13 +255,40 @@ export class GameVarManager<T> {
         return this.get(varName) instanceof GameBuyable;
     }
 
-    buy(varName) {
+    getCurrency(varName: string) : GameVar {
         const buyable = this.get(varName);
-        if ( ! (buyable instanceof GameBuyable)) return;
+        if ( ! (buyable instanceof GameBuyable)) {return;}
+        
+        return this.get(buyable.currency);
+    };
+
+    getCurrencyName(varName) {
+        const currency = this.getCurrency(varName);
+        if (!currency) { return ""; }
+        return currency.name;
+    }
+ 
+    buy(varName: string) {
+        const buyable = this.get(varName);
+        if ( ! (buyable instanceof GameBuyable)) { return; }
+
+        const currencyName = this.getCurrencyName(varName);
+        const currency = this.get(currencyName);
+
+        const cost = buyable.cost;
+        if (cost > this.valueGetter(this.uiState, currencyName)) { return; }
         
         buyable.buy();
+        this.setUIValue(currency, 'dirty');
         
-        this.costSetter(this.uiState, varName, buyable.cost);
+        this.setUIValue(buyable, 'dirty');
+        this.setUICost(buyable);
+        if (currency instanceof GameBuyable) { 
+            currency.spend(cost);
+            this.setUIValue(currency);
+            this.setUICost(currency); 
+        }
+
         this._dirty.push(varName);
 
         displayFunction(FunctionDefManager.get('sawtooth'),'', '#test-graph-expr', {});  

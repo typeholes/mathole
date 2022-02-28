@@ -1,7 +1,5 @@
 import { runDefinition as mathRunDefinition, runString } from "./mathUtil";
 
-import { GameVarManager } from "./GameVar";
-
 export type argMap = {[index: string]: string | number};
 
 export class FunctionDef {
@@ -18,8 +16,12 @@ export class FunctionDef {
         this._fn = mathRunDefinition(this.defString()).fn;
     }
 
-    argvalues(args: argMap) : (string|number)[] {
+    evalArgValues(args: argMap) : (string|number)[] {
         return this.argNames.map( name => runString(args[name]));
+    }
+
+    argValues(args: argMap) : (string|number)[] {
+        return this.argNames.map( name => args[name]);
     }
 
     private defString() : string {
@@ -28,12 +30,22 @@ export class FunctionDef {
 
 
     run(args: argMap) : number {    
-        return this._fn(...this.argvalues(args));
+        return this._fn(...this.evalArgValues(args));
     }
-    
+
+    callStr(args: argMap) : string {
+        return this.name + '(' + this.argValues(args).join(',') + ')';
+    }
+
+    callStrEvaluatedArgs(args: argMap) : string {
+        return this.name + '(' + this.evalArgValues(args).join(',') + ')';
+    }
+
+
 }
 
 export class FunctionDefManager {
+
     private static readonly _instance: FunctionDefManager = new FunctionDefManager();
 
     private map: {[any: string]: FunctionDef} = {};
@@ -50,6 +62,11 @@ export class FunctionDefManager {
         const fn = new FunctionDef(name, argNames, def);
         FunctionDefManager.add(fn);
         return fn;
+    }
+
+    static adjust(fn: FunctionDef, newName: string, bodyModifier: (body: string) => string): FunctionDef {
+        const ret = this.create(newName, fn.argNames, bodyModifier(fn.body));
+        return ret;
     }
 }
 

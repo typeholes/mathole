@@ -1,3 +1,4 @@
+import { string } from "mathjs";
 import { FunctionDefManager } from "./js/FunctionDef";
 
 import { GameVarManager } from "./js/GameVar";
@@ -60,6 +61,14 @@ export class GameState<T> {
         return this.gameVarManager.isBuyable(varName);
     }
 
+    getCurrencyName(varName) : string {
+        return this.gameVarManager.getCurrencyName(varName);
+    }
+
+    getCurrencyDisplayName(varName) : string {
+        return this.getDisplayName(this.getCurrencyName(varName));
+    }
+
     private static _instance: GameState<any>;
 
     private readonly gameVarManager: GameVarManager<T>;
@@ -86,12 +95,11 @@ export class GameState<T> {
         );
 
         const vars = this.gameVarManager;
-        const cnt = 'cnt';
-        const scoreGameVar = vars.newCalculation( 'score', 'Score', false, id, {'x': 't'} );
-        const stabilityGameVar = vars.newBuyable( 'stability', 'Market Stability', true, times, {'x': 1.25, b: 'smoother+1'});
-        const smootherGameVar = vars.newCalculation( 'smoother', 'Smoother', false, times, {x: 'stability', b: 0.01});
-        const marketValueGameVar = vars.newCalculation('marketValue', 'Market Value', true, curvedSawtooth, {x: 't'});
-
+        vars.newCalculation( 'score', 'Score', false, times, {'x': 't', b:2} );
+        vars.newBuyable( 'stability', 'Market Stability', true, times, {'x': 1.25, b: 'stability+1'}, 'score');
+        vars.newBuyable( 'marketScale', 'Market Scale', true, times, {'x': 2, b: 'marketScale+1'}, 'stability');
+        vars.newCalculation( 'smoother', 'Smoother', false, times, {x: 'stability', b: 0.01});
+        vars.newCalculation('marketValue', 'Market Value', true, calcMarketValue, {x: 't'});
     }
 
 }
@@ -106,7 +114,7 @@ const sawtooth = FunctionDefManager.create('sawtooth', ['x'], '(1+zigZag((2 * x 
 const steps = FunctionDefManager.create('steps', ['x'], 'x - sawtooth(x)');
 const logSquares = FunctionDefManager.create('logSquares', ['x','b'], 'log(x^2+b^2)');
 const curvedSawtooth = FunctionDefManager.create('curvedSawtooth', ['x'], 'logSquares(x^smoother,sawtooth(x))');
-const calcMarketValue = FunctionDefManager.create('calcMarketValue', ['x'], 'curvedSawtooth(t)');
+const calcMarketValue = FunctionDefManager.create('calcMarketValue', ['x'], 'curvedSawtooth(x)*(marketScale+1)');
 
 
 

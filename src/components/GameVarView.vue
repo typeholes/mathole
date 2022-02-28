@@ -20,13 +20,22 @@ function getCost(varName) {
   return Math.round(val *100)/100;
 }
 
+function canBuy(varName) {
+  const currencyName = gameState.getCurrencyName(varName);
+  if (!currencyName) { return false;}
+
+  const currency = gameState.getValue(currencyName);
+
+  return currency >= getCost(varName);
+  
+}
 </script>
 
 <template>
     <div v-if="gameState.isVisible(varName)">    
         {{ gameState.getDisplayName(varName) }}: {{ getValue(varName) }}         
-        <button @click="gameState.buy(varName)" v-if="gameState.isBuyable(varName)">
-            Cost: {{ getCost(varName) }}
+        <button @click="gameState.buy(varName)" v-if="gameState.isBuyable(varName)" :disabled="!canBuy(varName)" > 
+            Cost: {{ getCost(varName) }} {{ gameState.getCurrencyDisplayName(varName) }}
         </button> <br>
     </div>
 </template>
