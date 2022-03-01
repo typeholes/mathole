@@ -6,26 +6,27 @@ import Game from './Game.vue';
 import VarEditor from './VarEditor.vue';
 import FunctionDefEditor from './FunctionDefEditor.vue';
 
-import { GameState } from '../GameState';
+import { GameState } from '../js/GameState';
 
 import { ref } from 'vue';
 
-import { displayFunction } from '../js/mathUtil';
+import { gameSetup } from "../js/MarketGame";
 
 
 const _varMap = ref( 
   GameState.init
   (  ref( {} )
+  , (m) => { return {...m.value} }
   , (m,n) => m.value[n] = { cost:0, value: 0}
   , (m,n) => m.value[n].cost
   , (m,n, cost) => m.value[n].cost = cost
   , (m,n) => m.value[n].value
   , (m,n, value) => m.value[n].value = value
+  , gameSetup
   )
 );
 
 const gameState = GameState.getInstance();
-
 
 const props = defineProps({
 })
@@ -129,10 +130,11 @@ todo
         <button @click="setMode(VarEditor)">VarEditor</button>
         <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button>
         <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button>
-        <button @click="ST.saveAll">save</button>
-        <button @click="doExport">export</button>
+        <button @click="gameState.save">save</button>
+        <button @click="gameState.load">load</button>
+    <!-- <button @click="doExport">export</button>
         <button @click="doImport">import</button>
-        <button @click="ST.reset">reset</button>        
+        <button @click="ST.reset">reset</button>         -->
       </td>
     </tr>
     <tr>

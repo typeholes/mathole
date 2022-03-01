@@ -1,7 +1,7 @@
 <script setup>
 
 
-import { GameState } from '../GameState';
+import { GameState } from '../js/GameState';
 
 
 defineProps({

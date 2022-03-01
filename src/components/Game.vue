@@ -1,7 +1,7 @@
 <script setup>
 
 import GameVarView from './GameVarView.vue';
-import { GameState } from '../GameState';
+import { GameState } from '../js/GameState';
 
 
 const gameState = GameState.getInstance();

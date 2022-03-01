@@ -1,22 +1,24 @@
-import { string } from "mathjs";
-import { FunctionDefManager } from "./js/FunctionDef";
+import { FunctionDefManager } from "./FunctionDef";
 
-import { GameVarManager } from "./js/GameVar";
+import { GameVarManager } from "./GameVar";
+import { SaveManager } from "./SaveManager";
 
 export class GameState<T> {
     canTick = true;
 
     // must be called before any other method
     static init<T>( uiState: T
+        , cloner: (uiState: T) => T
         , varAdder: (uiState: T, name: string) => void
         , costGetter: (uiState: T, name: string) => number
         , costSetter: (uiState: T, name: string, cost: number) => void
         , valueGetter: (uiState: T, name: string) => number
         , valueSetter: (uiState: T, name: string, value: number) => number
+        , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager) => void
         ): T { 
 
 
-        GameState._instance = new GameState(uiState, varAdder, costGetter, costSetter, valueGetter, valueSetter);
+        GameState._instance = new GameState(uiState, cloner, varAdder, costGetter, costSetter, valueGetter, valueSetter, gameSetup);
         return uiState;
     }
 
@@ -61,60 +63,81 @@ export class GameState<T> {
         return this.gameVarManager.isBuyable(varName);
     }
 
-    getCurrencyName(varName) : string {
+    getCurrencyName(varName: string) : string {
         return this.gameVarManager.getCurrencyName(varName);
     }
 
-    getCurrencyDisplayName(varName) : string {
+    getCurrencyDisplayName(varName: string) : string {
         return this.getDisplayName(this.getCurrencyName(varName));
     }
 
-    private static _instance: GameState<any>;
+    save() : void {
+        this.canTick = false;
+        this.saveManager.save('default');
+        this.canTick = true;
+    }
 
+    // I'd like to use valueGetter and costGetter here, but newState doesn't have a value property
+    // maybe need to pass in a from JSON callback as well?
+    load() : void {
+        this.canTick = false;
+        const newState = this.saveManager.load('default');
+
+        for (const key in newState) {
+            const val = (newState[key] as any).value;
+            const cost = (newState[key] as any).cost;
+            this.valueSetter(this.uiState, key, val);
+            this.costSetter(this.uiState, key, cost);
+        }
+        this.gameVarManager.setFromUIValues();
+        this.canTick = true;
+    }
+    
+    private static _instance: GameState<any>;
+    
     private readonly gameVarManager: GameVarManager<T>;
+    private readonly saveManager: SaveManager<T>;
 
     private readonly uiState: T;
 
+    private readonly cloner: (uiState: T) => T;
     private readonly costGetter: (uiState: T, name: string) => number;
     private readonly valueGetter: (uiState: T, name: string) => number;
+    private readonly costSetter: (uiState: T, name: string, cost: number) => void;
+    private readonly valueSetter: (uiState: T, name: string, value: number) => number;
+
 
     private constructor
     ( uiState: T
+    , cloner: (uiState: T) => T
     , varAdder: (uiState: T, name: string) => void
     , costGetter: (uiState: T, name: string) => number
     , costSetter: (uiState: T, name: string, cost: number) => void
     , valueGetter: (uiState: T, name: string) => number
     , valueSetter: (uiState: T, name: string, value: number) => number
+    , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager) => void
     ) {
         this.uiState = uiState;
+        this.cloner = cloner;
         this.costGetter = costGetter;
         this.valueGetter = valueGetter;
+        this.costSetter = costSetter;
+        this.valueSetter = valueSetter;
 
         this.gameVarManager = new GameVarManager<T>(
             uiState, varAdder, costGetter, costSetter, valueGetter, valueSetter
         );
 
         const vars = this.gameVarManager;
-        vars.newCalculation( 'score', 'Score', false, times, {'x': 't', b:2} );
-        vars.newBuyable( 'stability', 'Market Stability', true, times, {'x': 1.25, b: 'stability+1'}, 'score');
-        vars.newBuyable( 'marketScale', 'Market Scale', true, times, {'x': 2, b: 'marketScale+1'}, 'stability');
-        vars.newCalculation( 'smoother', 'Smoother', false, times, {x: 'stability', b: 0.01});
-        vars.newCalculation('marketValue', 'Market Value', true, calcMarketValue, {x: 't'});
+
+        gameSetup(vars, FunctionDefManager);
+
+        this.saveManager = new SaveManager( () => this.cloner(this.uiState) );
     }
 
+
+
 }
-
-
-const id = FunctionDefManager.create('id', ['x'],'x');
-const times = FunctionDefManager.create('times', ['x','b'], 'x*b');
-const reciprical = FunctionDefManager.create('reciprical', ['x'], '1/(x+1)');
-const zigZag = FunctionDefManager.create('zigZag', ['x'], '1-2 * acos((1- smoother) * sin(2 * pi * x))/pi');
-const squareWave = FunctionDefManager.create('squareWave', ['x'], '2 * atan( sin(2 * pi * x)/ smoother )/pi');
-const sawtooth = FunctionDefManager.create('sawtooth', ['x'], '(1+zigZag((2 * x - 1)/4) * squareWave(x/2))/2');
-const steps = FunctionDefManager.create('steps', ['x'], 'x - sawtooth(x)');
-const logSquares = FunctionDefManager.create('logSquares', ['x','b'], 'log(x^2+b^2)');
-const curvedSawtooth = FunctionDefManager.create('curvedSawtooth', ['x'], 'logSquares(x^smoother,sawtooth(x))');
-const calcMarketValue = FunctionDefManager.create('calcMarketValue', ['x'], 'curvedSawtooth(x)*(marketScale+1)');
 
 
 

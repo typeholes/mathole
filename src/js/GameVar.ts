@@ -1,4 +1,4 @@
-import { removeValuefromArray } from "../util";
+import { removeValuefromArray } from "./util";
 import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
 import { displayFunction, setVariable as setMathVariable } from "./mathUtil";
 
@@ -58,6 +58,10 @@ export class GameCalculation extends GameVar  {
 }
 
 export class GameBuyable extends GameVar {
+    forceSetCounts(cnt: number, totalCnt: number) {
+        this._cntBought = cnt;
+        this._totalBought = totalCnt;
+    }
 
     private _cntBought = 0; 
     private _totalBought = 0;
@@ -294,4 +298,17 @@ export class GameVarManager<T> {
         displayFunction(FunctionDefManager.get('sawtooth'),'', '#test-graph-expr', {});  
     }
 
+    setFromUIValues() : void {
+
+        this._order.forEach( (varName) => {
+            const gameVar = this._items[varName];
+            if (gameVar instanceof GameBuyable) {
+                gameVar.forceSetCounts( this.valueGetter(this.uiState, varName), this.valueGetter(this.uiState, varName + '_total'));
+            } else if(gameVar instanceof GameTime) {
+                gameVar.time = this.valueGetter(this.uiState, varName);
+            }
+            this._dirty.push(varName);
+            setMathVariable(varName, this.valueGetter(this.uiState, varName));
+        });
+    }
 }
