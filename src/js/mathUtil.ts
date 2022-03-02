@@ -7,6 +7,7 @@ import { addHandlers, createHovers } from './mathHovers';
 import { plot } from './plot';
 
 import {FunctionDef, FunctionDefManager} from './FunctionDef';
+import { isInteger } from 'mathjs';
 
 export default displayExpr;
 export { displayExpr,  runDefinition, runString, setVariable, M, expand, getDerivative, displayFunction, updateVar };
@@ -27,24 +28,24 @@ function getDerivative(node: M.MathNode, by: string, args: argMap = {}) : M.Math
   return derived;
 }
 
-function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap = {}) {    
+function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap = {}, maxDepth=Number.MAX_SAFE_INTEGER, depth=1) {    
 
   if ( node.content) { // Parenthesis 
-    node.content = expand(node.content, replaceConstants, localScope);
+    node.content = expand(node.content, replaceConstants, localScope, maxDepth, depth+1);
     return node;
   }
   if (node.op) {  // OperatorNode2
     node.args = node.args.map( (a)=> 
-      expand(a, replaceConstants, localScope) 
+      expand(a, replaceConstants, localScope, maxDepth, depth+1) 
       );     
     return node;
   }
 
   if (node.fn) { // FunctionNode2 
     let def = FunctionDefManager.get(node.fn);
-    if (typeof def == 'undefined') { 
+    if (typeof def == 'undefined' || depth > maxDepth) { 
       node.args = node.args.map( (a)=> 
-      expand(a, replaceConstants, localScope) 
+      expand(a, replaceConstants, localScope, maxDepth, depth) 
       );     
   
       return node; 
@@ -54,9 +55,9 @@ function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap 
       for(var i=0;i<def.argNames.length;i++) {
         var argName = def.argNames[i];
         var argValue = node.args[i];
-        bodyScope[argName] = expand(argValue, replaceConstants, { ...localScope, ...bodyScope });
+        bodyScope[argName] = expand(argValue, replaceConstants, { ...localScope }, maxDepth, depth+1);
       }
-      var newNode=expand(bodyNode, replaceConstants, { ...localScope, ...bodyScope });
+      var newNode=expand(bodyNode, replaceConstants, { ...localScope, ...bodyScope }, maxDepth, depth+1);
       return newNode;    
     }
     // todo: expand function def.
