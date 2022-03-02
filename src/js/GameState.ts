@@ -98,13 +98,47 @@ export class GameState<T> {
     private readonly gameVarManager: GameVarManager<T>;
     private readonly saveManager: SaveManager<T>;
 
+    /**
+     * description
+     * 
+     * @category uiState
+     */
     private readonly uiState: T;
 
+    /**
+     * description
+     * 
+     * @category uiState
+     */
     private readonly cloner: (uiState: T) => T;
+
+    /**
+     * description
+     * 
+     * @category uiState
+     */
     private readonly costGetter: (uiState: T, name: string) => number;
-    private readonly valueGetter: (uiState: T, name: string) => number;
-    private readonly costSetter: (uiState: T, name: string, cost: number) => void;
-    private readonly valueSetter: (uiState: T, name: string, value: number) => number;
+
+    /**
+     * description
+     * 
+     * @category uiState
+     */
+     private readonly valueGetter: (uiState: T, name: string) => number;
+
+    /**
+     * description
+     * 
+     * @category uiState
+     */
+     private readonly costSetter: (uiState: T, name: string, cost: number) => void;
+
+    /**
+     * description
+     * 
+     * @category uiState
+     */
+     private readonly valueSetter: (uiState: T, name: string, value: number) => number;
 
 
     private constructor
