@@ -295,7 +295,7 @@ export class GameVarManager<T> {
 
         this._dirty.push(varName);
 
-        displayFunction(FunctionDefManager.get('sawtooth'),'', '#test-graph-expr', {});  
+        displayFunction(FunctionDefManager.get('calcMarketValue'),'', '#test-graph-expr', {});  
     }
 
     setFromUIValues() : void {

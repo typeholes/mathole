@@ -3,6 +3,8 @@
 import { shallowRef, onMounted } from 'vue'
 
 import Game from './Game.vue';
+import FunctionViewer from './FunctionViewer.vue';
+
 import VarEditor from './VarEditor.vue';
 import FunctionDefEditor from './FunctionDefEditor.vue';
 
@@ -127,11 +129,12 @@ todo
     <tr>
       <td>
         <button @click="setMode(Game)">Game</button>
-        <button @click="setMode(VarEditor)">VarEditor</button>
+        <!-- <button @click="setMode(VarEditor)">VarEditor</button>
         <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button>
-        <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button>
+        <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button> -->
         <button @click="gameState.save">save</button>
         <button @click="gameState.load">load</button>
+        <button @click="setMode(FunctionViewer)">Function Viewer</button>
     <!-- <button @click="doExport">export</button>
         <button @click="doImport">import</button>
         <button @click="ST.reset">reset</button>         -->
