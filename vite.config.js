@@ -9,6 +9,7 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/mathole/',
   optimizeDeps: {
 //		allowNodeBuiltins: ['function-plot']
 //		include: ['pouchdb-live-find/dist/index.es.js']
