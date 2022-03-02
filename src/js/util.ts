@@ -12,3 +12,9 @@ export function *zip (...iterables){
         else yield results.map(res => res.value )
     }
 }
+
+
+export function unique(arr: any[]) : any[] {
+    const check = (value, index, self) => self.indexOf(value) === index;
+    return arr.filter(check);
+}

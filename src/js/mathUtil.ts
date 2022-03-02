@@ -8,6 +8,7 @@ import { plot } from './plot';
 
 import {FunctionDef, FunctionDefManager} from './FunctionDef';
 import { isInteger } from 'mathjs';
+import { unique } from './util';
 
 export default displayExpr;
 export { displayExpr,  runDefinition, runString, setVariable, M, expand, getDerivative, displayFunction, updateVar };
@@ -149,8 +150,22 @@ function displayFunction(functionDef: FunctionDef, elementIdPrefix="", graphId="
 
   const expr = functionDef.body;
   const expanded = expand(M.parse(expr), true, args);
+  
+  const filtered = expanded.filter(function (node) {
+    return node.isSymbolNode && typeof parser.get(node.name) !== 'undefined'
+  });
+
+  const freeVars = unique(filtered.map( (x) => x.name));
+  if ( freeVars.length>1 ) {
+    throw "too many free variables in " + functionDef.name + ": " + freeVars.join(', ')
+  }
+  
+  const free = freeVars[0];
+
+  const makeX = free === 'x' ? '' : free + '=x;';
+
   // plot(graphId, expanded.toString(), getDerivative(expanded, 'x', args).toString()); 
-  plot(graphId, expanded.toString(), "TODO"); 
+  plot(graphId, makeX+expanded.toString(), free); 
     
 }   
 

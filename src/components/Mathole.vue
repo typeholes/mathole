@@ -1,6 +1,6 @@
 
-<script setup>
-import { shallowRef, onMounted } from 'vue'
+<script setup lang="ts">
+import { shallowRef, onMounted, provide, Ref } from 'vue'
 
 import Game from './Game.vue';
 import FunctionViewer from './FunctionViewer.vue';
@@ -14,11 +14,13 @@ import { ref } from 'vue';
 
 import { gameSetup } from "../js/MarketGame";
 
+import ToggleButton  from './ToggleButton.vue';
+import { clickActionsT } from './types';
 
 const _varMap = ref( 
   GameState.init
   (  ref( {} )
-  , (m) => { return {...m.value} }
+  , (m) => m 
   , (m,n) => m.value[n] = { cost:0, value: 0}
   , (m,n) => m.value[n].cost
   , (m,n, cost) => m.value[n].cost = cost
@@ -41,6 +43,25 @@ function setMode(newMode) {
 
 const deltaDisplay = ref(0);
 
+const clickActions: Ref<clickActionsT> = ref({ 
+  dependencies: false,
+  dependents: false,
+  graph: false,
+  sticky: false
+});
+
+
+provide( 'clickActions', () => clickActions.value);
+
+function clearClickActions() {
+  if (!clickActions.value.sticky) {
+    for (let key in clickActions.value) {
+      clickActions.value[key] = false;
+    }
+
+  }
+}
+
 let priorTime = 0;
 function loop(elapsedTime) {
   const delta = elapsedTime - priorTime
@@ -48,7 +69,6 @@ function loop(elapsedTime) {
     gameState.tick(delta/10000);
     priorTime = elapsedTime;
     deltaDisplay.value = Math.floor(delta);
-//      displayFunction(FunctionDefManager.get('curvedSawtooth'),'', '#test-graph-expr', {});  
   } 
   window.requestAnimationFrame(loop);
 }
@@ -139,9 +159,16 @@ todo
         <button @click="doImport">import</button>
         <button @click="ST.reset">reset</button>         -->
       </td>
+      <td rowspan="3" width="10%">
+        Click Actions
+           <ToggleButton label="Dependencies" v-model:state="clickActions.dependencies"></ToggleButton> 
+           <ToggleButton label="Dependents" v-model:state="clickActions.dependents"></ToggleButton> 
+           <ToggleButton label="Graph" v-model:state="clickActions.graph"></ToggleButton> 
+           <ToggleButton label="Sticky" v-model:state="clickActions.sticky"></ToggleButton> 
+      </td>
     </tr>
     <tr>
-      <td >
+      <td @click="clearClickActions">
         <keep-alive>
           <component :is="mode"></component>        
         </keep-alive>

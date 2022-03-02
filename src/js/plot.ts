@@ -3,11 +3,11 @@
 
 import functionPlot from "function-plot";
 
-export function plot(target: string, expr: string, derivativeExpr: string) {
+export function plot(target: string, expr: string, title: string) {
 
 functionPlot({
     target: target,
-    title: "graph",
+    title: title,
     //  width: 500,
     //  height: 500,
     yAxis: { domain: [-1, 9] },

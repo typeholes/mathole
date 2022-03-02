@@ -1,6 +1,7 @@
-import { FunctionDefManager } from "./FunctionDef";
+import { FunctionDef, FunctionDefManager } from "./FunctionDef";
 
 import { GameVarManager } from "./GameVar";
+import { displayFunction as mathDisplayFunction } from "./mathUtil";
 import { SaveManager } from "./SaveManager";
 
 export class GameState<T> {
@@ -25,6 +26,12 @@ export class GameState<T> {
     // must call init first
     static getInstance<T>(): GameState<T> {
         return GameState._instance;
+    }
+
+    displayFunction(varName: string, graphTgt: string): void {
+        const gameVar = this.gameVarManager.get(varName);
+        mathDisplayFunction(gameVar.fn,'', graphTgt, gameVar.args);
+
     }
 
     getCost( name: string) : number {

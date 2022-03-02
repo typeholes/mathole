@@ -1,6 +1,6 @@
 import { removeValuefromArray } from "./util";
 import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
-import { displayFunction, setVariable as setMathVariable } from "./mathUtil";
+import { setVariable as setMathVariable } from "./mathUtil";
 
 import { parser } from "./mathUtil";
 
@@ -128,7 +128,7 @@ export class GameVarManager<T> {
         this.valueGetter = valueGetter;
         this.valueSetter = valueSetter;
         
-        debugger;
+//        debugger;
         this.add(GameTime.instance);
     }
 
@@ -295,7 +295,6 @@ export class GameVarManager<T> {
 
         this._dirty.push(varName);
 
-        displayFunction(FunctionDefManager.get('calcMarketValue'),'', '#test-graph-expr', {});  
     }
 
     setFromUIValues() : void {

@@ -1,8 +1,11 @@
-<script setup>
+<script setup lang="ts">
 
 import GameVarView from './GameVarView.vue';
 import { GameState } from '../js/GameState';
+import { ref } from 'vue';
 
+import { FunctionDefManager } from '../js/FunctionDef';
+import { displayFunction } from '../js/mathUtil';
 
 const gameState = GameState.getInstance();
 
@@ -13,19 +16,19 @@ function getValue(name) {
 
 }
 
-function setScore() {
-  GameState.setVariable('score','444');
-}
+let dependencies = ref([]);
+let dependents = ref([]);
+let graphedVar = ref("");
+
 </script>
 
 <template>
   <div>
-
     <!-- <h1> Time: {{ getValue('t') }} </h1> -->
-    <h1> Score: {{getValue('score') }} </h1>
+    <h1> <GameVarView varName="score" v-model:dependencies="dependencies" v-model:dependents="dependents" forceVisible v-model:graphed="graphedVar"></GameVarView> </h1>
 
   <div v-for="(varName) in gameState.getNames()">
-    <GameVarView :varName="varName"></GameVarView>
+    <GameVarView :varName="varName" v-model:dependencies="dependencies" v-model:dependents="dependents" v-model:graphed="graphedVar"></GameVarView>
   </div>
 
   <div id='test-graph-expr' class="graphDiv"></div>
