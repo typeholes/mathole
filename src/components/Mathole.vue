@@ -18,7 +18,9 @@ const _varMap = ref(
   GameState.init
   (  ref( {} )
   , (m) => m.value 
-  , (m,n) => m.value[n] = { cost:0, value: 0}
+  , (m,n) => m.value[n] = { cost: 0, sellCost:0, value: 0}
+  , (m,n) => m.value[n].sellCost
+  , (m,n, sellCost) => m.value[n].sellCost = sellCost
   , (m,n) => m.value[n].cost
   , (m,n, cost) => m.value[n].cost = cost
   , (m,n) => m.value[n].value

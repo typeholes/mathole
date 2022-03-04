@@ -10,6 +10,8 @@ export class GameVarManager<T> {
 
     private readonly uiState: T;
     private readonly varAdder: (uiState: T, name: string) => void;
+    private readonly sellCostGetter: (uiState: T, name: string) => number;
+    private readonly sellCostSetter: (uiState: T, name: string, cost: number) => void;
     private readonly costGetter: (uiState: T, name: string) => number;
     private readonly costSetter: (uiState: T, name: string, cost: number) => void;
     private readonly valueGetter: (uiState: T, name: string) => number;
@@ -18,6 +20,8 @@ export class GameVarManager<T> {
 
     constructor(uiState: T,
         varAdder: (uiState: T, name: string) => void,
+        sellCostGetter: (uiState: T, name: string) => number,
+        sellCostSetter: (uiState: T, name: string, cost: number) => void,
         costGetter: (uiState: T, name: string) => number,
         costSetter: (uiState: T, name: string, cost: number) => void,
         valueGetter: (uiState: T, name: string) => number,
@@ -29,6 +33,8 @@ export class GameVarManager<T> {
         this.costSetter = costSetter;
         this.valueGetter = valueGetter;
         this.valueSetter = valueSetter;
+        this.sellCostGetter = sellCostGetter;
+        this.sellCostSetter = sellCostSetter;
 
         // debugger;
         this.add(GameTime.instance);
@@ -50,6 +56,16 @@ export class GameVarManager<T> {
         }
         if (makeDirty === "dirty") {
             this._dirty.push(varName);
+        }
+    }
+
+    getUISellCost(gameVar: GameVar): number {
+        return this.sellCostGetter(this.uiState, gameVar.name);
+    }
+
+    setUISellCost(gameVar: GameVar): void {
+        if (gameVar instanceof GameBuyable) {
+            this.sellCostSetter(this.uiState, gameVar.name, gameVar.sellCost);
         }
     }
 
@@ -165,6 +181,7 @@ export class GameVarManager<T> {
 
                 this.setUIValue(dirtyVar);
                 this.setUICost(dirtyVar);
+                this.setUISellCost(dirtyVar);
 
                 removeValuefromArray(this._dirty, name);
 

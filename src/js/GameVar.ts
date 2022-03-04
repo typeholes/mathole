@@ -4,7 +4,7 @@ import { parser } from "./mathUtil";
 
 
 export type uiVarMap = { [any: string]: uiVar };
-export type uiVar = { value: number, cost: number};
+export type uiVar = { value: number, cost: number, sellCost: number};
 
 export abstract class GameVar { 
     readonly name: string;
@@ -70,6 +70,8 @@ export class GameBuyable extends GameVar {
     currency: string;
     buyable: boolean = true;
     sellable: boolean = false;
+    sellFn: FunctionDef;
+    sellArgs: argMap;
 
     constructor(
         name: string,
@@ -79,17 +81,27 @@ export class GameBuyable extends GameVar {
         args: argMap,
         currency: string, 
         sellable: boolean,
+        sellFn: FunctionDef = fn,
+        sellArgs: argMap = args,
         buyable: boolean = true
     ) {
         super(name, displayName, visible, fn, args);
         this.currency = currency;
         this.sellable = sellable;
         this.buyable = buyable;
+        this.sellFn = sellFn;
+        this.sellArgs = sellArgs;
     }
 
     get cost () {
        return super.value;
     }
+
+    get sellCost() {
+        const p = parser;
+        const val = this.sellFn.run( this.sellArgs);
+        return val;
+    };
 
     get value(): number {
         return this._cntBought;
@@ -116,7 +128,10 @@ export class GameVarPlain extends GameBuyable {
         displayName: string,
         visible: boolean
     ) {
-        super(name, displayName, visible, FunctionDefManager.get('id'), {x: name}, "", false, false); // TODO replace with id after providing builtin functionDefs
+        const id = FunctionDefManager.get('id');
+        const args = {x: name};
+
+        super(name, displayName, visible, id, args, "", false, id, args, false); // TODO replace with id after providing builtin functionDefs
     }
 }
 

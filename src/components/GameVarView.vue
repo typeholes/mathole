@@ -28,6 +28,11 @@ function getValue(varName: string) {
   return Math.round(val *100)/100;
 }
 
+function getSellCost(varName: string) {
+  const val = gameState.getSellCost(varName);
+  return Math.round(val *100)/100;
+}
+
 function getCost(varName: string) {
   const val = gameState.getCost(varName);
   return Math.round(val *100)/100;
@@ -114,10 +119,9 @@ function graphTitle(varName: string) : string {
         <div :class="labelClass(varName, selectedVarName, dependencies, dependents)"><span> {{ varName === selectedVarName ? "&#8860" : "&#8658" }} </span></div>
         <span  @click="labelClick(varName)">{{ gameState.getDisplayName(varName) }}: </span> {{ getValue(varName) }}         
         <button @click="buy(varName, graphedVarName)" v-if="gameState.isBuyable(varName)" :disabled="!canBuy(varName)" > 
-            Buy
+            Buy: {{ getCost(varName) }} {{ gameState.getCurrencyDisplayName(varName) }}
         </button> 
-        <button @click="sell(varName, graphedVarName)" v-if="gameState.isSellable(varName)" :disabled="!canSell(varName)">sell</button> 
-        <span v-if="gameState.isBuyable(varName) || gameState.isSellable(varName)"> Cost: {{ getCost(varName) }} {{ gameState.getCurrencyDisplayName(varName) }}</span><br>
+        <button @click="sell(varName, graphedVarName)" v-if="gameState.isSellable(varName)" :disabled="!canSell(varName)">Sell: {{ getSellCost(varName) }} {{ gameState.getCurrencyDisplayName(varName) }}</button> 
     </div>
   </div>
 </template>

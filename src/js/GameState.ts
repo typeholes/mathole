@@ -11,6 +11,8 @@ export class GameState<T> {
     static init<T>( uiState: T
         , cloner: (uiState: any) => T // any because of things like vue wrapping with refs
         , varAdder: (uiState: T, name: string) => void
+        , sellCostGetter: (uiState: T, name: string) => number
+        , sellCostSetter: (uiState: T, name: string, cost: number) => void
         , costGetter: (uiState: T, name: string) => number
         , costSetter: (uiState: T, name: string, cost: number) => void
         , valueGetter: (uiState: T, name: string) => number
@@ -19,7 +21,7 @@ export class GameState<T> {
         ): T { 
 
 
-        GameState._instance = new GameState(uiState, cloner, varAdder, costGetter, costSetter, valueGetter, valueSetter, gameSetup);
+        GameState._instance = new GameState(uiState, cloner, varAdder, sellCostGetter, sellCostSetter, costGetter, costSetter, valueGetter, valueSetter, gameSetup);
         return uiState;
     }
 
@@ -41,6 +43,10 @@ export class GameState<T> {
         );
 
         return ret;
+    }
+
+    getSellCost( name: string) : number {
+        return this.sellCostGetter(this.uiState, name);
     }
 
     getCost( name: string) : number {
@@ -154,6 +160,8 @@ export class GameState<T> {
      */
     private readonly costGetter: (uiState: T, name: string) => number;
 
+    private readonly sellCostGetter: (uiState: T, name: string) => number;
+
     /**
      * description
      * 
@@ -167,6 +175,8 @@ export class GameState<T> {
      * @category uiState
      */
      private readonly costSetter: (uiState: T, name: string, cost: number) => void;
+     
+     private readonly sellCostSetter: (uiState: T, name: string, sellCost: number) => void;
 
     /**
      * description
@@ -180,6 +190,8 @@ export class GameState<T> {
     ( uiState: T
     , cloner: (uiState: T) => T
     , varAdder: (uiState: T, name: string) => void
+    , sellCostGetter: (uiState: T, name: string) => number
+    , sellCostSetter: (uiState: T, name: string, cost: number) => void
     , costGetter: (uiState: T, name: string) => number
     , costSetter: (uiState: T, name: string, cost: number) => void
     , valueGetter: (uiState: T, name: string) => number
@@ -192,9 +204,11 @@ export class GameState<T> {
         this.valueGetter = valueGetter;
         this.costSetter = costSetter;
         this.valueSetter = valueSetter;
+        this.sellCostGetter = sellCostGetter;
+        this.sellCostSetter = sellCostSetter;
 
         this.gameVarManager = new GameVarManager<T>(
-            uiState, varAdder, costGetter, costSetter, valueGetter, valueSetter
+            uiState, varAdder, sellCostGetter, sellCostSetter, costGetter, costSetter, valueGetter, valueSetter
         );
 
         const vars = this.gameVarManager;
