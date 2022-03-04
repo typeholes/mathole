@@ -1,6 +1,6 @@
 import { removeValuefromArray } from "./util";
 import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
-import { setVariable as setMathVariable } from "./mathUtil";
+import { setVariable as setMathVariable, getDependencies as getMathDependencies } from "./mathUtil";
 
 import { parser } from "./mathUtil";
 
@@ -128,7 +128,7 @@ export class GameVarManager<T> {
         this.valueGetter = valueGetter;
         this.valueSetter = valueSetter;
         
-//        debugger;
+        // debugger;
         this.add(GameTime.instance);
     }
 
@@ -202,8 +202,7 @@ export class GameVarManager<T> {
     add(g: GameVar) {
         this.varAdder(this.uiState, g.name);
 
-        this._dependencies[g.name] = [];
-        this._calculateDependencies(g);
+        this._dependencies[g.name] = getMathDependencies(g.fn, g.args);
         this._order.push( g.name );
         this._items[g.name] = g;
         this.setUIValue(g, "dirty");
@@ -221,14 +220,6 @@ export class GameVarManager<T> {
     private _order: string[] = [];
     private _dependencies: {[index: string]: string[]} =  { };
     private _dirty: string[] = [];
-
-    private _calculateDependencies(tgt: GameVar) : void {
-        for( const name in this._items) {
-            if (tgt.dependsOn(name)) {
-                this._dependencies[name].push(tgt.name);
-            }     
-        }
-    };
 
     tick(elapsedTime: number) : void {
 
@@ -257,6 +248,25 @@ export class GameVarManager<T> {
 
     isBuyable(varName) {
         return this.get(varName) instanceof GameBuyable;
+    }
+
+    getDependencies(varName: string) : string[] {
+        const deps = this._dependencies[varName] || [];
+        const childDeps = deps.map( (dep) => this.getDependencies(dep) ).flat();
+
+        deps.push(...childDeps);
+
+        return deps;
+
+    }
+
+    getDependents(varName: string) : string[] {
+        const ret : string[] = [];
+
+        this._order.forEach( (name) => {
+            if ( this._dependencies[name].includes(varName) ) ret.push(name);
+        });
+        return ret;
     }
 
     getCurrency(varName: string) : GameVar {

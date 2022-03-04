@@ -1,12 +1,9 @@
 
 <script setup lang="ts">
-import { shallowRef, onMounted, provide, Ref } from 'vue'
+import { shallowRef, onMounted } from 'vue'
 
 import Game from './Game.vue';
 import FunctionViewer from './FunctionViewer.vue';
-
-import VarEditor from './VarEditor.vue';
-import FunctionDefEditor from './FunctionDefEditor.vue';
 
 import { GameState } from '../js/GameState';
 
@@ -15,7 +12,7 @@ import { ref } from 'vue';
 import { gameSetup } from "../js/MarketGame";
 
 import ToggleButton  from './ToggleButton.vue';
-import { clickActionsT } from './types';
+import { PropKeys, provides } from './types';
 
 const _varMap = ref( 
   GameState.init
@@ -32,35 +29,28 @@ const _varMap = ref(
 
 const gameState = GameState.getInstance();
 
-const props = defineProps({
-})
+const { clickAction, graphedVarName, selectedVarName, dependencies, dependents } = provides(
+  [ PropKeys.ClickAction, "select" ],
+  [ PropKeys.GraphedVarName, "" ],
+  [ PropKeys.SelectedVarName, "" ],
+  [ PropKeys.Dependencies, [] ],
+  [ PropKeys.Dependents, [] ]
+);
 
-const mode = shallowRef(VarEditor);
+function dbg() { 
+  const foo = [
+    clickAction, graphedVarName, selectedVarName, dependencies, dependents 
+  ];
+  debugger;
+}
+
+const mode = shallowRef(Game);
 
 function setMode(newMode) {
   mode.value = newMode;
 }
 
 const deltaDisplay = ref(0);
-
-const clickActions: Ref<clickActionsT> = ref({ 
-  dependencies: false,
-  dependents: false,
-  graph: false,
-  sticky: false
-});
-
-
-provide( 'clickActions', () => clickActions.value);
-
-function clearClickActions() {
-  if (!clickActions.value.sticky) {
-    for (let key in clickActions.value) {
-      clickActions.value[key] = false;
-    }
-
-  }
-}
 
 let priorTime = 0;
 function loop(elapsedTime) {
@@ -160,17 +150,15 @@ todo
         <button @click="ST.reset">reset</button>         -->
       </td>
       <td rowspan="3" width="10%">
-        Click Actions
-           <ToggleButton label="Dependencies" v-model:state="clickActions.dependencies"></ToggleButton> 
-           <ToggleButton label="Dependents" v-model:state="clickActions.dependents"></ToggleButton> 
-           <ToggleButton label="Graph" v-model:state="clickActions.graph"></ToggleButton> 
-           <ToggleButton label="Sticky" v-model:state="clickActions.sticky"></ToggleButton> 
+        Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton>
+
+        <!-- <button @click="dbg">debugger</button> -->
       </td>
     </tr>
     <tr>
-      <td @click="clearClickActions">
+      <td>
         <keep-alive>
-          <component :is="mode"></component>        
+          <component :is="mode" v-model:selectedVarName="selectedVarName" v-model:graphedVarName="graphedVarName"></component>        
         </keep-alive>
       </td>
     </tr>

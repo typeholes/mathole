@@ -11,7 +11,7 @@ import { isInteger } from 'mathjs';
 import { unique } from './util';
 
 export default displayExpr;
-export { displayExpr,  runDefinition, runString, setVariable, M, expand, getDerivative, displayFunction, updateVar };
+export { displayExpr,  runDefinition, runString, setVariable, M, expand, getDerivative, displayFunction, updateVar, getDependencies };
 
 export type argMap = { [index: string]: string | number};
 
@@ -66,7 +66,8 @@ function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap 
   }
 
   if (node.name) { // SymbolNode2    
-    const value = localScope[node.name] || parser.get(node.name);
+    const localValue = localScope[node.name];
+    const value = replaceConstants ? localValue || parser.get(node.name) : localValue;
     if (typeof value == 'undefined') { 
       try {
         const result = node.evaluate();
@@ -142,7 +143,23 @@ function texDerivative(expr, selectedVar, args={}) {
 
 }
 
-function displayFunction(functionDef: FunctionDef, elementIdPrefix="", graphId="", args={}) {
+function getDependencies(functionDef: FunctionDef, args) : string[] {
+  if (!functionDef) { return []; }
+  
+  const expr = functionDef.body;
+  const expanded = expand(M.parse(expr), false, args);
+  
+  const filtered = expanded.filter(function (node) {
+    return node.isSymbolNode && typeof parser.get(node.name) !== 'undefined'
+  });
+
+  const dependencies = unique(filtered.map( (x) => x.name));
+  
+  return dependencies;
+  
+}
+
+function displayFunction(functionDef: FunctionDef, elementIdPrefix="", graphId="", graphTitle="", nameMap : {[any:string]: string}, args={}) {
 
   if ( typeof elementIdPrefix !== 'undefined' && elementIdPrefix !== "") {
     displayExpr( functionDef.body, 'x', elementIdPrefix, args);
@@ -165,7 +182,7 @@ function displayFunction(functionDef: FunctionDef, elementIdPrefix="", graphId="
   const makeX = free === 'x' ? '' : free + '=x;';
 
   // plot(graphId, expanded.toString(), getDerivative(expanded, 'x', args).toString()); 
-  plot(graphId, makeX+expanded.toString(), free); 
+  plot(graphId, makeX+expanded.toString(), (nameMap[free]||free) + ' -> ' + graphTitle); 
     
 }   
 

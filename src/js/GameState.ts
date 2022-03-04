@@ -28,10 +28,19 @@ export class GameState<T> {
         return GameState._instance;
     }
 
-    displayFunction(varName: string, graphTgt: string): void {
+    displayFunction(varName: string, graphTgt: string, nameMap : {[any:string]: string}, graphTitle: string): void {
         const gameVar = this.gameVarManager.get(varName);
-        mathDisplayFunction(gameVar.fn,'', graphTgt, gameVar.args);
+        mathDisplayFunction(gameVar.fn,'', graphTgt, graphTitle, nameMap, gameVar.args);
 
+    }
+
+    getNameMap() {
+        const ret = {};
+        this.gameVarManager.getNames().forEach( (key) => 
+            ret[key] = this.getDisplayName(key)
+        );
+
+        return ret;
     }
 
     getCost( name: string) : number {
@@ -76,6 +85,15 @@ export class GameState<T> {
 
     getCurrencyDisplayName(varName: string) : string {
         return this.getDisplayName(this.getCurrencyName(varName));
+    }
+    
+    getDependencies(varName: string) : string[] {
+        return this.gameVarManager.getDependencies(varName);
+    }
+
+    getDependents(varName: string) : string[] {
+        
+        return this.gameVarManager.getDependents(varName);
     }
 
     save() : void {

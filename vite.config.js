@@ -24,5 +24,6 @@ export default defineConfig({
 //    json()
   ],
   define: {     "global": {},   },
-// build: { target: 'esnext'}
+ build: { target: 'esnext',
+}
 })

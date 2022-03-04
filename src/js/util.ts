@@ -18,3 +18,4 @@ export function unique(arr: any[]) : any[] {
     const check = (value, index, self) => self.indexOf(value) === index;
     return arr.filter(check);
 }
+

@@ -1,34 +1,33 @@
 
 <script setup lang="ts">
 
-import { Ref, ref } from 'vue';
-
-import { GameState } from '../js/GameState';
+import { ref } from 'vue';
 
 interface Props {
-  label: string,
-  state: boolean
+  labelOn: string,
+  labelOff: string
+  colorOn: string,
+  colorOff: string,
+  valueOn: any,
+  valueOff: any
 }
 
+const props = withDefaults(defineProps<Props>(), {
+  colorOn: "#dee7a7",
+  colorOff: "#dee7a7",
+  labelOff: "",
+  valueOn: true as any,
+  valueOff: false as any
+});
 
-const emit = defineEmits<{
-  (e: 'update:state', state: boolean): void
+defineEmits<{
+  (e: 'update:value', value: any): void
 }>();
 
-
-const props = defineProps<Props>();
+const state = ref(true);
 
 </script>
 
 <template>
-    <button :class="{toggled: state}" @click="$emit('update:state', !state)">{{label}}</button>
+    <button :style="{backgroundColor: state ? colorOn : colorOff}" @click="state=!state; $emit('update:value', state ? valueOn : valueOff)">{{ state ? labelOn : labelOff || labelOn}}</button>
 </template>
-
-<style scoped>
-.toggled  {
-  background-color: #9342b9; 
-}
-button {
-  background-color: #dee7a7;
-}
-</style>
