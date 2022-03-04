@@ -44,9 +44,9 @@ export {}
 //   `
 //   <div>    
 //     <component v-bind:is="root.__type" :src="root" v-on:select-term="handleSelection" ></component>
-//     <div> selected: {{ selected.eqString() }} <br>
-//       Pretty: <div id="pretty"></div> <br>
-//       Pretty Val: <div id="pretty-val"></div> <br>
+//     <div> selected: {{ selected.eqString() }} 
+//       Pretty: <div id="pretty"></div> 
+//       Pretty Val: <div id="pretty-val"></div> 
 //       Derivative: <div id="derivative"></div>      
 //       Derivative Val: <div id="derivative-val"></div>      
 //     </div>     

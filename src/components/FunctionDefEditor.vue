@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 
 import { ref} from 'vue';
 
@@ -86,14 +86,14 @@ import { plot } from '../js/plot';
      <ul v-for="(arg, idx) in getField('args')"> 
          <li> {{ arg }} <input type="text" :value="getArgValue(idx)" @change="setArgValue($event, idx)"> </li>
      </ul> 
-        Result: {{ testResult }} <br>
+        Result: {{ testResult }} 
         <div id='test-graph-expr' class="graphDiv"></div>
 
     </div>
   </div> -->
 </template>
 
-<style scoped>
+<style >
 button {
   background-color: #dee7a7;
 }

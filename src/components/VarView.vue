@@ -38,7 +38,7 @@ makeViewMap(inject, provide, id.value, selected,
    </div>
 </template>
 
-<style scoped>
+<style >
 a {
   color: #42b983;
 }

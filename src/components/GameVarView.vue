@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import { GameState } from '../js/GameState';
+import { formatNumber } from '../js/util';
 import { injects, PropKeys } from './types';
 
 
@@ -25,17 +26,17 @@ const gameState = GameState.getInstance();
 
 function getValue(varName: string) {
   const val = gameState.getValue(varName);
-  return Math.round(val *100)/100;
+  return val;
 }
 
 function getSellCost(varName: string) {
   const val = gameState.getSellCost(varName);
-  return Math.round(val *100)/100;
+  return val;
 }
 
 function getCost(varName: string) {
   const val = gameState.getCost(varName);
-  return Math.round(val *100)/100;
+  return val;
 }
 
 //TODO: this belongs in GameState
@@ -57,7 +58,7 @@ function canBuy(varName: string) : boolean {
 }
 
 function labelClass(varName: string, selectedVarName: string, dependencies: string[], dependents: string[]) {
-  let ret = {dependent: false, depends: false, hidden: true, inline: true};
+  let ret = {marker: true, dependent: false, depends: false, hidden: true, inline: true};
   
   if ( varName === selectedVarName) {
     ret.hidden = false;
@@ -114,19 +115,27 @@ function graphTitle(varName: string) : string {
 </script>
 
 <template>
-  <div>
-    <div v-if="forceVisible || gameState.isVisible(varName)">    
-        <div :class="labelClass(varName, selectedVarName, dependencies, dependents)"><span> {{ varName === selectedVarName ? "&#8860" : "&#8658" }} </span></div>
-        <span  @click="labelClick(varName)">{{ gameState.getDisplayName(varName) }}: </span> {{ getValue(varName) }}         
-        <button @click="buy(varName, graphedVarName)" v-if="gameState.isBuyable(varName)" :disabled="!canBuy(varName)" > 
-            Buy: {{ getCost(varName) }} {{ gameState.getCurrencyDisplayName(varName) }}
-        </button> 
-        <button @click="sell(varName, graphedVarName)" v-if="gameState.isSellable(varName)" :disabled="!canSell(varName)">Sell: {{ getSellCost(varName) }} {{ gameState.getCurrencyDisplayName(varName) }}</button> 
+    <div class="gamevar" v-if="forceVisible || gameState.isVisible(varName)">    
+        <div :class="labelClass(varName, selectedVarName, dependencies, dependents)">
+          <span> {{ varName === selectedVarName ? "&#8860" : "&#8658" }} </span></div>
+        <div class="label">
+          <span  @click="labelClick(varName)">{{ gameState.getDisplayName(varName) }}: </span> 
+        </div>
+       <div class="value">
+          {{ formatNumber(getValue(varName)) }}         
+       </div> 
+        <div class="buy">
+          <button @click="buy(varName, graphedVarName)" v-if="gameState.isBuyable(varName)" :disabled="!canBuy(varName)" > 
+              Buy: {{ formatNumber(getCost(varName)) }} {{ gameState.getCurrencyDisplayName(varName) }}
+          </button> 
+        </div>
+        <div class="sell">
+          <button @click="sell(varName, graphedVarName)" v-if="gameState.isSellable(varName)" :disabled="!canSell(varName)">Sell: {{ formatNumber(getSellCost(varName)) }} {{ gameState.getCurrencyDisplayName(varName) }}</button> 
+        </div>
     </div>
-  </div>
 </template>
 
-<style scoped>
+<style >
 button {
   background-color: #dee7a7;
 }
@@ -153,5 +162,40 @@ button.selected {
 .hidden {
   visibility: hidden;
 }
+
+.marker {
+  display: block;
+  grid-column: 1;
+  justify-self: end;
+}
+
+.label {
+  display: block;
+  grid-column: 2;
+  justify-self: end;
+}
+
+.value {
+  display: block;
+  grid-column: 3;
+  justify-self: start;
+}
+
+.buy {
+  display: block;
+  grid-column: 4;
+  justify-self: start;
+}
+
+.sell {
+  display: block;
+  grid-column: 5;
+  justify-self: start;
+}
+
+.gamevar {
+  display: contents
+}
+
 
 </style>

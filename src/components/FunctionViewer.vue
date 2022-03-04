@@ -25,16 +25,16 @@ function replaceWithExpanded() {
 <template>
   <div>
 
-    function: <input v-model="expr" @change="showGraph" size="50" ><br>
+    function: <input v-model="expr" @change="showGraph" size="50" >
 
-    expanded: {{ displayExpr }} <br>
+    expanded: {{ displayExpr }} 
     <button @click="replaceWithExpanded">replace with expanded</button>
     <div id='view-fn-graph-expr' class="graphDiv"></div>
   
   </div>
 </template>
 
-<style scoped>
+<style >
 button {
   background-color: #dee7a7;
 }
