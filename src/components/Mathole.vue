@@ -17,7 +17,7 @@ import { PropKeys, provides } from './types';
 const _varMap = ref( 
   GameState.init
   (  ref( {} )
-  , (m) => m 
+  , (m) => m.value 
   , (m,n) => m.value[n] = { cost:0, value: 0}
   , (m,n) => m.value[n].cost
   , (m,n, cost) => m.value[n].cost = cost

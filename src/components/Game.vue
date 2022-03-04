@@ -13,7 +13,7 @@ const { dependencies, dependents, graphedVarName, selectedVarName} = injects( Pr
 <template>
   <div>
     <h1> <GameVarView varName="t" v-model:dependencies="dependencies" v-model:dependents="dependents" forceVisible v-model:graphedVarName="graphedVarName" v-model:selectedVarName="selectedVarName"></GameVarView> </h1>
-    <h1> <GameVarView varName="score" v-model:dependencies="dependencies" v-model:dependents="dependents" forceVisible v-model:graphedVarName="graphedVarName" v-model:selectedVarName="selectedVarName"></GameVarView> </h1>
+    <h1> <GameVarView varName="money" v-model:dependencies="dependencies" v-model:dependents="dependents" forceVisible v-model:graphedVarName="graphedVarName" v-model:selectedVarName="selectedVarName"></GameVarView> </h1>
 
   <div v-for="(varName) in gameState.getNames()">
     <GameVarView :varName="varName" v-model:dependencies="dependencies" v-model:dependents="dependents" v-model:graphedVarName="graphedVarName" v-model:selectedVarName="selectedVarName"></GameVarView>

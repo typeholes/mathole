@@ -1,6 +1,6 @@
 import { FunctionDef, FunctionDefManager } from "./FunctionDef";
 
-import { GameVarManager } from "./GameVar";
+import { GameVarManager } from "./GameVarManager";
 import { displayFunction as mathDisplayFunction } from "./mathUtil";
 import { SaveManager } from "./SaveManager";
 
@@ -9,7 +9,7 @@ export class GameState<T> {
 
     // must be called before any other method
     static init<T>( uiState: T
-        , cloner: (uiState: T) => T
+        , cloner: (uiState: any) => T // any because of things like vue wrapping with refs
         , varAdder: (uiState: T, name: string) => void
         , costGetter: (uiState: T, name: string) => number
         , costSetter: (uiState: T, name: string, cost: number) => void

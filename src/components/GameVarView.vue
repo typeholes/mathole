@@ -33,7 +33,15 @@ function getCost(varName: string) {
   return Math.round(val *100)/100;
 }
 
-function canBuy(varName: string) {
+//TODO: this belongs in GameState
+function canSell(varName: string) : boolean {
+  const cnt = gameState.getValue(varName);
+
+  return cnt > 0;
+}
+
+//TODO: this belongs in GameState
+function canBuy(varName: string) : boolean {
   const currencyName = gameState.getCurrencyName(varName);
   if (!currencyName) { return false;}
 
@@ -83,6 +91,11 @@ function labelClick(varName: string) {
   
 }
 
+function sell(varName: string, graphedVarName: string ) {
+  gameState.sell(varName);
+  if (graphedVarName !== '') { gameState.displayFunction(graphedVarName, '#test-graph-expr', gameState.getNameMap(), graphTitle(graphedVarName));  }
+}
+
 function buy(varName: string, graphedVarName: string ) {
   gameState.buy(varName);
   if (graphedVarName !== '') { gameState.displayFunction(graphedVarName, '#test-graph-expr', gameState.getNameMap(), graphTitle(graphedVarName));  }
@@ -101,8 +114,10 @@ function graphTitle(varName: string) : string {
         <div :class="labelClass(varName, selectedVarName, dependencies, dependents)"><span> {{ varName === selectedVarName ? "&#8860" : "&#8658" }} </span></div>
         <span  @click="labelClick(varName)">{{ gameState.getDisplayName(varName) }}: </span> {{ getValue(varName) }}         
         <button @click="buy(varName, graphedVarName)" v-if="gameState.isBuyable(varName)" :disabled="!canBuy(varName)" > 
-            Cost: {{ getCost(varName) }} {{ gameState.getCurrencyDisplayName(varName) }}
-        </button> <br>
+            Buy
+        </button> 
+        <button @click="sell(varName, graphedVarName)" v-if="gameState.isSellable(varName)" :disabled="!canSell(varName)">sell</button> 
+        <span v-if="gameState.isBuyable(varName) || gameState.isSellable(varName)"> Cost: {{ getCost(varName) }} {{ gameState.getCurrencyDisplayName(varName) }}</span><br>
     </div>
   </div>
 </template>

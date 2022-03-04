@@ -1,5 +1,5 @@
 import { FunctionDefManager } from "./FunctionDef";
-import { GameVarManager } from "./GameVar";
+import { GameVarManager } from "./GameVarManager";
 
 export function gameSetup<T> ( vars: GameVarManager<T>, functions: typeof FunctionDefManager) {
 
