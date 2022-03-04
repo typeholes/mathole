@@ -202,12 +202,23 @@ export class GameVarManager<T> {
     add(g: GameVar) {
         this.varAdder(this.uiState, g.name);
 
-        this._dependencies[g.name] = getMathDependencies(g.fn, g.args);
+        this._dependencies[g.name] = [];
+        this._calculateDependencies(g); 
+        this._deepDependencies[g.name] = getMathDependencies(g.fn, g.args);
         this._order.push( g.name );
         this._items[g.name] = g;
         this.setUIValue(g, "dirty");
     }
 
+    private _calculateDependencies(tgt: GameVar) : void {
+        for( const name in this._items) {
+            if (tgt.dependsOn(name)) {
+                this._dependencies[name].push(tgt.name);
+            }
+        }
+    };
+
+        
     get(name: string) {
         return this._items[name];
     }
@@ -219,6 +230,7 @@ export class GameVarManager<T> {
     private _items: {[index: string]: GameVar} = {t: GameTime.instance};
     private _order: string[] = [];
     private _dependencies: {[index: string]: string[]} =  { };
+    private _deepDependencies: {[index: string]: string[]} =  { };
     private _dirty: string[] = [];
 
     tick(elapsedTime: number) : void {
@@ -251,7 +263,7 @@ export class GameVarManager<T> {
     }
 
     getDependencies(varName: string) : string[] {
-        const deps = this._dependencies[varName] || [];
+        const deps = this._deepDependencies[varName] || [];
         const childDeps = deps.map( (dep) => this.getDependencies(dep) ).flat();
 
         deps.push(...childDeps);
@@ -264,7 +276,7 @@ export class GameVarManager<T> {
         const ret : string[] = [];
 
         this._order.forEach( (name) => {
-            if ( this._dependencies[name].includes(varName) ) ret.push(name);
+            if ( this._deepDependencies[name].includes(varName) ) ret.push(name);
         });
         return ret;
     }
