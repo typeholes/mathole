@@ -20,6 +20,10 @@ export abstract class GameVar {
         const val = this.fn.run( this.args);
         return val;
     };
+    
+    spend(cnt: number) :  void {
+        // does nothing by default as GameVars with value driven by fn will have their fn adjusted to account for spent cnt
+    }
 
     constructor(
         name: string,
@@ -66,6 +70,8 @@ export class GameBuyable extends GameVar {
     private _cntBought = 0; 
     private _totalBought = 0;
     currency: string;
+    buyable: boolean = true;
+    sellable: boolean = false;
 
     constructor(
         name: string,
@@ -73,10 +79,14 @@ export class GameBuyable extends GameVar {
         visible: boolean,
         fn: FunctionDef,
         args: argMap,
-        currency: string
+        currency: string, 
+        sellable: boolean,
+        buyable: boolean = true
     ) {
         super(name, displayName, visible, fn, args);
         this.currency = currency;
+        this.sellable = sellable;
+        this.buyable = buyable;
     }
 
     get cost () {
@@ -98,6 +108,17 @@ export class GameBuyable extends GameVar {
 
     spend(cnt: number): void {
         this._cntBought -= cnt;
+    }
+}
+
+export class GameVarPlain extends GameBuyable {
+
+    constructor(
+        name: string,
+        displayName: string,
+        visible: boolean
+    ) {
+        super(name, displayName, visible, FunctionDefManager.get('id'), {x: name}, "", false, false); // TODO replace with id after providing builtin functionDefs
     }
 }
 
@@ -174,17 +195,32 @@ export class GameVarManager<T> {
         return ret;
     }
 
+    newPlain(
+        name: string,
+        displayName: string,
+        visible: boolean,
+        value: number
+    ) : GameVarPlain {
+        this.varAdder(this.uiState, name + '_total');
+
+        const ret = new GameVarPlain(name, displayName, visible);
+        this.add(ret);
+        ret.spend(-1 * value);
+        return ret;
+    }
+
     newBuyable(
         name: string,
         displayName: string,
         visible: boolean,
         fn: FunctionDef,
         args: argMap, 
-        currency: string
+        currency: string,
+        sellable: boolean
     ) : GameBuyable {
         this.varAdder(this.uiState, name + '_total');
    
-        const ret = new GameBuyable(name, displayName, visible, fn, args, currency) ;
+        const ret = new GameBuyable(name, displayName, visible, fn, args, currency, sellable) ;
         this.add(ret);
         this.setUIValue(ret);
         this.setUICost(ret);
@@ -248,6 +284,7 @@ export class GameVarManager<T> {
                 const dirtyVar = this._items[name];
                 
                 this.setUIValue(dirtyVar);
+                this.setUICost(dirtyVar);
 
                 removeValuefromArray(this._dirty, name);
 
@@ -259,7 +296,13 @@ export class GameVarManager<T> {
     }
 
     isBuyable(varName) {
-        return this.get(varName) instanceof GameBuyable;
+        const gameVar = this.get(varName);
+        return gameVar instanceof GameBuyable && gameVar.buyable;
+    }
+
+    isSellable(varName) {
+        const gameVar = this.get(varName);
+        return gameVar instanceof GameBuyable && gameVar.sellable;
     }
 
     getDependencies(varName: string) : string[] {
@@ -294,6 +337,27 @@ export class GameVarManager<T> {
         return currency.name;
     }
  
+    sell(varName: string) {
+        const buyable = this.get(varName);
+        if ( ! (buyable instanceof GameBuyable)) { return; }
+
+        const currencyName = this.getCurrencyName(varName);
+        const currency = this.get(currencyName);
+
+        const cost = buyable.cost;
+        
+        buyable.spend(1);
+        this.setUIValue(currency, 'dirty');
+        
+        this.setUIValue(buyable, 'dirty');
+        this.setUICost(buyable);
+        currency.spend(cost * -1);
+        this.setUIValue(currency);
+        this.setUICost(currency); 
+
+        this._dirty.push(varName);
+
+    }
     buy(varName: string) {
         const buyable = this.get(varName);
         if ( ! (buyable instanceof GameBuyable)) { return; }
@@ -309,11 +373,9 @@ export class GameVarManager<T> {
         
         this.setUIValue(buyable, 'dirty');
         this.setUICost(buyable);
-        if (currency instanceof GameBuyable) { 
-            currency.spend(cost);
-            this.setUIValue(currency);
-            this.setUICost(currency); 
-        }
+        currency.spend(cost);
+        this.setUIValue(currency);
+        this.setUICost(currency); 
 
         this._dirty.push(varName);
 

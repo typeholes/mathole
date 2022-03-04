@@ -64,6 +64,7 @@ export class GameState<T> {
     }
 
     getDisplayName(varName: string) : string {
+        if ( varName === "") { return "WTF!"; }
         return this.gameVarManager.get(varName).displayName; 
     } 
 
@@ -75,6 +76,14 @@ export class GameState<T> {
         this.gameVarManager.buy(varName);
     }
 
+    sell(varName: string) {
+        this.gameVarManager.sell(varName);
+    }
+
+    isSellable(varName: string) : boolean {
+        return this.gameVarManager.isSellable(varName);
+    }
+
     isBuyable(varName: string) : boolean {
         return this.gameVarManager.isBuyable(varName);
     }
@@ -84,6 +93,7 @@ export class GameState<T> {
     }
 
     getCurrencyDisplayName(varName: string) : string {
+        if (varName === "") { return ""; }
         return this.getDisplayName(this.getCurrencyName(varName));
     }
     

@@ -68,6 +68,13 @@ export class FunctionDefManager {
         const ret = this.create(newName, fn.argNames, bodyModifier(fn.body));
         return ret;
     }
+    
+    private constructor() {
+    
+        const fn = new FunctionDef('id', ['x'],'x');
+        this.map.id = fn;
+        
+    }
 }
 
 
