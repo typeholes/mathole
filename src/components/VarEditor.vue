@@ -75,28 +75,28 @@
 
 <!--   <div>
     <input type="text" v-model="newVarName">
-    <br> new name: {{ newVarName }}<br>
-    <button @click="addNewVar">Add Var</button><br>
+     new name: {{ newVarName }}
+    <button @click="addNewVar">Add Var</button>
     <select  :value="selectedVarName" @change="selectVar">
     <option v-for="(_, varName) in varMap.value()" :value="varName"> {{ varName }} </option>
     </select>
     <div >
 
 
-        <br>
+        
         DisplayName <input type="text" :value="getField('displayName')" @change="update($event, 'displayName')">
         buyable <input type="checkbox" :checked="getField('buyable')" @change="update($event, 'buyable', 'checked')">
         visible <input type="checkbox" :checked="getField('visible')" @change="update($event, 'visible', 'checked')">
         Count bought <input type="text" :value="getField('cntBought')" @change="update($event, 'cntBought')">
-        <br>cost function <select :value="getField('costFn')" @change="update($event, 'costFn')" ><option v-for=" (_, fn) in functionDefMap.value()" :value="fn"> {{fn}} </option></select>
+        cost function <select :value="getField('costFn')" @change="update($event, 'costFn')" ><option v-for=" (_, fn) in functionDefMap.value()" :value="fn"> {{fn}} </option></select>
         args <input type="text" :value="getArray('costArgs')" @change="updateArray($event, 'costArgs')"> {{ getField('costMathFunction') }} {{ runVarFunction('costMathFunction') }}
-        <br>value function <select :value="getField('valueFn')" @change="update($event, 'valueFn')" ><option v-for=" (_, fn) in functionDefMap.value()" :value="fn"> {{fn}} </option></select>
+        value function <select :value="getField('valueFn')" @change="update($event, 'valueFn')" ><option v-for=" (_, fn) in functionDefMap.value()" :value="fn"> {{fn}} </option></select>
         args <input type="text" :value="getArray('valueArgs')" @change="updateArray($event, 'valueArgs')"> {{ getField('valueMathFunction') }} {{ runVarFunction('valueMathFunction') }}       
     </div>
   </div>
  --></template>
 
-<style scoped>
+<style >
 button {
   background-color: #dee7a7;
 }

@@ -136,45 +136,35 @@ function doExport() {
 </script>
 
 <template>
-todo
-   <table width="100%" border="1">
-    <tr>
-      <td>
-        <button @click="setMode(Game)">Game</button>
-        <!-- <button @click="setMode(VarEditor)">VarEditor</button>
-        <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button>
-        <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button> -->
-        <button @click="gameState.save">save</button>
-        <button @click="gameState.load">load</button>
-        <button @click="setMode(FunctionViewer)">Function Viewer</button>
-    <!-- <button @click="doExport">export</button>
-        <button @click="doImport">import</button>
-        <button @click="ST.reset">reset</button>         -->
-      </td>
-      <td rowspan="3" width="10%">
-        Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton>
+  <div class="mathole">
+    <div class="topbar">
+          <button @click="setMode(Game)">Game</button>
+          <!-- <button @click="setMode(VarEditor)">VarEditor</button>
+          <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button>
+          <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button> -->
+          <button @click="gameState.save">save</button>
+          <button @click="gameState.load">load</button>
+          <button @click="setMode(FunctionViewer)">Function Viewer</button>
+      <!-- <button @click="doExport">export</button>
+          <button @click="doImport">import</button>
+          <button @click="ST.reset">reset</button>         -->
+    </div>
+    <div class="sidebar">
+          Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton>
 
-        <!-- <button @click="dbg">debugger</button> -->
-      </td>
-    </tr>
-    <tr>
-      <td>
+          <!-- <button @click="dbg">debugger</button> -->
+    </div>
+    <div class="mainPain">
         <keep-alive>
           <component :is="mode" v-model:selectedVarName="selectedVarName" v-model:graphedVarName="graphedVarName"></component>        
         </keep-alive>
-      </td>
-    </tr>
-    <tr>
-      <td>
-  <!--      <span class="error">{{ _errorMessage.value() }}</span> -->
-      </td>
-    </tr>
-  </table>
- 
+    </div>
+
+  </div>
 
 </template>
 
-<style scoped>
+<style >
 a {
   color: #000000;
 }
@@ -182,4 +172,29 @@ a {
 span.error {
   color: #c70404
 }
+
+.mathole {
+  display: grid;
+  grid-auto-columns: minmax(content,1fr);
+  gap: 10px;
+  grid-auto-rows: minmax(100px, auto);
+
+}
+
+.topbar {
+  grid-row: 1;
+  grid-column: 1-2;
+}
+
+.sidebar {
+grid-column: 2;
+grid-row: 2;
+}
+
+.mainPain {
+  grid-row: 2;
+  grid-column: 1;
+
+}
+
 </style>
