@@ -2,7 +2,7 @@ import { removeValuefromArray, unique } from "./util";
 import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
 import { setVariable as setMathVariable, getDependencies as getMathDependencies } from "./mathUtil";
 import { GameTime, GameVar, GameBuyable, GameCalculation, GameVarPlain } from "./GameVar";
-import { GameMilestoneManager } from "./GameMilestoneManager";
+import { GameMilestoneManager, MilestoneRewardAction } from "./GameMilestoneManager";
 
 export const defaultUiVarFields: UiVarFields = {
     value: 0, cost: 0, sellCost: 0, total: 0
@@ -64,7 +64,7 @@ export class GameVarManager<T> {
          this.uiStateMethods.varSetter(this.uiState, gameVar.name, field, val);
          if ( field === 'value' ) { 
              setMathVariable(gameVar.name, val); 
-             this.milestoneManager.handleUpdate(gameVar.name);
+             this.handleMilestoneUpdate(gameVar.name);
          }
     }
     
@@ -277,8 +277,22 @@ export class GameVarManager<T> {
             }
             this._dirty.push(varName);
             setMathVariable(varName, this.uiStateMethods.varGetter(this.uiState, varName, 'value'));
-            this.milestoneManager.handleUpdate(varName);
+            this.handleMilestoneUpdate(varName);
 
+        });
+    }
+    
+    handleMilestoneUpdate(varName: string) : void {
+        const actions: MilestoneRewardAction[] = this.milestoneManager.handleUpdate(varName);
+        actions.forEach( (action) => {
+            if ( action.setSellable ) {
+                for( let varName in action.setSellable) {
+                    const gameVar = this.get(varName);
+                    if ( gameVar instanceof GameBuyable) { 
+                        gameVar.sellable = true;
+                    } 
+                }
+            }
         });
     }
 }

@@ -1,16 +1,27 @@
 import { GameMilestone } from "./GameMilestone";
-import { UiStateMethods } from "./GameVarManager";
+import { GameVarManager, UiStateMethods } from "./GameVarManager";
 
 import { runString, getDependenciesFromString } from "./mathUtil";
+
+type MilestoneFlags = { [any:string]: boolean}
+type MilestoneFnUpdaters = { [any:string]: string}
+export interface MilestoneRewardAction {
+    setVisible?: MilestoneFlags;
+    setBuyable?: MilestoneFlags;
+    setSellable?: MilestoneFlags;
+    adjustValue?: MilestoneFnUpdaters;
+    adjustCost?: MilestoneFnUpdaters;
+    adjustSellCost?: MilestoneFnUpdaters;
+}
 
 export class GameMilestoneManager<T> {
 
     private milestoneMap: { [any: string]: GameMilestone} = {};
     private dependencies: { [any: string]: string[] } = {};
 
-    create( name: string, displayName: string, condition: string, rewardText = "" ) : GameMilestone {
+    create( name: string, displayName: string, condition: string, rewardText = "", rewardAction: MilestoneRewardAction = {} ) : GameMilestone {
         // TODO create conditions and adjusters.
-        const milestone = new GameMilestone( name, displayName, condition, rewardText );
+        const milestone = new GameMilestone( name, displayName, condition, rewardText, rewardAction );
         this.milestoneMap[name] = milestone;
         
         const deps = getDependenciesFromString(condition);
@@ -21,16 +32,24 @@ export class GameMilestoneManager<T> {
         return milestone;
     }
 
-    handleUpdate( varName: string ) : void {
+    handleUpdate( varName: string ) : MilestoneRewardAction[] {
         const deps = this.dependencies[varName];
-        if (!deps) { return; }    
+        if (!deps) { return []; }   
+        
+        const actions : MilestoneRewardAction[] = [];
         
         deps.forEach( (dep) => {
             if ( this.milestoneReached( dep )) { return; }
             const milestone = this.milestoneMap[dep];
-            if ( milestone.check() ) { this.setReached(dep); };
+            if ( milestone.check() ) { 
+                this.setReached(dep); 
+                actions.push( milestone.rewardAction);
+            }
         })
+        
+        return actions;
     }
+
 
     private readonly uiState: T;
     private readonly uiStateMethods: UiStateMethods<T>;

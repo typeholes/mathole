@@ -27,5 +27,8 @@ vars.newBuyable( 'shares', 'Shares', true, id, {x: 'marketValue'}, 'money', true
 vars.newCalculation( 'dummy', 'dummy', true, id, {x:'2^(t*10)'});
 vars.newBuyable( 'sdummy', 'Dummy', true, id, {x: 'dummy'}, 'money', true);
 
-milestones.create('tooStable', 'Too Stable?', 'stability > 3', ' Can sell Market Stability');
+milestones.create('tooStable', 'Too Stable?', 'stability > 3', ' Can sell Market Stability'
+    , {setSellable: {stability: true}}
+);
+
 }
