@@ -12,6 +12,7 @@ export interface MilestoneRewardAction {
     adjustValue?: MilestoneFnUpdaters;
     adjustCost?: MilestoneFnUpdaters;
     adjustSellCost?: MilestoneFnUpdaters;
+    storyPoint?: string;
 }
 
 export class GameMilestoneManager<T> {

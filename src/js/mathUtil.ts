@@ -36,9 +36,10 @@ function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap 
     return node;
   }
   if (node.op) {  // OperatorNode2
-    node.args = node.args.map( (a)=> 
-      expand(a, replaceConstants, localScope, maxDepth, depth+1) 
-      );     
+    node.args = node.args.map( (a)=> {
+      const newArg = expand(a, replaceConstants, localScope, maxDepth, depth+1) 
+      return newArg;
+    });     
     return node;
   }
 
@@ -93,6 +94,7 @@ function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap 
     return node;
   }
 
+  return node;
 }
 
 function updateVar(name: string, value: string | number) {

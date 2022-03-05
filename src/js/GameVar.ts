@@ -5,7 +5,7 @@ import { parser } from "./mathUtil";
 export abstract class GameVar { 
     readonly name: string;
     readonly displayName: string;
-    readonly visible: boolean;
+    visible: boolean;
     fn: FunctionDef;
     readonly args: argMap;
 

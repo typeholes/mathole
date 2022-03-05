@@ -285,6 +285,20 @@ export class GameVarManager<T> {
     handleMilestoneUpdate(varName: string) : void {
         const actions: MilestoneRewardAction[] = this.milestoneManager.handleUpdate(varName);
         actions.forEach( (action) => {
+            if ( action.setVisible ) {
+                for( let varName in action.setVisible) {
+                    const gameVar = this.get(varName);
+                    gameVar.visible = true;
+                }
+            }
+            if ( action.setBuyable ) {
+                for( let varName in action.setBuyable) {
+                    const gameVar = this.get(varName);
+                    if ( gameVar instanceof GameBuyable) { 
+                        gameVar.buyable = true;
+                    } 
+                }
+            }
             if ( action.setSellable ) {
                 for( let varName in action.setSellable) {
                     const gameVar = this.get(varName);
@@ -292,6 +306,10 @@ export class GameVarManager<T> {
                         gameVar.sellable = true;
                     } 
                 }
+            }
+            if ( action.storyPoint ) {
+                //TODO make modal dialog 
+                alert(action.storyPoint);
             }
         });
     }
