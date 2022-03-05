@@ -22,7 +22,7 @@ const { dependencies, dependents, graphedVarName, selectedVarName} = injects( Pr
       </div>
     </div>
 
-     <div id='test-graph-expr' class="graphDiv"></div>
+     <!-- <div id='test-graph-expr' class="graphDiv"></div >-->
   
   </div>
 </template>

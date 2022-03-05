@@ -126,11 +126,10 @@ function doExport() {
           <button @click="setMode(Game)">Game</button>
           <button @click="setMode(Milestones)">Milestones</button>
           <!-- <button @click="setMode(VarEditor)">VarEditor</button>
-          <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button>
-          <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button> -->
+          <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button> -->
           <button @click="gameState.save">save</button>
           <button @click="gameState.load">load</button>
-          <button @click="setMode(FunctionViewer)">Function Viewer</button>
+          <!-- <button @click="setMode(FunctionViewer)">Function Viewer</button> -->
       <!-- <button @click="doExport">export</button>
           <button @click="doImport">import</button>
           <button @click="ST.reset">reset</button>         -->
@@ -139,6 +138,8 @@ function doExport() {
           Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton>
 
           <!-- <button @click="dbg">debugger</button> -->
+          <div id='test-graph-expr' class="graphDiv"></div>
+          
     </div>
     <div class="mainPain">
         <keep-alive>
