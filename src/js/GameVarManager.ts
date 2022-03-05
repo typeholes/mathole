@@ -63,8 +63,8 @@ export class GameVarManager<T> {
             val = this.getUiVarField(gameVar, field);
         }
          this.uiStateMethods.varSetter(this.uiState, gameVar.name, field, val);
-         if ( field === 'value' ) { 
-             setMathVariable(gameVar.name, val); 
+         if ( field === 'value' || field === 'total') { 
+             setMathVariable(gameVar.name + ( field === 'total' ? '_total' : ''), val); 
              this.handleMilestoneUpdate(gameVar.name);
          }
     }
@@ -278,6 +278,7 @@ export class GameVarManager<T> {
             }
             this._dirty.push(varName);
             setMathVariable(varName, this.uiStateMethods.varGetter(this.uiState, varName, 'value'));
+            setMathVariable(varName + '_total', this.uiStateMethods.varGetter(this.uiState, varName, 'value'));
             this.handleMilestoneUpdate(varName);
 
         });
