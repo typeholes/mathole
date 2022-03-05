@@ -14,13 +14,7 @@ import { gameSetup } from "../js/MarketGame";
 import ToggleButton  from './ToggleButton.vue';
 import { PropKeys, provides, uiState, uiStateMethods } from './uiUtil';
 
-const _varMap = ref( 
-  GameState.init
-  ( uiState 
-  , uiStateMethods
-  , gameSetup
-  )
-);
+GameState.init ( uiState , uiStateMethods , gameSetup);
 
 const gameState = GameState.getInstance();
 
@@ -45,15 +39,12 @@ function setMode(newMode) {
   mode.value = newMode;
 }
 
-const deltaDisplay = ref(0);
-
 let priorTime = 0;
 function loop(elapsedTime) {
   const delta = elapsedTime - priorTime
   if (gameState.canTick && delta >= 500) {
     gameState.tick(delta/10000);
     priorTime = elapsedTime;
-    deltaDisplay.value = Math.floor(delta);
   } 
   window.requestAnimationFrame(loop);
 }
