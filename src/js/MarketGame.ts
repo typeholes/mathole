@@ -28,11 +28,19 @@ vars.newBuyable( 'shares', 'Shares', true, id, {x: 'marketValue'}, 'money', true
 //vars.newBuyable( 'sdummy', 'Dummy', true, id, {x: 'dummy'}, 'money', true);
 
 milestones.create('startStory', 'Went Bankrupt', 't > 0', "You start the game from scratch"
-    , {storyPoint: "You went bankrupt. All you have left is your library card and a dollar's worth of coins you found in the gutter. Time to head to the library, grab a computer, and login to jankyMarketTrader.com"}
+    , {storyPoint: "You went bankrupt. All you have left is your library card and a dollar's worth of coins you found in the gutter. Time to head to the library, grab a computer, and login to jankyMarketTrader.com"
+        + "\n\n Warning: this is just a preview release so there will likely be bugs"
+        + "\n There is no auto save. Use the save and load buttons"
+        + "\n It is possible to price yourself out of the market until you reach the \"Too Stable?\" milestone"
+        + "\n this is intended to force some strategic play while the cost of having to restart is low"
+    }
 );
 
 milestones.create('tooStable', 'Too Stable?', 'stability > 3', ' Can sell Market Stability'
-    , {setSellable: {stability: true}}
+    , { setSellable: {stability: true}
+      , storyPoint: "It is harder to make money in stable markets. Maybe you should trade some of that stability to increase the scale of the market."
+    }
+    
 );
 
 milestones.create('scaled', 'Insider Trading', 'marketScale >= 1', ' Better price when selling shares '
