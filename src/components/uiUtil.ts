@@ -41,3 +41,19 @@ export const uiStateMethods : UiStateMethods<UiState> = {
     varGetter: (m,n,k) => m[n][k],
     varSetter: (m,n,k,v) => m[n][k]= v 
 }
+
+
+export function getValue(varName: string) {
+  const val = uiState[varName].value;
+  return val;
+}
+
+export function getSellCost(varName: string) {
+  const val = uiState[varName].sellCost;
+  return val;
+}
+
+export function getCost(varName: string) {
+  const val = uiState[varName].cost;
+  return val;
+}

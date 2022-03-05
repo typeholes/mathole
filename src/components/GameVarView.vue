@@ -2,7 +2,7 @@
 
 import { GameState } from '../js/GameState';
 import { formatNumber } from '../js/util';
-import { injects, PropKeys, uiState } from './uiUtil';
+import { injects, PropKeys, getCost, getSellCost, getValue } from './uiUtil';
 
 
 interface Props {
@@ -23,21 +23,6 @@ const { clickAction, dependencies, dependents, graphedVarName, selectedVarName }
   );
 
 const gameState = GameState.getInstance();
-
-function getValue(varName: string) {
-  const val = uiState[varName].value;
-  return val;
-}
-
-function getSellCost(varName: string) {
-  const val = uiState[varName].sellCost;
-  return val;
-}
-
-function getCost(varName: string) {
-  const val = uiState[varName].cost;
-  return val;
-}
 
 //TODO: this belongs in GameState
 function canSell(varName: string) : boolean {
