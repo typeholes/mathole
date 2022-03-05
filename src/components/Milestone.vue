@@ -10,10 +10,10 @@ const gameState = GameState.getInstance();
 
 <template>
     <div :class="{milestone: true, reached: milestoneReached(name)}">
-        {{ gameState.getMilestoneDisplayName(name) }}: 
-        {{ gameState.getMilestoneCondition(name) }}
+        {{ gameState.getMilestoneDisplayName(name) }}: {{ gameState.getMilestoneCondition(name) }}<br>
         {{ gameState.getMilestoneReward(name) }}
     </div>
+    <hr>
 </template>
 
 <style>

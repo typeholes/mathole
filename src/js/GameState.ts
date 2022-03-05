@@ -108,9 +108,15 @@ export class GameState<T> {
 
     getMilestoneCondition(name: string) : string {
         // TODO: sub names for display names in condition
-        return this.milestoneManager.get(name).condition;
+         const cond = this.milestoneManager.get(name).condition;
+        const ret = this.getDisplayExpr(cond);
+        return ret;
     }
-    
+
+    getDisplayExpr(expr: string) : string {
+        return this.gameVarManager.getDisplayExpr(expr);
+    }
+
     save() : void {
         this.canTick = false;
         this.saveManager.save('default');

@@ -1,8 +1,9 @@
 import { removeValuefromArray, unique } from "./util";
 import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
-import { setVariable as setMathVariable, getDependencies as getMathDependencies } from "./mathUtil";
+import { setVariable as setMathVariable, getDependencies as getMathDependencies, replaceSymbols } from "./mathUtil";
 import { GameTime, GameVar, GameBuyable, GameCalculation, GameVarPlain } from "./GameVar";
 import { GameMilestoneManager, MilestoneRewardAction } from "./GameMilestoneManager";
+import { i } from "mathjs";
 
 export const defaultUiVarFields: UiVarFields = {
     value: 0, cost: 0, sellCost: 0, total: 0
@@ -346,5 +347,12 @@ export class GameVarManager<T> {
             (body) => newBody.replace('<&>', fn.signatureString() )
         );
         setter(newFn);
+    }
+        
+    getDisplayExpr(expr: string) : string {
+        const entries = this._order.map( (name) => [name, this.get(name).displayName]);
+        const map = Object.fromEntries(entries);
+        const ret = replaceSymbols(expr, map);
+        return ret;
     }
 }

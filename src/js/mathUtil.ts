@@ -218,3 +218,15 @@ function displayExpr(expr, selectedVar, elementIdPrefix="", args={}) {
 }
 
 
+export function replaceSymbols(expr: string, replacements: {[any: string]: string}) {
+  const node = M.parse(expr);
+  const replaced = node.transform(function (node, path, parent) {
+    if (node.isSymbolNode && replacements[node.name] ) {
+      return M.parse( '"' + replacements[node.name] + '"');
+    }
+    else {
+      return node
+    }
+  })
+  return replaced.toString();
+}
