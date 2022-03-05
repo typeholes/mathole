@@ -32,28 +32,38 @@ export function injects( ...keys : PropKeys[]) : {[any: string]: any} {
 }
 
 export type UiVar = UiVarFields;
-export type UiState = { [any: string]: UiVar };
-export const uiState: UiState = reactive( {} );
+export type UiState = { 
+    vars: { [any: string]: UiVar },
+    milestones: { [any: string]: boolean}
+};
+
+export const uiState: UiState = reactive( { vars: {}, milestones: {}} );
 
 export const uiStateMethods : UiStateMethods<UiState> = {
     cloner: (m) => m,
-    varAdder: (m,n) => m[n] = reactive({...defaultUiVarFields}),
-    varGetter: (m,n,k) => m[n][k],
-    varSetter: (m,n,k,v) => m[n][k]= v 
+    varAdder: (m,n) => m.vars[n] = reactive({...defaultUiVarFields}),
+    varGetter: (m,n,k) => m.vars[n][k],
+    varSetter: (m,n,k,v) => m.vars[n][k]= v, 
+    milestoneGetter: (m,n) => m.milestones[n],
+    milestoneSetter: (m,n,v) => m.milestones[n] = v
 }
 
 
 export function getValue(varName: string) {
-  const val = uiState[varName].value;
+  const val = uiState.vars[varName].value;
   return val;
 }
 
 export function getSellCost(varName: string) {
-  const val = uiState[varName].sellCost;
+  const val = uiState.vars[varName].sellCost;
   return val;
 }
 
 export function getCost(varName: string) {
-  const val = uiState[varName].cost;
+  const val = uiState.vars[varName].cost;
   return val;
+}
+
+export function milestoneReached(name: string) {
+    return uiState.milestones[name];
 }

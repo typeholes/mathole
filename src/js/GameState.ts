@@ -1,8 +1,9 @@
 import { FunctionDef, FunctionDefManager } from "./FunctionDef";
 
-import { GameVarManager, UiStateMethods, UIVarFieldKeys } from "./GameVarManager";
+import { GameVarManager, UiStateMethods } from "./GameVarManager";
 import { displayFunction as mathDisplayFunction } from "./mathUtil";
 import { SaveManager } from "./SaveManager";
+import { GameMilestoneManager } from "./GameMilestoneManager";
 
 export class GameState<T> {
     canTick = true;
@@ -10,7 +11,7 @@ export class GameState<T> {
     // must be called before any other method
     static init<T>( uiState: T
         , uiStateMethods: UiStateMethods<T>
-        , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager) => void
+        , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<T>) => void
         ): T { 
 
 
@@ -93,6 +94,23 @@ export class GameState<T> {
         return this.gameVarManager.getDependents(varName);
     }
 
+    getMilestoneNames(): string[]{
+        return this.milestoneManager.getNames();
+    }
+  
+    getMilestoneDisplayName(name: string) : string {
+        return this.milestoneManager.get(name).displayName;
+    }
+
+    getMilestoneReward(name: string) : string {
+        return this.milestoneManager.get(name).rewardtext;
+    }
+
+    getMilestoneCondition(name: string) : string {
+        // TODO: sub names for display names in condition
+        return this.milestoneManager.get(name).condition;
+    }
+    
     save() : void {
         this.canTick = false;
         this.saveManager.save('default');
@@ -103,7 +121,7 @@ export class GameState<T> {
     // maybe need to pass in a from JSON callback as well?
     load() : void {
         this.canTick = false;
-        const newState = this.saveManager.load('default');
+        const newState = this.saveManager.load('default')['vars'];
 
         for (const name in newState) {
             const val = (newState[name] as any).value;
@@ -123,6 +141,7 @@ export class GameState<T> {
     
     private readonly gameVarManager: GameVarManager<T>;
     private readonly saveManager: SaveManager<T>;
+    private readonly milestoneManager: GameMilestoneManager<T>;
 
     /**
      * description
@@ -137,23 +156,24 @@ export class GameState<T> {
     private constructor
     ( uiState: T
     , uiStateMethods: UiStateMethods<T>
-    , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager) => void
+    , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<T>) => void
     ) {
         this.uiState = uiState;
         this.uiStateMethods = uiStateMethods;
 
-        this.gameVarManager = new GameVarManager<T>(
+
+        this.milestoneManager = new GameMilestoneManager<T>(
             uiState, uiStateMethods
         );
 
-        const vars = this.gameVarManager;
+        this.gameVarManager = new GameVarManager<T>(
+            uiState, uiStateMethods, this.milestoneManager
+        );
 
-        gameSetup(vars, FunctionDefManager);
+        gameSetup(this.gameVarManager, FunctionDefManager, this.milestoneManager);
 
         this.saveManager = new SaveManager( () => this.uiStateMethods.cloner(this.uiState) );
     }
-
-
 
 }
 

@@ -11,7 +11,7 @@ import { isInteger } from 'mathjs';
 import { unique } from './util';
 
 export default displayExpr;
-export { displayExpr,  runDefinition, runString, setVariable, M, expand, getDerivative, displayFunction, updateVar, getDependencies };
+export { displayExpr,  runDefinition, runString, setVariable, M, expand, getDerivative, displayFunction, updateVar, getDependencies, getDependenciesFromString };
 
 export type argMap = { [index: string]: string | number};
 
@@ -145,8 +145,10 @@ function texDerivative(expr, selectedVar, args={}) {
 
 function getDependencies(functionDef: FunctionDef, args) : string[] {
   if (!functionDef) { return []; }
-  
-  const expr = functionDef.body;
+  return getDependenciesFromString( functionDef.body, args);
+}
+
+function getDependenciesFromString( expr: string, args = {} ) : string[] {
   const expanded = expand(M.parse(expr), false, args);
   
   const filtered = expanded.filter(function (node) {

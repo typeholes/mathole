@@ -3,6 +3,7 @@
 import { shallowRef, onMounted, reactive } from 'vue'
 
 import Game from './Game.vue';
+import Milestones from './Milestones.vue';
 import FunctionViewer from './FunctionViewer.vue';
 
 import { GameState } from '../js/GameState';
@@ -123,6 +124,7 @@ function doExport() {
   <div class="mathole">
     <div class="topbar">
           <button @click="setMode(Game)">Game</button>
+          <button @click="setMode(Milestones)">Milestones</button>
           <!-- <button @click="setMode(VarEditor)">VarEditor</button>
           <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button>
           <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button> -->

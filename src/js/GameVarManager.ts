@@ -2,6 +2,7 @@ import { removeValuefromArray, unique } from "./util";
 import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
 import { setVariable as setMathVariable, getDependencies as getMathDependencies } from "./mathUtil";
 import { GameTime, GameVar, GameBuyable, GameCalculation, GameVarPlain } from "./GameVar";
+import { GameMilestoneManager } from "./GameMilestoneManager";
 
 export const defaultUiVarFields: UiVarFields = {
     value: 0, cost: 0, sellCost: 0, total: 0
@@ -22,6 +23,9 @@ export interface UiStateMethods<T> {
     varAdder: (state: T, name: string) => void; 
     varGetter: (state: T, name: string, key: string) => number;
     varSetter: (state: T, name: string, key: string, value) => void;
+    milestoneGetter: (state: T, name: string ) => boolean;
+    milestoneSetter: (state: T, name: string, gotten ) => void;
+    
 }
 
 export class GameVarManager<T> {
@@ -29,11 +33,13 @@ export class GameVarManager<T> {
 
     private readonly uiState: T;
     private readonly uiStateMethods: UiStateMethods<T>;
+    private readonly milestoneManager: GameMilestoneManager<T>;
 
 
-    constructor(uiState: T, uiStateMethods: UiStateMethods<T>) {
+    constructor(uiState: T, uiStateMethods: UiStateMethods<T>, milestoneManager: GameMilestoneManager<T>) {
         this.uiState = uiState;
         this.uiStateMethods = uiStateMethods;
+        this.milestoneManager = milestoneManager;
 
         // debugger;
         this.add(GameTime.instance);
@@ -56,7 +62,10 @@ export class GameVarManager<T> {
             val = this.getUiVarField(gameVar, field);
         }
          this.uiStateMethods.varSetter(this.uiState, gameVar.name, field, val);
-         if ( field === 'value' ) { setMathVariable(gameVar.name, val); }
+         if ( field === 'value' ) { 
+             setMathVariable(gameVar.name, val); 
+             this.milestoneManager.handleUpdate(gameVar.name);
+         }
     }
     
     private setUiVarFields(from: string|GameVar, makeDirty: 'clean' | 'dirty' = 'clean') {
@@ -268,6 +277,8 @@ export class GameVarManager<T> {
             }
             this._dirty.push(varName);
             setMathVariable(varName, this.uiStateMethods.varGetter(this.uiState, varName, 'value'));
+            this.milestoneManager.handleUpdate(varName);
+
         });
     }
 }
