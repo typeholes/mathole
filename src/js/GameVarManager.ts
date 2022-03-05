@@ -311,6 +311,40 @@ export class GameVarManager<T> {
                 //TODO make modal dialog 
                 alert(action.storyPoint);
             }
+            if ( action.adjustFunctions ) {
+                for( let varName in action.adjustFunctions) {
+                    for ( let fnType in action.adjustFunctions[varName]) {
+                        const newBody = action.adjustFunctions[varName][fnType];
+                        this.adjustFnOf(varName, fnType, newBody, 'M' );
+                    }
+                }
+            }
         });
+    }
+    
+    private adjustFnOf(varName: string, fnType: string, newBody: string, suffix: string) {
+        const gameVar = this.get(varName);
+        const uniqueSuffix = '_' + suffix + FunctionDefManager.makeUniqueSuffix();
+       
+        let fn: FunctionDef;
+        let setter: (newFn: FunctionDef) => void;
+        if ( fnType === 'value' && !(gameVar instanceof GameBuyable)) {
+            fn = gameVar.fn;
+            setter = (newFn) => gameVar.fn = newFn;
+        } else if ( fnType === 'cost' && gameVar instanceof GameBuyable) {
+           fn = gameVar.fn; 
+           setter = (newFn) => gameVar.fn = newFn;
+        } else if ( fnType === 'sellCost' && gameVar instanceof GameBuyable) {
+           fn = gameVar.sellFn;
+           setter = (newFn) => gameVar.sellFn = newFn;
+        } else {
+            throw('invalid fnType ' + fnType + ' for ' + gameVar.name);
+        }
+        
+        let newFn = FunctionDefManager.adjust(
+            fn, fn.name + uniqueSuffix, 
+            (body) => newBody.replace('<&>', fn.signatureString() )
+        );
+        setter(newFn);
     }
 }

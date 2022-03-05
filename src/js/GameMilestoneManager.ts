@@ -4,14 +4,12 @@ import { GameVarManager, UiStateMethods } from "./GameVarManager";
 import { runString, getDependenciesFromString } from "./mathUtil";
 
 type MilestoneFlags = { [any:string]: boolean}
-type MilestoneFnUpdaters = { [any:string]: string}
+type MilestoneFnUpdaters = { [any:string]: {value?: string, cost?: string, sellCost?: string}}
 export interface MilestoneRewardAction {
     setVisible?: MilestoneFlags;
     setBuyable?: MilestoneFlags;
     setSellable?: MilestoneFlags;
-    adjustValue?: MilestoneFnUpdaters;
-    adjustCost?: MilestoneFnUpdaters;
-    adjustSellCost?: MilestoneFnUpdaters;
+    adjustFunctions?: MilestoneFnUpdaters;
     storyPoint?: string;
 }
 

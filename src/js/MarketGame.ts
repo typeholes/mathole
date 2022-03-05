@@ -27,11 +27,16 @@ vars.newBuyable( 'shares', 'Shares', true, id, {x: 'marketValue'}, 'money', true
 vars.newCalculation( 'dummy', 'dummy', true, id, {x:'2^(t*10)'});
 vars.newBuyable( 'sdummy', 'Dummy', true, id, {x: 'dummy'}, 'money', true);
 
+milestones.create('startStory', 'Went Bankrupt', 't > 0', "You start the game from scratch"
+    , {storyPoint: "You went bankrupt. All you have left is your library card and a dollar's worth of coins you found in the gutter. Time to head to the library, grab a computer, and login to jankyMarketTrader.com"}
+);
+
 milestones.create('tooStable', 'Too Stable?', 'stability > 3', ' Can sell Market Stability'
     , {setSellable: {stability: true}}
 );
 
-milestones.create('startStory', 'Went Bankrupt', 't > 0', "You start the game from scratch"
-    , {storyPoint: "You went bankrupt. All you have left is your library card and a dollar's worth of coins you found in the gutter. Time to head to the library, grab a computer, and login to jankyMarketTrader.com"}
+milestones.create('scaled', 'Insider Trading', 'marketScale >= 1', ' Better price when selling shares '
+    , {adjustFunctions: {shares: {sellCost: ' 1.1 * <&>'}}}
 );
+
 }
