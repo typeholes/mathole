@@ -2,19 +2,19 @@ import { removeValuefromArray, unique } from "./util";
 import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
 import { setVariable as setMathVariable, getDependencies as getMathDependencies } from "./mathUtil";
 import { GameTime, GameVar, GameBuyable, GameCalculation, GameVarPlain } from "./GameVar";
-import { i } from "mathjs";
 
 export const defaultUiVarFields: UiVarFields = {
-    value: 0, cost: 0, sellCost: 0
+    value: 0, cost: 0, sellCost: 0, total: 0
 };
 
 export interface UiVarFields {
     value: number;
     cost: number;
     sellCost: number;
+    total: number;
 }
 
-export type UIVarFieldKeys = 'value' | 'cost' | 'sellCost';
+export type UIVarFieldKeys = 'value' | 'cost' | 'sellCost' | 'total';
 
 
 export interface UiStateMethods<T> {
@@ -42,6 +42,7 @@ export class GameVarManager<T> {
     getUiVarField(from: string|GameVar, field: UIVarFieldKeys) {
         const gameVar : GameVar = typeof from === 'string' ? this.get(from) : from;
         if ( field === 'value') { return gameVar.value; } 
+        else if ( field === 'total' && gameVar instanceof GameBuyable) { return gameVar.totalBought; }
         else if ( field === 'cost' && gameVar instanceof GameBuyable) { return gameVar.cost; }
         else if ( field === "sellCost" && gameVar instanceof GameBuyable) { return gameVar.sellCost; }
         else { return NaN; }
@@ -64,6 +65,7 @@ export class GameVarManager<T> {
         this.setUiVarField(gameVar, 'cost');
         this.setUiVarField(gameVar, 'sellCost');
         this.setUiVarField(gameVar, 'value');
+        this.setUiVarField(gameVar, 'total');
     }
     
     newCalculation(
@@ -85,8 +87,6 @@ export class GameVarManager<T> {
         visible: boolean,
         value: number
     ): GameVarPlain {
-        this.uiStateMethods.varAdder(this.uiState, name + '_total');
-
         const ret = new GameVarPlain(name, displayName, visible);
         this.add(ret);
         ret.spend(-1 * value);
@@ -102,8 +102,6 @@ export class GameVarManager<T> {
         currency: string,
         sellable: boolean
     ): GameBuyable {
-        this.uiStateMethods.varAdder(this.uiState, name + '_total');
-
         const ret = new GameBuyable(name, displayName, visible, fn, args, currency, sellable);
         this.add(ret);
         this.setUiVarField(ret,'value');
@@ -111,7 +109,9 @@ export class GameVarManager<T> {
 
         const currencyVar = this._items[currency];
         if (currencyVar instanceof GameCalculation) {
-            currencyVar.fn = FunctionDefManager.adjust(currencyVar.fn, name + '_' + currency, (body) => body + ' - ' + fn.callStr(args).replace(name, name + '_total') + ' + ' + fn.callStrEvaluatedArgs(args)
+            currencyVar.fn = FunctionDefManager.adjust(
+                currencyVar.fn, name + '_' + currency,
+                (body) => body + ' - ' + fn.callStr(args).replace(name, name + '_total') + ' + ' + fn.callStrEvaluatedArgs(args)
             );
         }
         this.setUiVarField(currencyVar, "value", 'dirty');
@@ -259,7 +259,10 @@ export class GameVarManager<T> {
         this._order.forEach((varName) => {
             const gameVar = this._items[varName];
             if (gameVar instanceof GameBuyable) {
-                gameVar.forceSetCounts(this.uiStateMethods.varGetter(this.uiState, varName, 'value'), this.uiStateMethods.varGetter(this.uiState, varName + '_total', 'value'));
+                gameVar.forceSetCounts(
+                    this.uiStateMethods.varGetter(this.uiState, varName, 'value'), 
+                    this.uiStateMethods.varGetter(this.uiState, varName, 'total')
+                );
             } else if (gameVar instanceof GameTime) {
                 gameVar.time = this.uiStateMethods.varGetter(this.uiState, varName, 'value');
             }

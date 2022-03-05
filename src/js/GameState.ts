@@ -109,9 +109,11 @@ export class GameState<T> {
             const val = (newState[name] as any).value;
             const cost = (newState[name] as any).cost;
             const sellCost = (newState[name] as any).cost;
+            const total = (newState[name] as any).total;
             this.gameVarManager.setUiVarField(name, 'value', val);
             this.gameVarManager.setUiVarField(name, 'cost', cost);
             this.gameVarManager.setUiVarField(name, 'sellCost', sellCost);
+            this.gameVarManager.setUiVarField(name, 'total', total);
         }
         this.gameVarManager.setFromUIValues();
         this.canTick = true;
