@@ -44,7 +44,7 @@ export class GameTime extends GameVar {
     time: number = 0;
 
     private constructor () {
-        super( 't', 'Time', false, null, {});
+        super( 't', 'Time', false, FunctionDefManager.get('id'), {'x': 't'});
     }
 
     get value(): number {
