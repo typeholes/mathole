@@ -3,14 +3,19 @@ import { FunctionDef } from "./FunctionDef";
 export class GameMilestone {
     readonly varName: string;
     readonly value: number;
-    readonly affectsVarName: string;
-    readonly fn: FunctionDef;
+    readonly displayName: string;
+    readonly rewardtext: string
 
-    constructor( varName: string, value: number, affectsVarName: string, fn: FunctionDef) {
+    constructor( 
+        varName: string, 
+        value: number, 
+        displayName: string,
+        rewardText: string = ""
+        ) {
         this.varName = varName;
         this.value = value;
-        this.affectsVarName = affectsVarName;
-        this.fn = fn;
+        this.displayName = displayName;
+        this.rewardtext = rewardText;
     }
     
 }

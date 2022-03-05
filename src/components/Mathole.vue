@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import { shallowRef, onMounted } from 'vue'
+import { shallowRef, onMounted, reactive } from 'vue'
 
 import Game from './Game.vue';
 import FunctionViewer from './FunctionViewer.vue';
@@ -12,19 +12,12 @@ import { ref } from 'vue';
 import { gameSetup } from "../js/MarketGame";
 
 import ToggleButton  from './ToggleButton.vue';
-import { PropKeys, provides } from './types';
+import { PropKeys, provides, uiState, uiStateMethods } from './uiUtil';
 
 const _varMap = ref( 
   GameState.init
-  (  ref( {} )
-  , (m) => m.value 
-  , (m,n) => m.value[n] = { cost: 0, sellCost:0, value: 0}
-  , (m,n) => m.value[n].sellCost
-  , (m,n, sellCost) => m.value[n].sellCost = sellCost
-  , (m,n) => m.value[n].cost
-  , (m,n, cost) => m.value[n].cost = cost
-  , (m,n) => m.value[n].value
-  , (m,n, value) => m.value[n].value = value
+  ( uiState 
+  , uiStateMethods
   , gameSetup
   )
 );

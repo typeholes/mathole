@@ -1,84 +1,71 @@
-import { removeValuefromArray } from "./util";
+import { removeValuefromArray, unique } from "./util";
 import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
 import { setVariable as setMathVariable, getDependencies as getMathDependencies } from "./mathUtil";
 import { GameTime, GameVar, GameBuyable, GameCalculation, GameVarPlain } from "./GameVar";
+import { i } from "mathjs";
+
+export const defaultUiVarFields: UiVarFields = {
+    value: 0, cost: 0, sellCost: 0
+};
+
+export interface UiVarFields {
+    value: number;
+    cost: number;
+    sellCost: number;
+}
+
+export type UIVarFieldKeys = 'value' | 'cost' | 'sellCost';
 
 
+export interface UiStateMethods<T> {
+    cloner: (state: any) => T; // make a fresh copy of the state for save/load
+    varAdder: (state: T, name: string) => void; 
+    varGetter: (state: T, name: string, key: string) => number;
+    varSetter: (state: T, name: string, key: string, value) => void;
+}
 
 export class GameVarManager<T> {
 
 
     private readonly uiState: T;
-    private readonly varAdder: (uiState: T, name: string) => void;
-    private readonly sellCostGetter: (uiState: T, name: string) => number;
-    private readonly sellCostSetter: (uiState: T, name: string, cost: number) => void;
-    private readonly costGetter: (uiState: T, name: string) => number;
-    private readonly costSetter: (uiState: T, name: string, cost: number) => void;
-    private readonly valueGetter: (uiState: T, name: string) => number;
-    private readonly valueSetter: (uiState: T, name: string, value: number) => number;
+    private readonly uiStateMethods: UiStateMethods<T>;
 
 
-    constructor(uiState: T,
-        varAdder: (uiState: T, name: string) => void,
-        sellCostGetter: (uiState: T, name: string) => number,
-        sellCostSetter: (uiState: T, name: string, cost: number) => void,
-        costGetter: (uiState: T, name: string) => number,
-        costSetter: (uiState: T, name: string, cost: number) => void,
-        valueGetter: (uiState: T, name: string) => number,
-        valueSetter: (uiState: T, name: string, value: number) => number
-    ) {
+    constructor(uiState: T, uiStateMethods: UiStateMethods<T>) {
         this.uiState = uiState;
-        this.varAdder = varAdder;
-        this.costGetter = costGetter;
-        this.costSetter = costSetter;
-        this.valueGetter = valueGetter;
-        this.valueSetter = valueSetter;
-        this.sellCostGetter = sellCostGetter;
-        this.sellCostSetter = sellCostSetter;
+        this.uiStateMethods = uiStateMethods;
 
         // debugger;
         this.add(GameTime.instance);
     }
 
-    getUIValue(gameVar: GameVar): number {
-        return this.valueGetter(this.uiState, gameVar.name);
+    getUiVarField(from: string|GameVar, field: UIVarFieldKeys) {
+        const gameVar : GameVar = typeof from === 'string' ? this.get(from) : from;
+        if ( field === 'value') { return gameVar.value; } 
+        else if ( field === 'cost' && gameVar instanceof GameBuyable) { return gameVar.cost; }
+        else if ( field === "sellCost" && gameVar instanceof GameBuyable) { return gameVar.sellCost; }
+        else { return NaN; }
     }
-
-    setUIValue(gameVar: GameVar, makeDirty: "dirty" | "clean" = "clean"): void {
-        const value = gameVar.value;
-        const varName = gameVar.name;
-        this.valueSetter(this.uiState, varName, value);
-        setMathVariable(varName, value);
-
-        if (gameVar instanceof GameBuyable) {
-            this.valueSetter(this.uiState, gameVar.name + '_total', gameVar.totalBought);
-            setMathVariable(varName + '_total', gameVar.totalBought);
+    
+    setUiVarField(from: string|GameVar, field: UIVarFieldKeys, value: number | 'dirty' = NaN) {
+        const gameVar : GameVar = typeof from === 'string' ? this.get(from) : from;
+        if ( value === 'dirty') { this._dirty.push(gameVar.name);}
+        let val = value;
+        if ( val  == 'dirty' || isNaN(val)) {
+            val = this.getUiVarField(gameVar, field);
         }
-        if (makeDirty === "dirty") {
-            this._dirty.push(varName);
-        }
+         this.uiStateMethods.varSetter(this.uiState, gameVar.name, field, val);
+         if ( field === 'value' ) { setMathVariable(gameVar.name, val); }
     }
-
-    getUISellCost(gameVar: GameVar): number {
-        return this.sellCostGetter(this.uiState, gameVar.name);
+    
+    private setUiVarFields(from: string|GameVar, makeDirty: 'clean' | 'dirty' = 'clean') {
+        const gameVar : GameVar = typeof from === 'string' ? this.get(from) : from;
+        if ( makeDirty === 'dirty') { this._dirty.push(gameVar.name);}
+        this.setUiVarField(gameVar, 'cost');
+        this.setUiVarField(gameVar, 'sellCost');
+        this.setUiVarField(gameVar, 'value');
     }
-
-    setUISellCost(gameVar: GameVar): void {
-        if (gameVar instanceof GameBuyable) {
-            this.sellCostSetter(this.uiState, gameVar.name, gameVar.sellCost);
-        }
-    }
-
-    getUICost(gameVar: GameVar): number {
-        return this.costGetter(this.uiState, gameVar.name);
-    }
-
-    setUICost(gameVar: GameVar): void {
-        if (gameVar instanceof GameBuyable) {
-            this.costSetter(this.uiState, gameVar.name, gameVar.cost);
-        }
-    }
-
+    
     newCalculation(
         name: string,
         displayName: string,
@@ -98,7 +85,7 @@ export class GameVarManager<T> {
         visible: boolean,
         value: number
     ): GameVarPlain {
-        this.varAdder(this.uiState, name + '_total');
+        this.uiStateMethods.varAdder(this.uiState, name + '_total');
 
         const ret = new GameVarPlain(name, displayName, visible);
         this.add(ret);
@@ -115,31 +102,31 @@ export class GameVarManager<T> {
         currency: string,
         sellable: boolean
     ): GameBuyable {
-        this.varAdder(this.uiState, name + '_total');
+        this.uiStateMethods.varAdder(this.uiState, name + '_total');
 
         const ret = new GameBuyable(name, displayName, visible, fn, args, currency, sellable);
         this.add(ret);
-        this.setUIValue(ret);
-        this.setUICost(ret);
+        this.setUiVarField(ret,'value');
+        this.setUiVarField(ret,'cost');
 
         const currencyVar = this._items[currency];
         if (currencyVar instanceof GameCalculation) {
             currencyVar.fn = FunctionDefManager.adjust(currencyVar.fn, name + '_' + currency, (body) => body + ' - ' + fn.callStr(args).replace(name, name + '_total') + ' + ' + fn.callStrEvaluatedArgs(args)
             );
         }
-        this.setUIValue(currencyVar, 'dirty');
+        this.setUiVarField(currencyVar, "value", 'dirty');
         return ret;
     }
 
     add(g: GameVar) {
-        this.varAdder(this.uiState, g.name);
+        this.uiStateMethods.varAdder(this.uiState, g.name);
 
         this._dependencies[g.name] = [];
         this._calculateDependencies(g);
         this._deepDependencies[g.name] = getMathDependencies(g.fn, g.args);
         this._order.push(g.name);
         this._items[g.name] = g;
-        this.setUIValue(g, "dirty");
+        this.setUiVarField(g, 'value', 'dirty');
     }
 
     private _calculateDependencies(tgt: GameVar): void {
@@ -166,30 +153,27 @@ export class GameVarManager<T> {
     private _dirty: string[] = [];
 
     tick(elapsedTime: number): void {
-
-
         const t = (this._items.t as GameTime);
         t.time += elapsedTime;
-        this.valueSetter(this.uiState, 't', t.time);
+        this.setUiVarField(t, 'value', t.time);
         this._dirty.push('t');
 
-        const ran: string[] = [];
+        for (let i = 0; i<2; i++) { // run through dirty twice so we process the fallout of the first pass
+            const ran: string[] = [];
 
-        this._order.forEach((name) => {
-            if (this._dirty.includes(name)) {
-                const dirtyVar = this._items[name];
+            this._order.forEach((name) => {
+                if (this._dirty.includes(name)) {
+                    const dirtyVar = this._items[name];
 
-                this.setUIValue(dirtyVar);
-                this.setUICost(dirtyVar);
-                this.setUISellCost(dirtyVar);
+                    this.setUiVarFields(dirtyVar);
 
-                removeValuefromArray(this._dirty, name);
-
-                this._dirty.push(...this._dependencies[name]);
-                ran.push(name);
-            }
-
-        });
+                    this._dirty.push(...this._dependencies[name]);
+                    ran.push(name);
+                }
+                this._dirty = unique( this._dirty );
+                ran.forEach( (ranName ) => { removeValuefromArray( this._dirty, ranName); });
+            });
+        }
     }
 
     isBuyable(varName) {
@@ -245,17 +229,13 @@ export class GameVarManager<T> {
         const cost = buyable.cost;
 
         buyable.spend(1);
-        this.setUIValue(currency, 'dirty');
-
-        this.setUIValue(buyable, 'dirty');
-        this.setUICost(buyable);
+        this.setUiVarFields(buyable, 'dirty');
+        
         currency.spend(cost * -1);
-        this.setUIValue(currency);
-        this.setUICost(currency);
-
-        this._dirty.push(varName);
+        this.setUiVarFields(currency, 'dirty');
 
     }
+
     buy(varName: string) {
         const buyable = this.get(varName);
         if (!(buyable instanceof GameBuyable)) { return; }
@@ -264,18 +244,13 @@ export class GameVarManager<T> {
         const currency = this.get(currencyName);
 
         const cost = buyable.cost;
-        if (cost > this.valueGetter(this.uiState, currencyName)) { return; }
+        if (cost > this.getUiVarField(currency, 'cost')) { return; }
 
         buyable.buy();
-        this.setUIValue(currency, 'dirty');
+        this.setUiVarFields(buyable, 'dirty');
 
-        this.setUIValue(buyable, 'dirty');
-        this.setUICost(buyable);
         currency.spend(cost);
-        this.setUIValue(currency);
-        this.setUICost(currency);
-
-        this._dirty.push(varName);
+        this.setUiVarFields(currency, 'dirty');
 
     }
 
@@ -284,12 +259,12 @@ export class GameVarManager<T> {
         this._order.forEach((varName) => {
             const gameVar = this._items[varName];
             if (gameVar instanceof GameBuyable) {
-                gameVar.forceSetCounts(this.valueGetter(this.uiState, varName), this.valueGetter(this.uiState, varName + '_total'));
+                gameVar.forceSetCounts(this.uiStateMethods.varGetter(this.uiState, varName, 'value'), this.uiStateMethods.varGetter(this.uiState, varName + '_total', 'value'));
             } else if (gameVar instanceof GameTime) {
-                gameVar.time = this.valueGetter(this.uiState, varName);
+                gameVar.time = this.uiStateMethods.varGetter(this.uiState, varName, 'value');
             }
             this._dirty.push(varName);
-            setMathVariable(varName, this.valueGetter(this.uiState, varName));
+            setMathVariable(varName, this.uiStateMethods.varGetter(this.uiState, varName, 'value'));
         });
     }
 }

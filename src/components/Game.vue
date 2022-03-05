@@ -2,7 +2,7 @@
 
 import GameVarView from './GameVarView.vue';
 import { GameState } from '../js/GameState';
-import { injects, PropKeys } from './types';
+import { injects, PropKeys } from './uiUtil';
 
 const gameState = GameState.getInstance();
 

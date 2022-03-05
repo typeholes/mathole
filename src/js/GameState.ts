@@ -1,6 +1,6 @@
 import { FunctionDef, FunctionDefManager } from "./FunctionDef";
 
-import { GameVarManager } from "./GameVarManager";
+import { GameVarManager, UiStateMethods, UIVarFieldKeys } from "./GameVarManager";
 import { displayFunction as mathDisplayFunction } from "./mathUtil";
 import { SaveManager } from "./SaveManager";
 
@@ -9,19 +9,12 @@ export class GameState<T> {
 
     // must be called before any other method
     static init<T>( uiState: T
-        , cloner: (uiState: any) => T // any because of things like vue wrapping with refs
-        , varAdder: (uiState: T, name: string) => void
-        , sellCostGetter: (uiState: T, name: string) => number
-        , sellCostSetter: (uiState: T, name: string, cost: number) => void
-        , costGetter: (uiState: T, name: string) => number
-        , costSetter: (uiState: T, name: string, cost: number) => void
-        , valueGetter: (uiState: T, name: string) => number
-        , valueSetter: (uiState: T, name: string, value: number) => number
+        , uiStateMethods: UiStateMethods<T>
         , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager) => void
         ): T { 
 
 
-        GameState._instance = new GameState(uiState, cloner, varAdder, sellCostGetter, sellCostSetter, costGetter, costSetter, valueGetter, valueSetter, gameSetup);
+        GameState._instance = new GameState(uiState, uiStateMethods, gameSetup);
         return uiState;
     }
 
@@ -43,18 +36,6 @@ export class GameState<T> {
         );
 
         return ret;
-    }
-
-    getSellCost( name: string) : number {
-        return this.sellCostGetter(this.uiState, name);
-    }
-
-    getCost( name: string) : number {
-        return this.costGetter(this.uiState, name);
-    }
-
-    getValue( name: string) : number {
-        return this.valueGetter(this.uiState, name);
     }
 
     getNames() : string[] {
@@ -124,11 +105,13 @@ export class GameState<T> {
         this.canTick = false;
         const newState = this.saveManager.load('default');
 
-        for (const key in newState) {
-            const val = (newState[key] as any).value;
-            const cost = (newState[key] as any).cost;
-            this.valueSetter(this.uiState, key, val);
-            this.costSetter(this.uiState, key, cost);
+        for (const name in newState) {
+            const val = (newState[name] as any).value;
+            const cost = (newState[name] as any).cost;
+            const sellCost = (newState[name] as any).cost;
+            this.gameVarManager.setUiVarField(name, 'value', val);
+            this.gameVarManager.setUiVarField(name, 'cost', cost);
+            this.gameVarManager.setUiVarField(name, 'sellCost', sellCost);
         }
         this.gameVarManager.setFromUIValues();
         this.canTick = true;
@@ -145,77 +128,27 @@ export class GameState<T> {
      * @category uiState
      */
     private readonly uiState: T;
+    private readonly uiStateMethods: UiStateMethods<T>;
 
-    /**
-     * description
-     * 
-     * @category uiState
-     */
-    private readonly cloner: (uiState: T) => T;
-
-    /**
-     * description
-     * 
-     * @category uiState
-     */
-    private readonly costGetter: (uiState: T, name: string) => number;
-
-    private readonly sellCostGetter: (uiState: T, name: string) => number;
-
-    /**
-     * description
-     * 
-     * @category uiState
-     */
-     private readonly valueGetter: (uiState: T, name: string) => number;
-
-    /**
-     * description
-     * 
-     * @category uiState
-     */
-     private readonly costSetter: (uiState: T, name: string, cost: number) => void;
-     
-     private readonly sellCostSetter: (uiState: T, name: string, sellCost: number) => void;
-
-    /**
-     * description
-     * 
-     * @category uiState
-     */
-     private readonly valueSetter: (uiState: T, name: string, value: number) => number;
 
 
     private constructor
     ( uiState: T
-    , cloner: (uiState: T) => T
-    , varAdder: (uiState: T, name: string) => void
-    , sellCostGetter: (uiState: T, name: string) => number
-    , sellCostSetter: (uiState: T, name: string, cost: number) => void
-    , costGetter: (uiState: T, name: string) => number
-    , costSetter: (uiState: T, name: string, cost: number) => void
-    , valueGetter: (uiState: T, name: string) => number
-    , valueSetter: (uiState: T, name: string, value: number) => number
+    , uiStateMethods: UiStateMethods<T>
     , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager) => void
     ) {
         this.uiState = uiState;
-        this.cloner = cloner;
-        this.costGetter = costGetter;
-        this.valueGetter = valueGetter;
-        this.costSetter = costSetter;
-        this.valueSetter = valueSetter;
-        this.sellCostGetter = sellCostGetter;
-        this.sellCostSetter = sellCostSetter;
+        this.uiStateMethods = uiStateMethods;
 
         this.gameVarManager = new GameVarManager<T>(
-            uiState, varAdder, sellCostGetter, sellCostSetter, costGetter, costSetter, valueGetter, valueSetter
+            uiState, uiStateMethods
         );
 
         const vars = this.gameVarManager;
 
         gameSetup(vars, FunctionDefManager);
 
-        this.saveManager = new SaveManager( () => this.cloner(this.uiState) );
+        this.saveManager = new SaveManager( () => this.uiStateMethods.cloner(this.uiState) );
     }
 
 

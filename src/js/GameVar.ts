@@ -2,10 +2,6 @@ import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
 
 import { parser } from "./mathUtil";
 
-
-export type uiVarMap = { [any: string]: uiVar };
-export type uiVar = { value: number, cost: number, sellCost: number};
-
 export abstract class GameVar { 
     readonly name: string;
     readonly displayName: string;
