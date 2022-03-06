@@ -11,7 +11,7 @@ import { isInteger } from 'mathjs';
 import { unique } from './util';
 
 export default displayExpr;
-export { displayExpr,  runDefinition, runString, setVariable, M, expand, getDerivative, displayFunction, updateVar, getDependencies };
+export { displayExpr,  runDefinition, runString, setVariable, M, expand, getDerivative, displayFunction, updateVar, getDependencies, getDependenciesFromString };
 
 export type argMap = { [index: string]: string | number};
 
@@ -36,9 +36,10 @@ function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap 
     return node;
   }
   if (node.op) {  // OperatorNode2
-    node.args = node.args.map( (a)=> 
-      expand(a, replaceConstants, localScope, maxDepth, depth+1) 
-      );     
+    node.args = node.args.map( (a)=> {
+      const newArg = expand(a, replaceConstants, localScope, maxDepth, depth+1) 
+      return newArg;
+    });     
     return node;
   }
 
@@ -93,6 +94,7 @@ function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap 
     return node;
   }
 
+  return node;
 }
 
 function updateVar(name: string, value: string | number) {
@@ -145,8 +147,10 @@ function texDerivative(expr, selectedVar, args={}) {
 
 function getDependencies(functionDef: FunctionDef, args) : string[] {
   if (!functionDef) { return []; }
-  
-  const expr = functionDef.body;
+  return getDependenciesFromString( functionDef.body, args);
+}
+
+function getDependenciesFromString( expr: string, args = {} ) : string[] {
   const expanded = expand(M.parse(expr), false, args);
   
   const filtered = expanded.filter(function (node) {
@@ -214,3 +218,15 @@ function displayExpr(expr, selectedVar, elementIdPrefix="", args={}) {
 }
 
 
+export function replaceSymbols(expr: string, replacements: {[any: string]: string}) {
+  const node = M.parse(expr);
+  const replaced = node.transform(function (node, path, parent) {
+    if (node.isSymbolNode && replacements[node.name] ) {
+      return M.parse( '"' + replacements[node.name] + '"');
+    }
+    else {
+      return node
+    }
+  })
+  return replaced.toString();
+}

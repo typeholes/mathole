@@ -2,7 +2,7 @@
 
 import { GameState } from '../js/GameState';
 import { formatNumber } from '../js/util';
-import { injects, PropKeys } from './types';
+import { injects, PropKeys, getCost, getSellCost, getValue } from './uiUtil';
 
 
 interface Props {
@@ -24,24 +24,9 @@ const { clickAction, dependencies, dependents, graphedVarName, selectedVarName }
 
 const gameState = GameState.getInstance();
 
-function getValue(varName: string) {
-  const val = gameState.getValue(varName);
-  return val;
-}
-
-function getSellCost(varName: string) {
-  const val = gameState.getSellCost(varName);
-  return val;
-}
-
-function getCost(varName: string) {
-  const val = gameState.getCost(varName);
-  return val;
-}
-
 //TODO: this belongs in GameState
 function canSell(varName: string) : boolean {
-  const cnt = gameState.getValue(varName);
+  const cnt = getValue(varName);
 
   return cnt > 0;
 }
@@ -51,7 +36,7 @@ function canBuy(varName: string) : boolean {
   const currencyName = gameState.getCurrencyName(varName);
   if (!currencyName) { return false;}
 
-  const currency = gameState.getValue(currencyName);
+  const currency = getValue(currencyName);
 
   return currency >= getCost(varName);
 

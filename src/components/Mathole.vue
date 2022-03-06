@@ -1,8 +1,9 @@
 
 <script setup lang="ts">
-import { shallowRef, onMounted } from 'vue'
+import { shallowRef, onMounted, reactive } from 'vue'
 
 import Game from './Game.vue';
+import Milestones from './Milestones.vue';
 import FunctionViewer from './FunctionViewer.vue';
 
 import { GameState } from '../js/GameState';
@@ -12,22 +13,9 @@ import { ref } from 'vue';
 import { gameSetup } from "../js/MarketGame";
 
 import ToggleButton  from './ToggleButton.vue';
-import { PropKeys, provides } from './types';
+import { PropKeys, provides, uiState, uiStateMethods } from './uiUtil';
 
-const _varMap = ref( 
-  GameState.init
-  (  ref( {} )
-  , (m) => m.value 
-  , (m,n) => m.value[n] = { cost: 0, sellCost:0, value: 0}
-  , (m,n) => m.value[n].sellCost
-  , (m,n, sellCost) => m.value[n].sellCost = sellCost
-  , (m,n) => m.value[n].cost
-  , (m,n, cost) => m.value[n].cost = cost
-  , (m,n) => m.value[n].value
-  , (m,n, value) => m.value[n].value = value
-  , gameSetup
-  )
-);
+GameState.init ( uiState , uiStateMethods , gameSetup);
 
 const gameState = GameState.getInstance();
 
@@ -52,15 +40,12 @@ function setMode(newMode) {
   mode.value = newMode;
 }
 
-const deltaDisplay = ref(0);
-
 let priorTime = 0;
 function loop(elapsedTime) {
   const delta = elapsedTime - priorTime
   if (gameState.canTick && delta >= 500) {
     gameState.tick(delta/10000);
     priorTime = elapsedTime;
-    deltaDisplay.value = Math.floor(delta);
   } 
   window.requestAnimationFrame(loop);
 }
@@ -139,12 +124,12 @@ function doExport() {
   <div class="mathole">
     <div class="topbar">
           <button @click="setMode(Game)">Game</button>
+          <button @click="setMode(Milestones)">Milestones</button>
           <!-- <button @click="setMode(VarEditor)">VarEditor</button>
-          <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button>
-          <button><a href="https://youtu.be/akT0wxv9ON8?t=30">Help</a></button> -->
+          <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button> -->
           <button @click="gameState.save">save</button>
           <button @click="gameState.load">load</button>
-          <button @click="setMode(FunctionViewer)">Function Viewer</button>
+          <!-- <button @click="setMode(FunctionViewer)">Function Viewer</button> -->
       <!-- <button @click="doExport">export</button>
           <button @click="doImport">import</button>
           <button @click="ST.reset">reset</button>         -->
@@ -153,6 +138,8 @@ function doExport() {
           Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton>
 
           <!-- <button @click="dbg">debugger</button> -->
+          <div id='test-graph-expr' class="graphDiv"></div>
+          
     </div>
     <div class="mainPain">
         <keep-alive>

@@ -2,14 +2,10 @@ import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
 
 import { parser } from "./mathUtil";
 
-
-export type uiVarMap = { [any: string]: uiVar };
-export type uiVar = { value: number, cost: number, sellCost: number};
-
 export abstract class GameVar { 
     readonly name: string;
     readonly displayName: string;
-    readonly visible: boolean;
+    visible: boolean;
     fn: FunctionDef;
     readonly args: argMap;
 
@@ -48,7 +44,7 @@ export class GameTime extends GameVar {
     time: number = 0;
 
     private constructor () {
-        super( 't', 'Time', false, null, {});
+        super( 't', 'Time', false, FunctionDefManager.get('id'), {'x': 't'});
     }
 
     get value(): number {

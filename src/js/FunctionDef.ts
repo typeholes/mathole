@@ -24,8 +24,12 @@ export class FunctionDef {
         return this.argNames.map( name => args[name]);
     }
 
+    public signatureString(): string {
+        return this.name + '(' + this.argNames.join(',') + ')';
+    }
+    
     private defString() : string {
-        return this.name + '(' + this.argNames.join(',') + ') = ' + this.body;
+        return this.signatureString() + ' = ' + this.body;
     }
 
 
@@ -45,7 +49,6 @@ export class FunctionDef {
 }
 
 export class FunctionDefManager {
-
     private static readonly _instance: FunctionDefManager = new FunctionDefManager();
 
     private map: {[any: string]: FunctionDef} = {};
@@ -68,7 +71,32 @@ export class FunctionDefManager {
         const ret = this.create(newName, fn.argNames, bodyModifier(fn.body));
         return ret;
     }
-    
+   
+    private static uniqCnt=0;
+    private static digitMap = {
+        1: 'a',
+        2: 'b',
+        3: 'c',
+        4: 'd',
+        5: 'e',
+        6: 'f',
+        7: 'g',
+        8: 'h',
+        9: 'i',
+        0: 'j',
+        '.': 'k',
+        '+': 'l',
+        '-': 'm',
+        ',': 'n',
+        e: 'o'
+    };
+       
+    static makeUniqueSuffix() {
+        this.uniqCnt++;
+        const unique = this.uniqCnt.toString().split('').map( (c) => this.digitMap[c]).join('');
+        return unique + '_';
+    }
+
     private constructor() {
     
         const fn = new FunctionDef('id', ['x'],'x');

@@ -2,7 +2,7 @@
 
 import GameVarView from './GameVarView.vue';
 import { GameState } from '../js/GameState';
-import { injects, PropKeys } from './types';
+import { injects, PropKeys } from './uiUtil';
 
 const gameState = GameState.getInstance();
 
@@ -22,7 +22,7 @@ const { dependencies, dependents, graphedVarName, selectedVarName} = injects( Pr
       </div>
     </div>
 
-     <div id='test-graph-expr' class="graphDiv"></div>
+     <!-- <div id='test-graph-expr' class="graphDiv"></div >-->
   
   </div>
 </template>
