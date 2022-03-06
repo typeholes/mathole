@@ -5,3 +5,6 @@ milestones
 options
 accesibility
 writeup accessibility how-to
+replace provide/inject with reactive vars in uiUtils.tx like I do for uiState
+milestone list sorting options. maybe filters by variable
+todo recognize swipe controls for mobile.
