@@ -1,44 +1,34 @@
 
 <script setup lang="ts">
-import { shallowRef, onMounted, reactive } from 'vue'
 
 import Game from './Game.vue';
-import Milestones from './Milestones.vue';
-import FunctionViewer from './FunctionViewer.vue';
 
 import { GameState } from '../js/GameState';
 
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { gameSetup } from "../js/MarketGame";
 
-import ToggleButton  from './ToggleButton.vue';
-import { PropKeys, provides, uiState, uiStateMethods } from './uiUtil';
+import { init, uiState, uiStateMethods, sidebarComponent, Globals, setMode, gotoPriorMode } from './uiUtil';
+
+import Options from './Options.vue';
+import Dependencies from './Dependencies.vue';
+import Graph from './Graph.vue';
+import Milestones from './Milestones.vue';
+import Story from './Story.vue';
+import Sidebars from './Sidebars.vue';
 
 GameState.init ( uiState , uiStateMethods , gameSetup);
-
 const gameState = GameState.getInstance();
 
-const { clickAction, graphedVarName, selectedVarName, dependencies, dependents } = provides(
-  [ PropKeys.ClickAction, "select" ],
-  [ PropKeys.GraphedVarName, "" ],
-  [ PropKeys.SelectedVarName, "" ],
-  [ PropKeys.Dependencies, [] ],
-  [ PropKeys.Dependents, [] ]
-);
-
-function dbg() { 
-  const foo = [
-    clickAction, graphedVarName, selectedVarName, dependencies, dependents 
-  ];
-  debugger;
-}
-
-const mode = shallowRef(Game);
-
-function setMode(newMode) {
-  mode.value = newMode;
-}
+init( {
+  Options: Options,
+  Dependencies: Dependencies, 
+  Graph : Graph,
+  Milestones : Milestones,
+  Story : Story,
+  Sidebars : Sidebars
+}, gameState);
 
 let priorTime = 0;
 function loop(elapsedTime) {
@@ -122,29 +112,19 @@ function doExport() {
 
 <template>
   <div class="mathole">
-    <div class="topbar">
-          <button @click="setMode(Game)">Game</button>
-          <button @click="setMode(Milestones)">Milestones</button>
-          <!-- <button @click="setMode(VarEditor)">VarEditor</button>
-          <button @click="setMode(FunctionDefEditor)">FunctionDefEditor</button> -->
-          <button @click="gameState.save">save</button>
-          <button @click="gameState.load">load</button>
-          <!-- <button @click="setMode(FunctionViewer)">Function Viewer</button> -->
-      <!-- <button @click="doExport">export</button>
-          <button @click="doImport">import</button>
-          <button @click="ST.reset">reset</button>         -->
-    </div>
     <div class="sidebar">
-          Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton>
-
-          <!-- <button @click="dbg">debugger</button> -->
-          <div id='test-graph-expr' class="graphDiv"></div>
-          
+      <div class="topBar">
+        <button @click="gotoPriorMode()"> &#8592</button>{{ Globals.sidebarMode }} <button @click="setMode('Sidebars')"> &#8801</button>
+ <!--         Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton> -->
+      </div>
+      <div class="sidePane">
+        <keep-alive>
+          <component :is="sidebarComponent()"></component>        
+        </keep-alive>
+      </div>
     </div>
     <div class="mainPain">
-        <keep-alive>
-          <component :is="mode" v-model:selectedVarName="selectedVarName" v-model:graphedVarName="graphedVarName"></component>        
-        </keep-alive>
+      <Game></Game>
     </div>
 
   </div>
@@ -162,7 +142,7 @@ span.error {
 
 .mathole {
   display: grid;
-  grid-auto-columns: minmax(content,1fr);
+  grid-template-columns: minmax(75%,1fr) 1fr;
   gap: 10px;
   grid-auto-rows: minmax(100px, auto);
 
@@ -170,7 +150,7 @@ span.error {
 
 .topbar {
   grid-row: 1;
-  grid-column: 1-2;
+  grid-column: 2;
 }
 
 .sidebar {
@@ -179,7 +159,7 @@ grid-row: 2;
 }
 
 .mainPain {
-  grid-row: 2;
+  grid-row: 1/2;
   grid-column: 1;
 
 }

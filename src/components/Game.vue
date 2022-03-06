@@ -2,27 +2,23 @@
 
 import GameVarView from './GameVarView.vue';
 import { GameState } from '../js/GameState';
-import { injects, PropKeys } from './uiUtil';
 
 const gameState = GameState.getInstance();
-
-const { dependencies, dependents, graphedVarName, selectedVarName} = injects( PropKeys.Dependencies, PropKeys.Dependents, PropKeys.GraphedVarName, PropKeys.SelectedVarName);
 
 </script>
 
 <template>
   <div class="game">
     <div class="mainVar">
-      <GameVarView varName="t" v-model:dependencies="dependencies" v-model:dependents="dependents" forceVisible v-model:graphedVarName="graphedVarName" v-model:selectedVarName="selectedVarName"></GameVarView> 
-      <GameVarView varName="money" v-model:dependencies="dependencies" v-model:dependents="dependents" forceVisible v-model:graphedVarName="graphedVarName" v-model:selectedVarName="selectedVarName"></GameVarView>
+      <GameVarView varName="t" forceVisible ></GameVarView> 
+      <GameVarView varName="money" forceVisible></GameVarView>
     </div>
     <div class="vars">
       <div class="contents" v-for="(varName) in gameState.getNames()">
-        <GameVarView :varName="varName" v-model:dependencies="dependencies" v-model:dependents="dependents" v-model:graphedVarName="graphedVarName" v-model:selectedVarName="selectedVarName"></GameVarView>
+        <GameVarView :varName="varName"></GameVarView>
       </div>
     </div>
 
-     <!-- <div id='test-graph-expr' class="graphDiv"></div >-->
   
   </div>
 </template>

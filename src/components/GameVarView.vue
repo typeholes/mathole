@@ -2,8 +2,7 @@
 
 import { GameState } from '../js/GameState';
 import { formatNumber } from '../js/util';
-import { injects, PropKeys, getCost, getSellCost, getValue } from './uiUtil';
-
+import { getCost, getSellCost, getValue, Globals, mainClick as labelClick, refreshGraph } from './uiUtil';
 
 interface Props {
   varName: string,
@@ -13,14 +12,6 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   forceVisible: false,
 })
-
-const { clickAction, dependencies, dependents, graphedVarName, selectedVarName } = injects( 
-  PropKeys.ClickAction, 
-  PropKeys.Dependencies,
-  PropKeys.Dependents,
-  PropKeys.GraphedVarName,
-  PropKeys.SelectedVarName 
-  );
 
 const gameState = GameState.getInstance();
 
@@ -42,20 +33,20 @@ function canBuy(varName: string) : boolean {
 
 }
 
-function labelClass(varName: string, selectedVarName: string, dependencies: string[], dependents: string[]) {
+function labelClass(varName: string) {
   let ret = {marker: true, dependent: false, depends: false, hidden: true, inline: true};
   
-  if ( varName === selectedVarName) {
+  if ( varName === Globals.selectedVarName) {
     ret.hidden = false;
     return ret;
   } 
 
-  if ( dependencies.includes(varName)) {
+  if ( Globals.dependencies.includes(varName)) {
      ret.dependent = true;
      ret.hidden = false;
   }
 
-  if ( dependents.includes(varName)) {
+  if ( Globals.dependents.includes(varName)) {
      ret.depends = true;
      ret.hidden = false;
   }
@@ -64,45 +55,24 @@ function labelClass(varName: string, selectedVarName: string, dependencies: stri
 }
 
 
-function labelClick(varName: string) {
-  
-  if ( clickAction.value === 'select') {
-    selectedVarName.value = varName;
-    let newDependencies = gameState.getDependencies(varName);
-    let newDependents = gameState.getDependents(varName);
 
-    dependencies.value =  newDependencies;
-    dependents.value = newDependents;
-  }
-  
-  if ( clickAction.value === 'graph' ) {
-    graphedVarName.value = varName;
-    gameState.displayFunction(varName, '#test-graph-expr', gameState.getNameMap(), graphTitle(varName));  
-  }
-  
-}
-
-function sell(varName: string, graphedVarName: string ) {
+function sell(varName: string) {
   gameState.sell(varName);
-  if (graphedVarName !== '') { gameState.displayFunction(graphedVarName, '#test-graph-expr', gameState.getNameMap(), graphTitle(graphedVarName));  }
+  refreshGraph();
 }
 
-function buy(varName: string, graphedVarName: string ) {
+function buy(varName: string) {
   gameState.buy(varName);
-  if (graphedVarName !== '') { gameState.displayFunction(graphedVarName, '#test-graph-expr', gameState.getNameMap(), graphTitle(graphedVarName));  }
+  refreshGraph();
 }
 
-function graphTitle(varName: string) : string {
-  const prefix = gameState.isBuyable(varName) ? "Cost of " : "";
-  return prefix + gameState.getDisplayName(varName);
-}
 
 </script>
 
 <template>
     <div class="gamevar" v-if="forceVisible || gameState.isVisible(varName)">    
-        <div :class="labelClass(varName, selectedVarName, dependencies, dependents)">
-          <span> {{ varName === selectedVarName ? "&#8860" : "&#8658" }} </span></div>
+        <div :class="labelClass(varName)">
+          <span> {{ varName === Globals.selectedVarName ? "&#8860" : "&#8658" }} </span></div>
         <div class="label">
           <span  @click="labelClick(varName)">{{ gameState.getDisplayName(varName) }}: </span> 
         </div>
@@ -110,12 +80,12 @@ function graphTitle(varName: string) : string {
           {{ formatNumber(getValue(varName)) }}         
        </div> 
         <div class="buy">
-          <button @click="buy(varName, graphedVarName)" v-if="gameState.isBuyable(varName)" :disabled="!canBuy(varName)" > 
+          <button @click="buy(varName)" v-if="gameState.isBuyable(varName)" :disabled="!canBuy(varName)" > 
               Buy: {{ formatNumber(getCost(varName)) }} {{ gameState.getCurrencyDisplayName(varName) }}
           </button> 
         </div>
         <div class="sell">
-          <button @click="sell(varName, graphedVarName)" v-if="gameState.isSellable(varName)" :disabled="!canSell(varName)">Sell: {{ formatNumber(getSellCost(varName)) }} {{ gameState.getCurrencyDisplayName(varName) }}</button> 
+          <button @click="sell(varName)" v-if="gameState.isSellable(varName)" :disabled="!canSell(varName)">Sell: {{ formatNumber(getSellCost(varName)) }} {{ gameState.getCurrencyDisplayName(varName) }}</button> 
         </div>
     </div>
 </template>
