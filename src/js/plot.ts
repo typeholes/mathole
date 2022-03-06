@@ -8,7 +8,7 @@ export function plot(target: string, expr: string, title: string) {
 functionPlot({
     target: target,
     title: title,
-    //  width: 500,
+    width: 300,
     //  height: 500,
     yAxis: { domain: [-1, 9] },
     grid: true,

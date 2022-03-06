@@ -112,16 +112,14 @@ function doExport() {
 
 <template>
   <div class="mathole">
-    <div class="sidebar">
       <div class="topBar">
         <button @click="gotoPriorMode()"> &#8592</button>{{ Globals.sidebarMode }} <button @click="setMode('Sidebars')"> &#8801</button>
  <!--         Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton> -->
       </div>
-      <div class="sidePane">
+    <div class="sidebar">
         <keep-alive>
           <component :is="sidebarComponent()"></component>        
         </keep-alive>
-      </div>
     </div>
     <div class="mainPain">
       <Game></Game>
@@ -142,9 +140,9 @@ span.error {
 
 .mathole {
   display: grid;
-  grid-template-columns: minmax(75%,1fr) 1fr;
+  grid-template-columns: auto 300px;
   gap: 10px;
-  grid-auto-rows: minmax(100px, auto);
+  grid-auto-rows: 20px auto;
 
 }
 
