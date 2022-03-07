@@ -8,5 +8,7 @@
     "noEmit": true,
     "experimentalDecorators": true,
     "esModuleInterop": true
+   // , "noImplicitAny": true
+
   }
 }

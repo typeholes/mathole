@@ -1,4 +1,3 @@
-import { parseDependencies } from "mathjs";
 
 export function removeValuefromArray<T>(arr: T[], value: T) : void {
     const idx = arr.indexOf(value);
@@ -28,5 +27,45 @@ export function formatNumber(n: number, pad: number = 8) {
    return str.padStart(pad,"\u2000");
 //   const pad = Math.max(10 - str.length,0)
 //   return fixed + '&nbsp'.repeat(pad);
-
 }
+
+
+export function callEach<F extends (...args: any) => void> (
+    f1: F, 
+    ...fns: (typeof f1)[]
+) : (...args: [...Parameters<F>]) => void  {
+
+    return (...args)=>{
+        f1(...args);
+        fns.forEach( (fn) => 
+            fn(...args));
+    }
+}
+
+
+type Transform<From, To> = (
+    value: From,
+    index: number,
+    entries: [unknown, From][]
+) => To;
+
+type Choose<A, B> = A extends B ? A : B;
+
+const overObj = <From, To>(t: Transform<From, To>) => 
+    <Input extends Record<string, From>>(obj: Input) => 
+        Object.fromEntries(
+            Object.entries(obj).map(
+                ([key, val], i, arr) => [key, t(val, i, arr)])
+        ) as Choose<Input, Record<keyof Input, To>>;
+
+
+export function objMap<ObjT extends Record<string, From>, From,To>(obj: ObjT, f: (value: From)=>To) {
+   return Object.fromEntries(
+            Object.entries(obj).map(
+                ([key, val], i, arr) => [key, f(val)])
+   ) as Choose<ObjT, Record<keyof ObjT, To>>
+};
+
+let i = objMap( { x:1 }, (x:number)=>'a');
+    
+let z = (f) => objMap( {x:3},f);

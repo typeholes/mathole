@@ -5,11 +5,11 @@ import Game from './Game.vue';
 
 import { GameState } from '../js/GameState';
 
-import { onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
 
 import { gameSetup } from "../js/MarketGame";
 
-import { init, uiState, uiStateMethods, sidebarComponent, Globals, setMode, gotoPriorMode } from './uiUtil';
+import { init as UiInit, onUiMounted, uiState, uiStateMethods, sidebarComponent, Globals, setMode, gotoPriorMode, engineCallbacks } from './uiUtil';
 
 import Options from './Options.vue';
 import Dependencies from './Dependencies.vue';
@@ -18,10 +18,11 @@ import Milestones from './Milestones.vue';
 import Story from './Story.vue';
 import Sidebars from './Sidebars.vue';
 
-GameState.init ( uiState , uiStateMethods , gameSetup);
+GameState.init ( uiState , uiStateMethods , gameSetup, engineCallbacks);
+
 const gameState = GameState.getInstance();
 
-init( {
+UiInit( {
   Options: Options,
   Dependencies: Dependencies, 
   Graph : Graph,
@@ -41,7 +42,7 @@ function loop(elapsedTime) {
 }
 
 onMounted( ()=> { 
-  console.log('mounted ' );
+  onUiMounted();
   window.requestAnimationFrame( loop);
 }
 );

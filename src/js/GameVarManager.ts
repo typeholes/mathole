@@ -4,6 +4,9 @@ import { setVariable as setMathVariable, getDependencies as getMathDependencies,
 import { GameTime, GameVar, GameBuyable, GameCalculation, GameVarPlain } from "./GameVar";
 import { GameMilestoneManager, MilestoneRewardAction } from "./GameMilestoneManager";
 import { i } from "mathjs";
+import { gameSetup } from "./MarketGame";
+import { GameState } from "./GameState";
+import { Action, TickBuffer } from "./TickBuffer";
 
 export const defaultUiVarFields: UiVarFields = {
     value: 0, cost: 0, sellCost: 0, total: 0
@@ -161,6 +164,11 @@ export class GameVarManager<T> {
     private _dependencies: { [index: string]: string[]; } = {};
     private _deepDependencies: { [index: string]: string[]; } = {};
     private _dirty: string[] = [];
+    private _tickBuffer: TickBuffer = new TickBuffer();
+
+
+    asap(...actions: Action[]) : void { this._tickBuffer.asap(...actions) };
+    schedule(action: Action, waitAfter=0, minWait=0) : void { this._tickBuffer.schedule(action, waitAfter, minWait) }
 
     tick(elapsedTime: number): void {
         const t = (this._items.t as GameTime);
@@ -184,6 +192,8 @@ export class GameVarManager<T> {
                 ran.forEach( (ranName ) => { removeValuefromArray( this._dirty, ranName); });
             });
         }
+        
+        this._tickBuffer.tick();
     }
 
     isBuyable(varName) {
@@ -308,10 +318,6 @@ export class GameVarManager<T> {
                         gameVar.sellable = true;
                     } 
                 }
-            }
-            if ( action.storyPoint ) {
-                //TODO make modal dialog 
-                alert(action.storyPoint);
             }
             if ( action.adjustFunctions ) {
                 for( let varName in action.adjustFunctions) {

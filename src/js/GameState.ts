@@ -4,18 +4,24 @@ import { GameVarManager, UiStateMethods } from "./GameVarManager";
 import { displayFunction as mathDisplayFunction } from "./mathUtil";
 import { SaveManager } from "./SaveManager";
 import { GameMilestoneManager } from "./GameMilestoneManager";
+import { Action } from "./TickBuffer";
+
+export type EngineCallbackMap = {
+    milestoneReached?: (milestoneName: string, storyPoint: string) => void
+}
+
+function ignore(...args: any[]) : void {}
 
 export class GameState<T> {
-    canTick = true;
 
     // must be called before any other method
     static init<T>( uiState: T
         , uiStateMethods: UiStateMethods<T>
         , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<T>) => void
+        , callbacks: EngineCallbackMap
         ): T { 
 
-
-        GameState._instance = new GameState(uiState, uiStateMethods, gameSetup);
+        GameState._instance = new GameState(uiState, uiStateMethods, gameSetup, callbacks);
         return uiState;
     }
 
@@ -23,6 +29,21 @@ export class GameState<T> {
     static getInstance<T>(): GameState<T> {
         return GameState._instance;
     }
+
+    canTick = false;
+    
+    callbacks: EngineCallbackMap;
+
+    private hasStarted = false;
+    start() {
+        if (!this.hasStarted) {
+            this.hasStarted = true;
+            this.canTick = true;
+        }
+    }
+
+    asap(...actions: Action[]) : void { this.gameVarManager.asap(...actions) };
+    schedule(action: Action, waitAfter=0, minWait=0) : void { this.gameVarManager.schedule(action, waitAfter, minWait) };
 
     displayFunction(varName: string, graphTgt: string, nameMap : {[any:string]: string}, graphTitle: string): void {
         const gameVar = this.gameVarManager.get(varName);
@@ -99,15 +120,18 @@ export class GameState<T> {
     }
   
     getMilestoneDisplayName(name: string) : string {
+        if (!name) { return ''};
         return this.milestoneManager.get(name).displayName;
     }
 
     getMilestoneReward(name: string) : string {
+        if (!name) { return ''};
         return this.milestoneManager.get(name).rewardtext;
     }
 
     getMilestoneCondition(name: string) : string {
-        // TODO: sub names for display names in condition
+        if (!name) { return ''};
+        
          const cond = this.milestoneManager.get(name).condition;
         const ret = this.getDisplayExpr(cond);
         return ret;
@@ -144,6 +168,7 @@ export class GameState<T> {
     }
     
     private static _instance: GameState<any>;
+    static get instance() { return GameState._instance; }
     
     private readonly gameVarManager: GameVarManager<T>;
     private readonly saveManager: SaveManager<T>;
@@ -163,10 +188,15 @@ export class GameState<T> {
     ( uiState: T
     , uiStateMethods: UiStateMethods<T>
     , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<T>) => void
+    , callbacks: EngineCallbackMap
     ) {
         this.uiState = uiState;
         this.uiStateMethods = uiStateMethods;
-
+        this.callbacks = callbacks;
+        
+        for(let key in callbacks) {
+            this.callbacks[key] ||= ignore;
+        }
 
         this.milestoneManager = new GameMilestoneManager<T>(
             uiState, uiStateMethods
@@ -179,6 +209,7 @@ export class GameState<T> {
         gameSetup(this.gameVarManager, FunctionDefManager, this.milestoneManager);
 
         this.saveManager = new SaveManager( () => this.uiStateMethods.cloner(this.uiState) );
+        
     }
 
 }

@@ -6,7 +6,7 @@ import { getCost, getSellCost, getValue, Globals, mainClick as labelClick, refre
 
 interface Props {
   varName: string,
-  forceVisible: boolean,
+  forceVisible?: boolean,
 }
 
 const props = withDefaults(defineProps<Props>(), {

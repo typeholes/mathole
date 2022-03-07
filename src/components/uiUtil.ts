@@ -1,10 +1,15 @@
 import { reactive } from "vue";
 import { GameState } from "../js/GameState";
 import { UiVarFields, UiStateMethods, defaultUiVarFields } from "../js/GameVarManager";
+import { callEach, objMap} from "../js/util";
 
 export function init<T>( modeToComponentMap: ModeMap, initializedGameState: GameState<T>) {
    modeMap = modeToComponentMap; 
    gameState = initializedGameState;
+}
+
+export function onUiMounted() {
+  gameState.start();
 }
 
 let modeMap : ModeMap = null; // init
@@ -33,14 +38,15 @@ function getMode(modeStr: SidebarModesT) : any {
   return modeMap[modeStr] || modeMap['Sidebars'];
 }
 
-let priorMode : SidebarModesT = 'Sidebars';
+let priorModes : SidebarModesT[] = ['Sidebars'];
 export function gotoPriorMode() : void {
-  console.log(priorMode);
-  setMode(priorMode);
+  if ( priorModes.length == 0) { setMode('Sidebars', false); return;}
+  setMode(priorModes.pop(), false);
 }
 
-export function setMode(modeStr: SidebarModesT) : void {
-  if ( Globals.sidebarMode !== 'Sidebars' ) { priorMode = Globals.sidebarMode; }
+export function setMode(modeStr: SidebarModesT, setPrior = true) : void {
+  if ( setPrior && Globals.sidebarMode !== 'Sidebars' ) { priorModes.push( Globals.sidebarMode); }
+  if ( priorModes.length > 20 ) priorModes.splice(0, priorModes.length-20);
   Globals.sidebarMode = modeStr;
 }
 
@@ -53,7 +59,7 @@ export const Globals = reactive({
     selectedVarName : "",
     dependencies : [],
     dependents : [],
-    sidebarMode : 'Sidebars' as SidebarModesT
+    sidebarMode : 'Story' as SidebarModesT
 });
 
 export type UiVar = UiVarFields;
@@ -127,3 +133,50 @@ export function mainClick(varName: string) {
     if ( Globals.graphedVarName === '' ) { return; }
     gameState.displayFunction(Globals.graphedVarName, '#test-graph-expr', gameState.getNameMap(), graphTitle(Globals.graphedVarName));  
   }
+  
+  function engineCallbackRunner( callback: EngineCallback ) {
+    return (...args) => {
+      const [ fn1, fns ] = engineCallbacks[callback];
+      const runner = callEach( fn1, ...fns);
+      runner( ...args);
+    }
+  }
+
+  const engineCallbacks : Record<string, [ handler: any, otherHandlers: any[]]> = {
+    milestoneReached: [onMilestoneReached, []],
+    something: [(n: number) => {}, []]
+  }
+
+  export { engineCallbackUI as engineCallbacks };
+  let engineCallbackUI = buildEngineCallbackUI();
+  
+  function buildEngineCallbackUI() {
+    const entries = Object.keys(engineCallbacks).map( (key) => [key, engineCallbackRunner(key)]);
+    
+    return Object.fromEntries(entries);
+  }
+
+  export type EngineCallback = keyof typeof engineCallbacks;
+
+
+  export function onEngineCallback( 
+    callback : EngineCallback, 
+    handler,
+    ) : void {
+     engineCallbacks[callback][1].push(handler)
+  }
+    
+  function onMilestoneReached(milestoneName: string, storyPoint: string) {
+    gameState.schedule( () => {
+      setMode('Story')
+    });
+    if (!storyPoint) {
+      gameState.schedule( () => {
+        if (Globals.sidebarMode === 'Story') { gotoPriorMode(); }
+      }, 0, 2);
+    }
+  }
+  
+
+
+  

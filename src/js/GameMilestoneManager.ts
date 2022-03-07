@@ -1,4 +1,5 @@
 import { GameMilestone } from "./GameMilestone";
+import { GameState } from "./GameState";
 import { GameVarManager, UiStateMethods } from "./GameVarManager";
 
 import { runString, getDependenciesFromString } from "./mathUtil";
@@ -43,6 +44,7 @@ export class GameMilestoneManager<T> {
             if ( milestone.check() ) { 
                 this.setReached(dep); 
                 actions.push( milestone.rewardAction);
+                GameState.instance.callbacks.milestoneReached(milestone.name, milestone.rewardAction.storyPoint);
             }
         })
         
