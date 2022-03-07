@@ -70,8 +70,19 @@ export type UiState = {
 
 export const uiState: UiState = reactive( { vars: {}, milestones: {}} );
 
+function cloneUiState(state: UiState) : UiState {
+  const newState : UiState = { vars: {}, milestones: {}};
+  
+  for (let varName in state.vars) {
+    newState.vars[varName] = {...state.vars[varName]};
+  }
+
+  newState.milestones = {...state.milestones};
+  return newState;
+}
+
 export const uiStateMethods : UiStateMethods<UiState> = {
-    cloner: (m) => m,
+    cloner: (m) => cloneUiState(m),
     varAdder: (m,n) => m.vars[n] = reactive({...defaultUiVarFields}),
     varGetter: (m,n,k) => m.vars[n][k],
     varSetter: (m,n,k,v) => m.vars[n][k]= v, 

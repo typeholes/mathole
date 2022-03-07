@@ -151,18 +151,26 @@ export class GameState<T> {
     // maybe need to pass in a from JSON callback as well?
     load() : void {
         this.canTick = false;
-        const newState = this.saveManager.load('default')['vars'];
-
-        for (const name in newState) {
-            const val = (newState[name] as any).value;
-            const cost = (newState[name] as any).cost;
-            const sellCost = (newState[name] as any).cost;
-            const total = (newState[name] as any).total;
+        const newState = this.saveManager.load('default');
+        const newVars = newState['vars'];
+        const newMilestones = newState['milestones'];
+        
+        this.gameVarManager.getNames().forEach( (name) => {
+            const values = newVars[name] || { value: 0, cost: 0, sellCost: 0, total: 0};
+            const val = values.value;
+            const cost = values.cost;
+            const sellCost = values.cost;
+            const total = values.total;
             this.gameVarManager.setUiVarField(name, 'value', val);
             this.gameVarManager.setUiVarField(name, 'cost', cost);
             this.gameVarManager.setUiVarField(name, 'sellCost', sellCost);
             this.gameVarManager.setUiVarField(name, 'total', total);
-        }
+        });
+        
+        this.milestoneManager.getNames().forEach( (name) => {
+            this.milestoneManager.loadReached(name, newMilestones[name]||false);
+        });
+
         this.gameVarManager.setFromUIValues();
         this.canTick = true;
     }

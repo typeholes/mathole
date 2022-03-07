@@ -15,12 +15,10 @@ export interface MilestoneRewardAction {
 }
 
 export class GameMilestoneManager<T> {
-
     private milestoneMap: { [any: string]: GameMilestone} = {};
     private dependencies: { [any: string]: string[] } = {};
 
     create( name: string, displayName: string, condition: string, rewardText = "", rewardAction: MilestoneRewardAction = {} ) : GameMilestone {
-        // TODO create conditions and adjusters.
         const milestone = new GameMilestone( name, displayName, condition, rewardText, rewardAction );
         this.milestoneMap[name] = milestone;
         
@@ -69,6 +67,10 @@ export class GameMilestoneManager<T> {
    
     get(name) : GameMilestone {
         return this.milestoneMap[name];
+    }
+
+    loadReached(name: string, reached: boolean) {
+        this.uiStateMethods.milestoneSetter(this.uiState, name, reached);
     }
 
     constructor(uiState: T, uiStateMethods: UiStateMethods<T>) {
