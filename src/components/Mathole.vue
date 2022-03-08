@@ -9,7 +9,7 @@ import { onMounted } from 'vue';
 
 import { gameSetup } from "../js/MarketGame";
 
-import { init as UiInit, onUiMounted, uiState, uiStateMethods, sidebarComponent, Globals, setMode, gotoPriorMode, engineCallbacks } from './uiUtil';
+import { init as UiInit, onUiMounted, uiState, uiStateMethods, sidebarComponent, Globals, setMode, gotoPriorMode, engineCallbacks, showHelp } from './uiUtil';
 
 import Options from './Options.vue';
 import Dependencies from './Dependencies.vue';
@@ -17,6 +17,7 @@ import Graph from './Graph.vue';
 import Milestones from './Milestones.vue';
 import Story from './Story.vue';
 import Sidebars from './Sidebars.vue';
+import Help from './Help.vue';
 
 GameState.init ( uiState , uiStateMethods , gameSetup, engineCallbacks);
 
@@ -28,7 +29,8 @@ UiInit( {
   Graph : Graph,
   Milestones : Milestones,
   Story : Story,
-  Sidebars : Sidebars
+  Sidebars : Sidebars,
+  Help : Help
 }, gameState);
 
 let priorTime = 0;
@@ -114,7 +116,11 @@ function doExport() {
 <template>
   <div class="mathole">
       <div class="topBar">
-        <button @click="gotoPriorMode()"> &#8592</button>{{ Globals.sidebarMode }} <button @click="setMode('Sidebars')"> &#8801</button>
+        <button @click="gotoPriorMode()"> &#8592</button>
+        {{ Globals.sidebarMode }} 
+        <button @click="setMode('Sidebars')"> &#8801</button>
+        
+        <button @mouseenter="showHelp()" @mouseleave="gotoPriorMode()" style="border-radius: 100%; float: right;"> ? </button>
  <!--         Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton> -->
       </div>
     <div class="sidebar">

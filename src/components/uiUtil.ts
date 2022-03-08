@@ -22,7 +22,12 @@ export type ModeMap =
   , 'Milestones' : any
   , 'Story' : any
   , 'Sidebars' : any
+  , 'Help' : any
   };
+
+export function showHelp() {
+  setMode('Help', true, false);
+}
 
 export function sidebarModeList() : SidebarModesT[] { 
   return Object.keys(modeMap) as SidebarModesT[]
@@ -44,7 +49,9 @@ export function gotoPriorMode() : void {
   setMode(priorModes.pop(), false);
 }
 
-export function setMode(modeStr: SidebarModesT, setPrior = true) : void {
+export function setMode(modeStr: SidebarModesT, setPrior = true, setHelp = true) : void {
+  if ( setHelp ) { Globals.helpKey = modeStr; }
+
   if ( setPrior && Globals.sidebarMode !== 'Sidebars' ) { priorModes.push( Globals.sidebarMode); }
   if ( priorModes.length > 20 ) priorModes.splice(0, priorModes.length-20);
   Globals.sidebarMode = modeStr;
@@ -59,7 +66,8 @@ export const Globals = reactive({
     selectedVarName : "",
     dependencies : [],
     dependents : [],
-    sidebarMode : 'Story' as SidebarModesT
+    sidebarMode : 'Story' as SidebarModesT,
+    helpKey: ""
 });
 
 export type UiVar = UiVarFields;

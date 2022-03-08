@@ -4,6 +4,9 @@ import { sidebarModeList, setMode } from './uiUtil';
 
 <template>
 <div class="contents" v-for="(sidebarMode) in sidebarModeList()">
-    <div><button @click="setMode(sidebarMode)">{{sidebarMode}}</button></div>
+    <div>
+        <button @click="setMode(sidebarMode)">
+        {{sidebarMode}}</button>
+    </div>
 </div>
 </template>
