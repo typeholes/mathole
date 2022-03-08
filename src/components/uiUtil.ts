@@ -138,7 +138,7 @@ export function mainClick(varName: string) {
   
   if ( Globals.sidebarMode === 'Graph' ) {
     Globals.graphedVarName = varName;
-    refreshGraph();
+    refreshGraph(false);
   }
   
 }
@@ -148,9 +148,16 @@ export function mainClick(varName: string) {
     return prefix + gameState.getDisplayName(varName);
   }
   
-  export function refreshGraph() : void {
+  export function refreshGraph(delay = true) : void {
     if ( Globals.graphedVarName === '' ) { return; }
-    gameState.displayFunction(Globals.graphedVarName, '#test-graph-expr', gameState.getNameMap(), graphTitle(Globals.graphedVarName));  
+    if ( delay ) {
+      // wait 1 tick for variables to update before refreshing graph
+      gameState.schedule( () => {
+        gameState.displayFunction(Globals.graphedVarName, '#test-graph-expr', gameState.getNameMap(), graphTitle(Globals.graphedVarName));  
+      }, 0, 1); 
+    } else {
+        gameState.displayFunction(Globals.graphedVarName, '#test-graph-expr', gameState.getNameMap(), graphTitle(Globals.graphedVarName));  
+    }
   }
   
   function engineCallbackRunner( callback: EngineCallback ) {
