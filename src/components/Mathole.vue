@@ -120,7 +120,8 @@ function doExport() {
         {{ Globals.sidebarMode }} 
         <button @click="setMode('Sidebars')"> &#8801</button>
         
-        <button @mouseenter="showHelp()" @mouseleave="gotoPriorMode()" style="border-radius: 100%; float: right;"> ? </button>
+        <!-- <div @mouseenter="showHelp()" @mouseleave="gotoPriorMode()" class="helpicon" @touchstart="showHelp()"  @touchend="gotoPriorMode()"  @touchcancel="gotoPriorMode()"  @click=";"> ? </div> -->
+        <div @pointerenter="showHelp()" @pointerleave="gotoPriorMode()" class="helpicon"> ? </div>
  <!--         Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton> -->
       </div>
     <div class="sidebar">
@@ -167,6 +168,15 @@ grid-row: 2;
   grid-row: 1/2;
   grid-column: 1;
 
+}
+
+.helpicon {
+  border-radius: 100%; 
+  float: right; 
+  border-width: 2px;
+  background-color: rgb(255, 164, 164);
+  touch-action: none;
+  width: 10%
 }
 
 </style>
