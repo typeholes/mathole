@@ -32,6 +32,31 @@ export interface UiStateMethods<T> {
     
 }
 
+type NewPlainT = {
+    name: string,
+    displayName: string,
+    visible: boolean,
+    value: number
+};
+
+type NewBuyableT = {
+    name: string,
+    displayName: string,
+    visible: boolean,
+    fn: FunctionDef,
+    args: argMap,
+    currency: string,
+    sellable: boolean
+}
+
+type NewCalculationT = {
+    name: string,
+    displayName: string,
+    visible: boolean,
+    fn: FunctionDef,
+    args: argMap
+}
+
 export class GameVarManager<T> {
 
 
@@ -81,50 +106,33 @@ export class GameVarManager<T> {
         this.setUiVarField(gameVar, 'total');
     }
     
-    newCalculation(
-        name: string,
-        displayName: string,
-        visible: boolean,
-        fn: FunctionDef,
-        args: argMap
-    ): GameCalculation {
+    newCalculation( args: NewCalculationT ): GameCalculation {
 
-        const ret = new GameCalculation(name, displayName, visible, fn, args);
+        const ret = new GameCalculation(args.name, args.displayName, args.visible, args.fn, args.args);
         this.add(ret);
         return ret;
     }
 
-    newPlain(
-        name: string,
-        displayName: string,
-        visible: boolean,
-        value: number
-    ): GameVarPlain {
-        const ret = new GameVarPlain(name, displayName, visible);
+        
+    newPlain( args : NewPlainT ) : GameVarPlain {
+        
+        const ret = new GameVarPlain(args.name, args.displayName, args.visible);
         this.add(ret);
-        ret.spend(-1 * value);
+        ret.spend(-1 * args.value);
         return ret;
     }
 
-    newBuyable(
-        name: string,
-        displayName: string,
-        visible: boolean,
-        fn: FunctionDef,
-        args: argMap,
-        currency: string,
-        sellable: boolean
-    ): GameBuyable {
-        const ret = new GameBuyable(name, displayName, visible, fn, args, currency, sellable);
+    newBuyable( args: NewBuyableT ) : GameBuyable {
+        const ret = new GameBuyable(args.name, args.displayName, args.visible, args.fn, args.args, args.currency, args.sellable);
         this.add(ret);
         this.setUiVarField(ret,'value');
         this.setUiVarField(ret,'cost');
 
-        const currencyVar = this._items[currency];
+        const currencyVar = this._items[args.currency];
         if (currencyVar instanceof GameCalculation) {
             currencyVar.fn = FunctionDefManager.adjust(
-                currencyVar.fn, name + '_' + currency,
-                (body) => body + ' - ' + fn.callStr(args).replace(name, name + '_total') + ' + ' + fn.callStrEvaluatedArgs(args)
+                currencyVar.fn, name + '_' + args.currency,
+                (body) => body + ' - ' + args.fn.callStr(args.args).replace(args.name, args.name + '_total') + ' + ' + args.fn.callStrEvaluatedArgs(args.args)
             );
         }
         this.setUiVarField(currencyVar, "value", 'dirty');

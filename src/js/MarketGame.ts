@@ -16,13 +16,37 @@ const logSquares = functions.create('logSquares', ['x','b'], 'log(x^2+b^2)');
 const curvedSawtooth = functions.create('curvedSawtooth', ['x'], 'logSquares(x^smoother,sawtooth(x))');
 const calcMarketValue = functions.create('calcMarketValue', ['x'], 'curvedSawtooth(x)*(marketScale+1)');
 
-vars.newPlain('money', '$', false, 1);
-vars.newBuyable( 'stability', 'Market Stability', true, times, {'x': 1.25, b: 'stability+2/1.25'}, 'money', false);
-vars.newBuyable( 'marketScale', 'Market Scale', true, times, {'x': 2, b: 'marketScale+1'}, 'stability', false);
-vars.newCalculation( 'smoother', 'Smoother', false, times, {x: 'stability', b: 0.01});
-vars.newCalculation('marketValue', 'Market Value', true, calcMarketValue, {x: 't'});
+vars.newPlain({ name: 'money', displayName: '$', visible: false, value: 1});
 
-vars.newBuyable( 'shares', 'Shares', true, id, {x: 'marketValue'}, 'money', true);
+vars.newBuyable(
+    { name: 'stability', displayName: 'Market Stability', visible: true, 
+      fn: times, args: {'x': 1.25, b: 'stability+2/1.25'}, 
+      currency: 'money', sellable: false 
+});
+
+vars.newBuyable({ 
+    name: 'marketScale', displayName: 'Market Scale', visible: true, 
+    fn: times, args: {'x': 2, b: 'marketScale+1'}, 
+    currency: 'stability', sellable: false 
+});
+
+vars.newCalculation({ 
+    name: 'smoother', displayName: 'Smoother', visible: false, 
+    fn: times, args: {x: 'stability', b: 0.01} 
+});
+
+vars.newCalculation({
+    name: 'marketValue', displayName: 'Market Value', visible: true, 
+    fn: calcMarketValue, args: {x: 't'}
+});
+
+
+vars.newBuyable({
+    name: 'shares', displayName: 'Shares', visible: true, 
+    fn: id, args: {x: 'marketValue'}, 
+    currency: 'money', sellable: true
+});
+
 
 //vars.newCalculation( 'dummy', 'dummy', true, id, {x:'2^(t*10)'});
 //vars.newBuyable( 'sdummy', 'Dummy', true, id, {x: 'dummy'}, 'money', true);
