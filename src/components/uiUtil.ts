@@ -67,7 +67,8 @@ export const Globals = reactive({
     dependencies : [],
     dependents : [],
     sidebarMode : 'Story' as SidebarModesT,
-    helpKey: ""
+    helpKey: "",
+    freeAccount: false,
 });
 
 export type UiVar = UiVarFields;

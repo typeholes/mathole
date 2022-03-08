@@ -1,11 +1,14 @@
 
 <script setup lang="ts">
+import VsplitterVue from './Vsplitter.vue';
 
+
+import Vsplitter from './Vsplitter.vue';
 import Game from './Game.vue';
 
 import { GameState } from '../js/GameState';
 
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { gameSetup } from "../js/MarketGame";
 
@@ -110,28 +113,33 @@ function doExport() {
 
 }
 
+const gameCollapsed = ref ( false );
 
 </script>
 
 <template>
   <div class="mathole">
-      <div class="topBar">
-        <button @click="gotoPriorMode()"> &#8592</button>
-        {{ Globals.sidebarMode }} 
-        <button @click="setMode('Sidebars')"> &#8801</button>
-        
-        <!-- <div @mouseenter="showHelp()" @mouseleave="gotoPriorMode()" class="helpicon" @touchstart="showHelp()"  @touchend="gotoPriorMode()"  @touchcancel="gotoPriorMode()"  @click=";"> ? </div> -->
-        <div @pointerenter="showHelp()" @pointerleave="gotoPriorMode()" class="helpicon"> ? </div>
- <!--         Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton> -->
-      </div>
-    <div class="sidebar">
-        <keep-alive>
-          <component :is="sidebarComponent()"></component>        
-        </keep-alive>
-    </div>
-    <div class="mainPain">
-      <Game></Game>
-    </div>
+    <Vsplitter right-col-spec="300px" v-model:collapsed="gameCollapsed">
+      <template #left>
+        <Game></Game>
+      </template>
+      <template #right>
+        <div class="sideTopbar">
+          <button @click="gotoPriorMode()"> &#8592</button>
+          {{ Globals.sidebarMode }} 
+          <button @click="setMode('Sidebars')"> &#8801</button>
+          
+          <!-- <div @mouseenter="showHelp()" @mouseleave="gotoPriorMode()" class="helpicon" @touchstart="showHelp()"  @touchend="gotoPriorMode()"  @touchcancel="gotoPriorMode()"  @click=";"> ? </div> -->
+          <div @pointerenter="showHelp()" @pointerleave="gotoPriorMode()" class="helpicon"> ? </div>
+    <!--         Click Action <ToggleButton labelOn="Select" labelOff="Graph" valueOn="select" valueOff="graph" v-model:value="clickAction"></ToggleButton> -->
+        </div>
+        <div class="sidebar">
+            <keep-alive>
+              <component :is="sidebarComponent()"></component>        
+            </keep-alive>
+        </div>
+      </template>
+    </Vsplitter>
 
   </div>
 
@@ -144,30 +152,6 @@ a {
 
 span.error {
   color: #c70404
-}
-
-.mathole {
-  display: grid;
-  grid-template-columns: auto 300px;
-  gap: 10px;
-  grid-auto-rows: 20px auto;
-
-}
-
-.topbar {
-  grid-row: 1;
-  grid-column: 2;
-}
-
-.sidebar {
-grid-column: 2;
-grid-row: 2;
-}
-
-.mainPain {
-  grid-row: 1/2;
-  grid-column: 1;
-
 }
 
 .helpicon {
