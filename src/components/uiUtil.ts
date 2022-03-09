@@ -1,9 +1,9 @@
 import { reactive } from "vue";
 import { GameState } from "../js/GameState";
-import { UiVarFields, UiStateMethods, defaultUiVarFields } from "../js/GameVarManager";
-import { callEach, objMap} from "../js/util";
+import { RequiredVarFields, UiStateMethods, defaultUiVarFields, ExtraVarFields, RequiredStateFields, RequiredMilestoneFields, ExtraMilestoneFields, defaultUiMilestoneFields } from "../js/GameVarManager";
+import { callEach } from "../js/util";
 
-export function init<T>( modeToComponentMap: ModeMap, initializedGameState: GameState<T>) {
+export function init<T extends RequiredStateFields>( modeToComponentMap: ModeMap, initializedGameState: GameState<T>) {
    modeMap = modeToComponentMap; 
    gameState = initializedGameState;
 }
@@ -71,10 +71,19 @@ export const Globals = reactive({
     freeAccount: false,
 });
 
-export type UiVar = UiVarFields;
+export interface UiVar extends RequiredVarFields {
+  janky?: boolean
+};
+
+export type UiMilestone = RequiredMilestoneFields;
+
+export const defaultExtraVarFields = {
+  janky: false
+}
+
 export type UiState = { 
     vars: { [any: string]: UiVar },
-    milestones: { [any: string]: boolean}
+    milestones: { [any: string]: { reached: boolean}}
 };
 
 export const uiState: UiState = reactive( { vars: {}, milestones: {}} );
@@ -91,12 +100,13 @@ function cloneUiState(state: UiState) : UiState {
 }
 
 export const uiStateMethods : UiStateMethods<UiState> = {
-    cloner: (m) => cloneUiState(m),
-    varAdder: (m,n) => m.vars[n] = reactive({...defaultUiVarFields}),
-    varGetter: (m,n,k) => m.vars[n][k],
-    varSetter: (m,n,k,v) => m.vars[n][k]= v, 
-    milestoneGetter: (m,n) => m.milestones[n],
-    milestoneSetter: (m,n,v) => m.milestones[n] = v
+    cloner: (m: UiState) => cloneUiState(m),
+    varAdder: (m: UiState, n: string, extra: ExtraVarFields<UiVar>) => m.vars[n] = reactive({...defaultUiVarFields, ...extra}),
+    varGetter: (m: UiState, n: string, k: string) => m.vars[n][k],
+    varSetter: (m: UiState, n: string, k: string, v: number) => m.vars[n][k]= v, 
+    milestoneAdder: (m: UiState, n: string, extra: ExtraMilestoneFields<UiMilestone>) => m.milestones[n] = reactive({...defaultUiMilestoneFields, ...extra}),
+    milestoneGetter: (m: UiState, n: string) => m.milestones[n].reached,
+    milestoneSetter: (m: UiState, n: string, v: boolean) => m.milestones[n].reached = v,
 }
 
 

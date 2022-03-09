@@ -11,7 +11,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     collapsed: false,
     leftColSpec: "45%",
-    rightColSpec: "45%"
+    rightColSpec: "2fr"
 });
 
 const emit = defineEmits<{

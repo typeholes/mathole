@@ -1,6 +1,6 @@
 import { FunctionDef, FunctionDefManager } from "./FunctionDef";
 
-import { GameVarManager, UiStateMethods } from "./GameVarManager";
+import { ExtraVarFields, GameVarManager, RequiredStateFields, UiStateMethods, VarType } from "./GameVarManager";
 import { displayFunction as mathDisplayFunction } from "./mathUtil";
 import { SaveManager } from "./SaveManager";
 import { GameMilestoneManager } from "./GameMilestoneManager";
@@ -12,21 +12,22 @@ export type EngineCallbackMap = {
 
 function ignore(...args: any[]) : void {}
 
-export class GameState<T> {
+export class GameState<T extends RequiredStateFields> {
 
     // must be called before any other method
-    static init<T>( uiState: T
+    static init<T extends RequiredStateFields>( uiState: T
         , uiStateMethods: UiStateMethods<T>
+        , defaultVarExtra: ExtraVarFields<VarType<T>>
         , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<T>) => void
         , callbacks: EngineCallbackMap
         ): T { 
 
-        GameState._instance = new GameState(uiState, uiStateMethods, gameSetup, callbacks);
+        GameState._instance = new GameState(uiState, uiStateMethods, defaultVarExtra, gameSetup, callbacks);
         return uiState;
     }
 
     // must call init first
-    static getInstance<T>(): GameState<T> {
+    static getInstance<T extends RequiredStateFields>(): GameState<T> {
         return GameState._instance;
     }
 
@@ -168,7 +169,7 @@ export class GameState<T> {
         });
         
         this.milestoneManager.getNames().forEach( (name) => {
-            this.milestoneManager.loadReached(name, newMilestones[name]||false);
+            this.milestoneManager.loadReached(name, (newMilestones[name]||{reached: false}).reached);
         });
 
         this.gameVarManager.setFromUIValues();
@@ -195,6 +196,7 @@ export class GameState<T> {
     private constructor
     ( uiState: T
     , uiStateMethods: UiStateMethods<T>
+    , defaultVarExtra: ExtraVarFields<VarType<T>>
     , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<T>) => void
     , callbacks: EngineCallbackMap
     ) {
@@ -211,7 +213,7 @@ export class GameState<T> {
         );
 
         this.gameVarManager = new GameVarManager<T>(
-            uiState, uiStateMethods, this.milestoneManager
+            uiState, uiStateMethods, defaultVarExtra, this.milestoneManager
         );
 
         gameSetup(this.gameVarManager, FunctionDefManager, this.milestoneManager);

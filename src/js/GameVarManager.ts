@@ -3,75 +3,101 @@ import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
 import { setVariable as setMathVariable, getDependencies as getMathDependencies, replaceSymbols } from "./mathUtil";
 import { GameTime, GameVar, GameBuyable, GameCalculation, GameVarPlain } from "./GameVar";
 import { GameMilestoneManager, MilestoneRewardAction } from "./GameMilestoneManager";
-import { i } from "mathjs";
-import { gameSetup } from "./MarketGame";
-import { GameState } from "./GameState";
 import { Action, TickBuffer } from "./TickBuffer";
 
-export const defaultUiVarFields: UiVarFields = {
+export const defaultUiVarFields: RequiredVarFields = {
     value: 0, cost: 0, sellCost: 0, total: 0
 };
 
-export interface UiVarFields {
+export const defaultUiMilestoneFields: RequiredMilestoneFields = {
+    reached: false
+}
+
+export interface RequiredVarFields {
     value: number;
     cost: number;
     sellCost: number;
     total: number;
 }
 
-export type UIVarFieldKeys = 'value' | 'cost' | 'sellCost' | 'total';
-
-
-export interface UiStateMethods<T> {
-    cloner: (state: any) => T; // make a fresh copy of the state for save/load
-    varAdder: (state: T, name: string) => void; 
-    varGetter: (state: T, name: string, key: string) => number;
-    varSetter: (state: T, name: string, key: string, value) => void;
-    milestoneGetter: (state: T, name: string ) => boolean;
-    milestoneSetter: (state: T, name: string, gotten ) => void;
-    
+export interface RequiredMilestoneFields {
+    reached: boolean;
 }
 
-type NewPlainT = {
+export interface RequiredStateFields {
+    vars: {[any: string] : RequiredVarFields},
+    milestones: {[any: string] : RequiredMilestoneFields }
+}
+
+
+type Extra<Required, Full extends Required> = Omit<Full, keyof Required>;
+
+export type ExtraVarFields<T extends RequiredVarFields> = Extra<RequiredVarFields, T>;
+
+export type ExtraStateFields<T extends RequiredStateFields> = Extra<RequiredStateFields, T>;
+
+export type ExtraMilestoneFields<T extends RequiredMilestoneFields> = Extra<RequiredMilestoneFields, T>;
+
+
+export type UIVarFieldKeys = 'value' | 'cost' | 'sellCost' | 'total';
+
+export type VarType<T extends RequiredStateFields> = T['vars'][any];
+export type MilestoneType<T extends RequiredStateFields> = T['milestones'][any];
+
+
+
+export interface UiStateMethods<T extends RequiredStateFields> {
+    cloner: (state: any) => T; // make a fresh copy of the state for save/load
+    varAdder: (state: T, name: string, extra: ExtraVarFields<VarType<T>>) => void; 
+    varGetter: (state: T, name: string, key: string) => number;
+    varSetter: (state: T, name: string, key: string, value) => void;
+    milestoneAdder: (state: T, n: string, extra: ExtraMilestoneFields<MilestoneType<T>>) => void,
+    milestoneGetter: (state: T, name: string ) => boolean;
+    milestoneSetter: (state: T, name: string, gotten ) => void;
+}
+
+type NewPlainArgs<T extends RequiredStateFields> = {
     name: string,
     displayName: string,
     visible: boolean,
-    value: number
+    value: number,
+    extra: ExtraVarFields<VarType<T>>
 };
 
-type NewBuyableT = {
+type NewBuyableArgs<T extends RequiredStateFields> = {
     name: string,
     displayName: string,
     visible: boolean,
     fn: FunctionDef,
     args: argMap,
     currency: string,
-    sellable: boolean
+    sellable: boolean,
+    extra: ExtraVarFields<VarType<T>>
 }
 
-type NewCalculationT = {
+type NewCalculationArgs<T extends RequiredStateFields> = {
     name: string,
     displayName: string,
     visible: boolean,
     fn: FunctionDef,
-    args: argMap
+    args: argMap,
+    extra: ExtraVarFields<VarType<T>>
 }
 
-export class GameVarManager<T> {
-
+export class GameVarManager<T extends RequiredStateFields> {
 
     private readonly uiState: T;
     private readonly uiStateMethods: UiStateMethods<T>;
     private readonly milestoneManager: GameMilestoneManager<T>;
 
 
-    constructor(uiState: T, uiStateMethods: UiStateMethods<T>, milestoneManager: GameMilestoneManager<T>) {
+    constructor(uiState: T, uiStateMethods: UiStateMethods<T>, defaultVarExtra: ExtraVarFields<VarType<T>>, milestoneManager: GameMilestoneManager<T>) {
         this.uiState = uiState;
         this.uiStateMethods = uiStateMethods;
         this.milestoneManager = milestoneManager;
 
         // debugger;
-        this.add(GameTime.instance);
+        this.add(GameTime.instance, defaultVarExtra);
     }
 
     getUiVarField(from: string|GameVar, field: UIVarFieldKeys) {
@@ -106,25 +132,25 @@ export class GameVarManager<T> {
         this.setUiVarField(gameVar, 'total');
     }
     
-    newCalculation( args: NewCalculationT ): GameCalculation {
+    newCalculation( args: NewCalculationArgs<T> ): GameCalculation {
 
         const ret = new GameCalculation(args.name, args.displayName, args.visible, args.fn, args.args);
-        this.add(ret);
+        this.add(ret, args.extra);
         return ret;
     }
 
         
-    newPlain( args : NewPlainT ) : GameVarPlain {
+    newPlain( args : NewPlainArgs<T> ) : GameVarPlain {
         
         const ret = new GameVarPlain(args.name, args.displayName, args.visible);
-        this.add(ret);
+        this.add(ret, args.extra);
         ret.spend(-1 * args.value);
         return ret;
     }
 
-    newBuyable( args: NewBuyableT ) : GameBuyable {
+    newBuyable( args: NewBuyableArgs<T> ) : GameBuyable {
         const ret = new GameBuyable(args.name, args.displayName, args.visible, args.fn, args.args, args.currency, args.sellable);
-        this.add(ret);
+        this.add(ret, args.extra);
         this.setUiVarField(ret,'value');
         this.setUiVarField(ret,'cost');
 
@@ -139,8 +165,8 @@ export class GameVarManager<T> {
         return ret;
     }
 
-    add(g: GameVar) {
-        this.uiStateMethods.varAdder(this.uiState, g.name);
+    add(g: GameVar, extra: ExtraVarFields<VarType<T>>) {
+        this.uiStateMethods.varAdder(this.uiState, g.name, extra);
 
         this._dependencies[g.name] = [];
         this._calculateDependencies(g);

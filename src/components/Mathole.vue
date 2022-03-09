@@ -12,7 +12,7 @@ import { onMounted, ref } from 'vue';
 
 import { gameSetup } from "../js/MarketGame";
 
-import { init as UiInit, onUiMounted, uiState, uiStateMethods, sidebarComponent, Globals, setMode, gotoPriorMode, engineCallbacks, showHelp } from './uiUtil';
+import { init as UiInit, onUiMounted, uiState, uiStateMethods, sidebarComponent, Globals, setMode, gotoPriorMode, engineCallbacks, showHelp, defaultExtraVarFields } from './uiUtil';
 
 import Options from './Options.vue';
 import Dependencies from './Dependencies.vue';
@@ -22,7 +22,7 @@ import Story from './Story.vue';
 import Sidebars from './Sidebars.vue';
 import Help from './Help.vue';
 
-GameState.init ( uiState , uiStateMethods , gameSetup, engineCallbacks);
+GameState.init ( uiState , uiStateMethods, defaultExtraVarFields, gameSetup, engineCallbacks);
 
 const gameState = GameState.getInstance();
 
@@ -119,7 +119,7 @@ const gameCollapsed = ref ( false );
 
 <template>
   <div class="mathole">
-    <Vsplitter right-col-spec="300px" v-model:collapsed="gameCollapsed">
+    <Vsplitter left-col-spec="1fr" right-col-spec="300px" v-model:collapsed="gameCollapsed">
       <template #left>
         <Game></Game>
       </template>

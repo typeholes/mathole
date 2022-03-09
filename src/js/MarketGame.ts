@@ -1,8 +1,10 @@
+import { UiState } from "../components/uiUtil";
 import { FunctionDefManager } from "./FunctionDef";
 import { GameMilestoneManager } from "./GameMilestoneManager";
-import { GameVarManager } from "./GameVarManager";
+import { GameVarManager} from "./GameVarManager";
 
-export function gameSetup<T> ( vars: GameVarManager<T>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<T>) {
+export function gameSetup ( vars: GameVarManager<UiState>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<UiState>) {
+
 
 const id = functions.get('id');
 
@@ -16,35 +18,35 @@ const logSquares = functions.create('logSquares', ['x','b'], 'log(x^2+b^2)');
 const curvedSawtooth = functions.create('curvedSawtooth', ['x'], 'logSquares(x^smoother,sawtooth(x))');
 const calcMarketValue = functions.create('calcMarketValue', ['x'], 'curvedSawtooth(x)*(marketScale+1)');
 
-vars.newPlain({ name: 'money', displayName: '$', visible: false, value: 1});
+vars.newPlain({ name: 'money', displayName: '$', visible: false, value: 1, extra: {} });
 
 vars.newBuyable(
     { name: 'stability', displayName: 'Market Stability', visible: true, 
       fn: times, args: {'x': 1.25, b: 'stability+2/1.25'}, 
-      currency: 'money', sellable: false 
+      currency: 'money', sellable: false, extra: {} 
 });
 
 vars.newBuyable({ 
     name: 'marketScale', displayName: 'Market Scale', visible: true, 
     fn: times, args: {'x': 2, b: 'marketScale+1'}, 
-    currency: 'stability', sellable: false 
+    currency: 'stability', sellable: false, extra: {} 
 });
 
 vars.newCalculation({ 
     name: 'smoother', displayName: 'Smoother', visible: false, 
-    fn: times, args: {x: 'stability', b: 0.01} 
+    fn: times, args: {x: 'stability', b: 0.01}, extra: {} 
 });
 
 vars.newCalculation({
     name: 'marketValue', displayName: 'Market Value', visible: true, 
-    fn: calcMarketValue, args: {x: 't'}
+    fn: calcMarketValue, args: {x: 't'}, extra: {}
 });
 
 
 vars.newBuyable({
     name: 'shares', displayName: 'Shares', visible: true, 
     fn: id, args: {x: 'marketValue'}, 
-    currency: 'money', sellable: true
+    currency: 'money', sellable: true, extra: {}
 });
 
 
@@ -57,18 +59,18 @@ milestones.create('startStory', 'Went Bankrupt', 't > 0', "You start the game fr
         + "\n There is no auto save. Use the save and load buttons"
         + "\n It is possible to price yourself out of the market until you reach the \"Too Stable?\" milestone"
         + "\n this is intended to force some strategic play while the cost of having to restart is low"
-    }
+    }, {}
 );
 
 milestones.create('tooStable', 'Too Stable?', 'stability > 3', ' Can sell Market Stability'
     , { setSellable: {stability: true}
       , storyPoint: "It is harder to make money in stable markets. Maybe you should trade some of that stability to increase the scale of the market."
-    }
+    }, {}
     
 );
 
 milestones.create('scaled', 'Insider Trading', 'marketScale >= 1', ' Better price when selling shares '
-    , {adjustFunctions: {shares: {sellCost: ' 1.1 * <&>'}}}
+    , {adjustFunctions: {shares: {sellCost: ' 1.1 * <&>'}}}, {}
 );
 
 }

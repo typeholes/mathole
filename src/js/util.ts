@@ -69,3 +69,21 @@ export function objMap<ObjT extends Record<string, From>, From,To>(obj: ObjT, f:
 let i = objMap( { x:1 }, (x:number)=>'a');
     
 let z = (f) => objMap( {x:3},f);
+
+
+type A = {
+    a : number,
+    b : number,
+    c : number,
+    d : number
+  }
+  
+  type B = {
+    b : number,
+    d : number
+  }
+  
+//   type Diff<From, Minus> = {
+//     [Property in keyof From as (Property in keyof Minus) ? never : Property;
+//   }
+  
