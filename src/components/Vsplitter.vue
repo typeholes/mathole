@@ -23,16 +23,16 @@ type LeftRight = 'left';
 
 const theme = reactive({
     color : 'rgb(255,255,255)',
-    left : { width: props.leftColSpec, collapsed: props.collapsed, label: '<' },
+    left : { width: props.leftColSpec, collapsed: props.collapsed, label: '\u00AB' },
 });
 
     function toggle(side: LeftRight) {
         if ( props.collapsed ) {
             theme[side].width = props.leftColSpec;
-            theme[side].label = '<';
+            theme[side].label = '\u00AB';
         } else {
             theme[side].width = '0%';
-            theme[side].label = '>';
+            theme[side].label = '\u00BB';
         }
         emit('update:collapsed', !props.collapsed);
     }
