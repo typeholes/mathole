@@ -7,7 +7,7 @@ import { GameMilestoneManager } from "./GameMilestoneManager";
 import { Action } from "./TickBuffer";
 
 export type EngineCallbackMap = {
-    milestoneReached?: (milestoneName: string, storyPoint: string) => void
+    milestoneReached?: (milestoneName: string, storyPoint: string, milestoneVisible) => void
 }
 
 function ignore(...args: any[]) : void {}
@@ -105,6 +105,10 @@ export class GameState<T extends RequiredStateFields> {
 
     isBuyable(varName: string) : boolean {
         return this.gameVarManager.isBuyable(varName);
+    }
+    
+    isToggle(varName: string) : boolean {
+        return this.gameVarManager.isToggle(varName);
     }
 
     getCurrencyName(varName: string) : string {

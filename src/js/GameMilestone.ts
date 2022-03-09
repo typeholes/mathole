@@ -8,11 +8,13 @@ export class GameMilestone {
     readonly rewardtext: string
     readonly condition: string; // to be evaluated by mathjs parser
     readonly rewardAction: MilestoneRewardAction;
+    readonly visible: boolean;
 
     constructor( 
         name: string, 
         displayName: string,
         condition: string,
+        visible: boolean,
         rewardText: string = "",
         rewardAction: MilestoneRewardAction = {}
         ) {

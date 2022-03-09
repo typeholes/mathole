@@ -1,7 +1,7 @@
 import { removeValuefromArray, unique } from "./util";
 import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
 import { setVariable as setMathVariable, getDependencies as getMathDependencies, replaceSymbols } from "./mathUtil";
-import { GameTime, GameVar, GameBuyable, GameCalculation, GameVarPlain } from "./GameVar";
+import { GameTime, GameVar, GameBuyable, GameCalculation, GameVarPlain, GameToggle } from "./GameVar";
 import { GameMilestoneManager, MilestoneRewardAction } from "./GameMilestoneManager";
 import { Action, TickBuffer } from "./TickBuffer";
 import { i } from "mathjs";
@@ -66,6 +66,14 @@ type NewPlainArgs<T extends RequiredStateFields> = {
     displayName: string,
     visible: boolean,
     value: number,
+    extra: ExtraVarFields<VarType<T>>
+};
+
+type NewToggleArgs<T extends RequiredStateFields> = {
+    name: string,
+    displayName: string,
+    visible: boolean,
+    reversible: boolean,
     extra: ExtraVarFields<VarType<T>>
 };
 
@@ -150,6 +158,13 @@ export class GameVarManager<T extends RequiredStateFields> {
         const ret = new GameVarPlain(args.name, args.displayName, args.visible);
         this.add(ret, args.extra);
         ret.spend(-1 * args.value);
+        return ret;
+    }
+
+    newToggle( args: NewToggleArgs<T>) : GameToggle {
+        const ret = new GameToggle(args.name, args.displayName, args.visible, args.reversible);
+        this.add(ret, args.extra);
+        
         return ret;
     }
 
@@ -240,6 +255,11 @@ export class GameVarManager<T extends RequiredStateFields> {
         return gameVar instanceof GameBuyable && gameVar.buyable;
     }
 
+    isToggle(varName) {
+        const gameVar = this.get(varName);
+        return gameVar instanceof GameToggle;
+    }
+
     isSellable(varName) {
         const gameVar = this.get(varName);
         return gameVar instanceof GameBuyable && gameVar.sellable;
@@ -308,8 +328,10 @@ export class GameVarManager<T extends RequiredStateFields> {
         buyable.buy();
         this.setUiVarFields(buyable, 'dirty');
 
-        currency.spend(cost);
-        this.setUiVarFields(currency, 'dirty');
+        if (currency) { 
+            currency.spend(cost);
+            this.setUiVarFields(currency, 'dirty');
+        }
 
     }
 

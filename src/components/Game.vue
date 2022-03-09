@@ -4,7 +4,7 @@ import Vsplitter from './Vsplitter.vue';
 import GameVarView from './GameVarView.vue';
 import JankyMarketTrader from './JankyMarketTrader.vue';
 import { GameState } from '../js/GameState';
-import { Globals, UiState } from './uiUtil';
+import { Globals, UiState, uiState } from './uiUtil';
 import { ref } from 'vue';
 
 const gameState : GameState<UiState> = GameState.getInstance();
@@ -25,7 +25,7 @@ function getNames() : string[] {
         <JankyMarketTrader></JankyMarketTrader>
       </template>
       <template #right>
-        <div v-if="Globals.freeAccount" class="varPane">
+        <div v-if="uiState.vars.loggedIn.value>0" class="varPane">
           <div class="mainVar">
             <GameVarView varName="t" forceVisible ></GameVarView> 
             <GameVarView varName="money" forceVisible></GameVarView>

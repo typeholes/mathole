@@ -61,8 +61,8 @@ export class GameBuyable extends GameVar {
         this._totalBought = totalCnt;
     }
 
-    private _cntBought = 0; 
-    private _totalBought = 0;
+    protected _cntBought = 0; 
+    protected _totalBought = 0;
     currency: string;
     buyable: boolean = true;
     sellable: boolean = false;
@@ -128,6 +128,36 @@ export class GameVarPlain extends GameBuyable {
         const args = {x: name};
 
         super(name, displayName, visible, id, args, "", false, id, args, false); // TODO replace with id after providing builtin functionDefs
+    }
+}
+
+export class GameToggle extends GameBuyable {
+    reversible: boolean;
+
+    constructor(
+        name: string,
+        displayName: string,
+        visible: boolean,
+        reversible: boolean
+    ) {
+        const id = FunctionDefManager.get('id');
+        const args = {x: '0'};
+
+        super(name, displayName, visible, id, args, "", false, id, args, false); // TODO replace with id after providing builtin functionDefs
+        
+        this.reversible = reversible
+    }
+    
+    buy() : void { 
+        if ( this._cntBought == 0 ) {
+            this._cntBought = 1;
+            this._totalBought = 1;
+            if (! this.reversible) { this.visible = false; }
+        } else {
+            if ( this.reversible ) {
+                this._cntBought = 0;
+            }
+        }
     }
 }
 

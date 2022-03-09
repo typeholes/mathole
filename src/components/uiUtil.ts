@@ -68,7 +68,6 @@ export const Globals = reactive({
     dependents : [],
     sidebarMode : 'Story' as SidebarModesT,
     helpKey: "",
-    freeAccount: false,
 });
 
 export interface UiVar extends RequiredVarFields {
@@ -203,7 +202,9 @@ export function mainClick(varName: string) {
      engineCallbacks[callback][1].push(handler)
   }
     
-  function onMilestoneReached(milestoneName: string, storyPoint: string) {
+  function onMilestoneReached(milestoneName: string, storyPoint: string, milestoneVisible: boolean) {
+    if ( ! milestoneVisible ) { return; }
+
     gameState.schedule( () => {
       setMode('Story')
     });

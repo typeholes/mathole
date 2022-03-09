@@ -55,11 +55,23 @@ vars.newBuyable({
     currency: 'money', sellable: false, extra: {janky: true}
 })
 
+vars.newToggle({
+    name: 'reallyFree', displayName: "Yes I'm sure", visible: true, reversible: false, extra: {janky: true}
+})
+
+vars.newToggle({
+    name: 'freeAccount', displayName: 'Switch to a free account now', visible: true, reversible: false, extra: {janky: true}
+})
+
+vars.newToggle({
+    name: 'loggedIn', displayName: 'Log In', visible: true, reversible: false, extra: {janky: true}
+})
+
 
 //vars.newCalculation( 'dummy', 'dummy', true, id, {x:'2^(t*10)'});
 //vars.newBuyable( 'sdummy', 'Dummy', true, id, {x: 'dummy'}, 'money', true);
 
-milestones.create('startStory', 'Went Bankrupt', 't > 0', "You start the game from scratch"
+milestones.create('startStory', 'Went Bankrupt', 't > 0', true, "You start the game from scratch"
     , {storyPoint: "You went bankrupt. All you have left is your library card and a dollar's worth of coins you found in the gutter. Time to head to the library, grab a computer, and login to jankyMarketTrader.com"
         + "\n\n Warning: this is just a preview release so there will likely be bugs"
         + "\n There is no auto save. Use the save and load buttons"
@@ -68,14 +80,14 @@ milestones.create('startStory', 'Went Bankrupt', 't > 0', "You start the game fr
     }, {}
 );
 
-milestones.create('tooStable', 'Too Stable?', 'stability > 3', ' Can sell Market Stability'
+milestones.create('tooStable', 'Too Stable?', 'stability > 3', true, 'Can sell Market Stability'
     , { setSellable: {stability: true}
       , storyPoint: "It is harder to make money in stable markets. Maybe you should trade some of that stability to increase the scale of the market."
     }, {}
     
 );
 
-milestones.create('scaled', 'Insider Trading', 'marketScale >= 1', ' Better price when selling shares '
+milestones.create('scaled', 'Insider Trading', 'marketScale >= 1', true, 'Better price when selling shares '
     , {adjustFunctions: {shares: {sellCost: ' 1.1 * <&>'}}}, {}
 );
 

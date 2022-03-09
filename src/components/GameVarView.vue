@@ -73,21 +73,26 @@ function buy(varName: string) {
 
 <template>
     <div class="gamevar" v-if="forceVisible || gameState.isVisible(varName)">    
-        <div :class="labelClass(varName)">
-          <span> {{ varName === Globals.selectedVarName ? "&#8860" : "&#8658" }} </span></div>
-        <div class="label">
-          <span  @click="labelClick(varName)">{{ gameState.getDisplayName(varName) }}: </span> 
+        <div v-if="gameState.isToggle(varName)" class="inline"> 
+          <button @click="buy(varName)"> {{ gameState.getDisplayName(varName) }} </button>
         </div>
-       <div class="value" v-if="!props.hideCnt">
-          {{ formatNumber(getValue(varName)) }}         
-       </div> 
-        <div class="buy">
-          <button @click="buy(varName)" v-if="gameState.isBuyable(varName)" :disabled="!canBuy(varName)" > 
-              Buy: {{ formatNumber(getCost(varName)) }} {{ gameState.getCurrencyDisplayName(varName) }}
-          </button> 
-        </div>
-        <div class="sell">
-          <button @click="sell(varName)" v-if="gameState.isSellable(varName)" :disabled="!canSell(varName)">Sell: {{ formatNumber(getSellCost(varName)) }} {{ gameState.getCurrencyDisplayName(varName) }}</button> 
+        <div v-else class="inline">
+          <div :class="labelClass(varName)">
+            <span> {{ varName === Globals.selectedVarName ? "&#8860" : "&#8658" }} </span></div>
+          <div class="label">
+            <span  @click="labelClick(varName)">{{ gameState.getDisplayName(varName) }}: </span> 
+          </div>
+         <div class="value" v-if="!props.hideCnt">
+            {{ formatNumber(getValue(varName)) }}         
+         </div> 
+          <div class="buy">
+            <button @click="buy(varName)" v-if="gameState.isBuyable(varName)" :disabled="!canBuy(varName)" > 
+                Buy: {{ formatNumber(getCost(varName)) }} {{ gameState.getCurrencyDisplayName(varName) }}
+            </button> 
+          </div>
+          <div class="sell">
+            <button @click="sell(varName)" v-if="gameState.isSellable(varName)" :disabled="!canSell(varName)">Sell: {{ formatNumber(getSellCost(varName)) }} {{ gameState.getCurrencyDisplayName(varName) }}</button> 
+          </div>
         </div>
     </div>
 </template>

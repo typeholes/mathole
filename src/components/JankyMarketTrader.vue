@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
-import { Globals } from './uiUtil';
+import { Globals, uiState } from './uiUtil';
 import GameVarView from './GameVarView.vue';
+import Swap from './Swap.vue';
 
-  const state = reactive ({
-    loggedIn: false,
-  });
+  function hasToggle(name: string) : boolean {
+    return uiState.vars[name].value === 1;
+  }
 
   function shout() {
     alert('JankyMarketTrader.com says\\nCould not process payment for user: Password123');
   }
   
-  function getFreeAccount() : boolean {
-    return Globals.freeAccount;
-  }
 </script>
 
 <template>
@@ -32,17 +30,24 @@ import GameVarView from './GameVarView.vue';
   </div>
   </div>
 
-  <div v-if="!getFreeAccount()">
-    <button v-if="!state.loggedIn" @click="state.loggedIn=true">Log in</button>
-    <div v-if="state.loggedIn">
-      <div class="blink_me">Your account has been disabled due to automatic payments being declined</div>
-      <input type="text"><button @click="shout()">Update Credit Card</button>
-      <button @click="Globals.freeAccount=true">Switch to a free account now</button>
-    </div>
-  </div>
-  <div v-else>
-    freebee
-  </div>
+  <Swap :swap="hasToggle('loggedIn')">
+    <template #before>
+      <Swap :swap="hasToggle('freeAccount')">
+        <template #before>
+          <div class="blink_me">Your account has been disabled due to automatic payments being declined</div>
+          <input type="text"><button @click="shout()">Update Credit Card</button>
+          <GameVarView var-name="freeAccount"></GameVarView>
+        </template>
+        <template #after>
+          <GameVarView var-name="loggedIn"></GameVarView>
+        </template> 
+      </Swap>
+    </template>
+    <template #after>
+      freebee
+    </template>
+  </Swap>
+ 
   
   <GameVarView var-name="premiumJanky" hide-cnt></GameVarView>
   

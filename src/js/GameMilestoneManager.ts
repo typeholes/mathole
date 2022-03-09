@@ -18,9 +18,9 @@ export class GameMilestoneManager<T extends RequiredStateFields> {
     private milestoneMap: { [any: string]: GameMilestone} = {};
     private dependencies: { [any: string]: string[] } = {};
 
-    create( name: string, displayName: string, condition: string, rewardText = "", rewardAction: MilestoneRewardAction = {}, extra: ExtraMilestoneFields<MilestoneType<T>> ) : GameMilestone {
+    create( name: string, displayName: string, condition: string, visible = false, rewardText = "", rewardAction: MilestoneRewardAction = {}, extra: ExtraMilestoneFields<MilestoneType<T>> ) : GameMilestone {
         this.uiStateMethods.milestoneAdder(this.uiState, name, extra);
-        const milestone = new GameMilestone( name, displayName, condition, rewardText, rewardAction );
+        const milestone = new GameMilestone( name, displayName, condition, visible, rewardText, rewardAction );
         this.milestoneMap[name] = milestone;
         
         const deps = getDependenciesFromString(condition);
@@ -43,7 +43,7 @@ export class GameMilestoneManager<T extends RequiredStateFields> {
             if ( milestone.check() ) { 
                 this.setReached(dep); 
                 actions.push( milestone.rewardAction);
-                GameState.instance.callbacks.milestoneReached(milestone.name, milestone.rewardAction.storyPoint);
+                GameState.instance.callbacks.milestoneReached(milestone.name, milestone.rewardAction.storyPoint, milestone.visible);
             }
         })
         
