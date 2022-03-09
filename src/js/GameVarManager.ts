@@ -4,6 +4,7 @@ import { setVariable as setMathVariable, getDependencies as getMathDependencies,
 import { GameTime, GameVar, GameBuyable, GameCalculation, GameVarPlain } from "./GameVar";
 import { GameMilestoneManager, MilestoneRewardAction } from "./GameMilestoneManager";
 import { Action, TickBuffer } from "./TickBuffer";
+import { i } from "mathjs";
 
 export const defaultUiVarFields: RequiredVarFields = {
     value: 0, cost: 0, sellCost: 0, total: 0
@@ -29,8 +30,10 @@ export interface RequiredStateFields {
     milestones: {[any: string] : RequiredMilestoneFields }
 }
 
-
+// I wish I could use this type but it always resolves to the never case when used in the generic class.  Either I'm doing something wrong or TS is too eager and shrinks T extends X to X. 
+//type Extra<Required, Full extends Required> = Required extends Full ? Record<string, never> : Omit<Full, keyof Required>;
 type Extra<Required, Full extends Required> = Omit<Full, keyof Required>;
+
 
 export type ExtraVarFields<T extends RequiredVarFields> = Extra<RequiredVarFields, T>;
 
@@ -41,10 +44,12 @@ export type ExtraMilestoneFields<T extends RequiredMilestoneFields> = Extra<Requ
 
 export type UIVarFieldKeys = 'value' | 'cost' | 'sellCost' | 'total';
 
-export type VarType<T extends RequiredStateFields> = T['vars'][string];
+export type VarType<T extends RequiredStateFields> = T['vars'][any];
 export type MilestoneType<T extends RequiredStateFields> = T['milestones'][any];
-
-
+ 
+export interface UiVar extends RequiredVarFields {
+    janky?: boolean
+  };
 
 export interface UiStateMethods<T extends RequiredStateFields> {
     cloner: (state: any) => T; // make a fresh copy of the state for save/load
