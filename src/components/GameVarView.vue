@@ -7,10 +7,12 @@ import { getCost, getSellCost, getValue, Globals, mainClick as labelClick, refre
 interface Props {
   varName: string,
   forceVisible?: boolean,
+  hideCnt?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   forceVisible: false,
+  hideCnt: false
 })
 
 const gameState = GameState.getInstance();
@@ -76,7 +78,7 @@ function buy(varName: string) {
         <div class="label">
           <span  @click="labelClick(varName)">{{ gameState.getDisplayName(varName) }}: </span> 
         </div>
-       <div class="value">
+       <div class="value" v-if="!props.hideCnt">
           {{ formatNumber(getValue(varName)) }}         
        </div> 
         <div class="buy">

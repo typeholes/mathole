@@ -41,7 +41,7 @@ export type ExtraMilestoneFields<T extends RequiredMilestoneFields> = Extra<Requ
 
 export type UIVarFieldKeys = 'value' | 'cost' | 'sellCost' | 'total';
 
-export type VarType<T extends RequiredStateFields> = T['vars'][any];
+export type VarType<T extends RequiredStateFields> = T['vars'][string];
 export type MilestoneType<T extends RequiredStateFields> = T['milestones'][any];
 
 

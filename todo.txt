@@ -10,3 +10,5 @@ milestone list sorting options. maybe filters by variable
 todo recognize swipe controls for mobile.
 
 graph not updated on load
+
+add temporary effects so I can demo premium features of jankymarkettrader like dependencies and graphs

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import { Globals } from './uiUtil';
+import GameVarView from './GameVarView.vue';
 
   const state = reactive ({
     loggedIn: false,
@@ -42,6 +43,8 @@ import { Globals } from './uiUtil';
   <div v-else>
     freebee
   </div>
+  
+  <GameVarView var-name="premiumJanky" hide-cnt></GameVarView>
   
   </div>
 </template>

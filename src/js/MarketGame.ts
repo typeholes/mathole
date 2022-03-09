@@ -49,6 +49,12 @@ vars.newBuyable({
     currency: 'money', sellable: true, extra: {}
 });
 
+vars.newBuyable({
+    name: 'premiumJanky', displayName: 'Premium', visible: true,
+    fn: id, args: {x: '100'},
+    currency: 'money', sellable: false, extra: {janky: true}
+})
+
 
 //vars.newCalculation( 'dummy', 'dummy', true, id, {x:'2^(t*10)'});
 //vars.newBuyable( 'sdummy', 'Dummy', true, id, {x: 'dummy'}, 'money', true);

@@ -4,12 +4,17 @@ import Vsplitter from './Vsplitter.vue';
 import GameVarView from './GameVarView.vue';
 import JankyMarketTrader from './JankyMarketTrader.vue';
 import { GameState } from '../js/GameState';
-import { Globals } from './uiUtil';
+import { Globals, UiState } from './uiUtil';
 import { ref } from 'vue';
 
-const gameState = GameState.getInstance();
+const gameState : GameState<UiState> = GameState.getInstance();
 
 const jankyCollapsed = ref (false);
+
+function getNames() : string[] {
+  const names = gameState.getNames( (varFields) => !varFields.janky);
+  return names;
+}
 
 </script>
 
@@ -26,7 +31,7 @@ const jankyCollapsed = ref (false);
             <GameVarView varName="money" forceVisible></GameVarView>
           </div>
           <div class="vars">
-            <div class="contents" v-for="(varName) in gameState.getNames()">
+            <div class="contents" v-for="(varName) in getNames()">
               <GameVarView :varName="varName"></GameVarView>
             </div>
           </div>

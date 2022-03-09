@@ -1,6 +1,6 @@
 import { FunctionDef, FunctionDefManager } from "./FunctionDef";
 
-import { ExtraVarFields, GameVarManager, RequiredStateFields, UiStateMethods, VarType } from "./GameVarManager";
+import { ExtraVarFields, GameVarManager, MilestoneType, RequiredStateFields, UiStateMethods, VarType } from "./GameVarManager";
 import { displayFunction as mathDisplayFunction } from "./mathUtil";
 import { SaveManager } from "./SaveManager";
 import { GameMilestoneManager } from "./GameMilestoneManager";
@@ -61,8 +61,17 @@ export class GameState<T extends RequiredStateFields> {
         return ret;
     }
 
-    getNames() : string[] {
-        return this.gameVarManager.getNames();
+    getNames( filter: (varField: VarType<T>) => boolean = null) : string[] {
+        if (!filter) { 
+            return this.gameVarManager.getNames();
+        } else {
+            const varFilter = filter;
+            const filtered = this.gameVarManager.getNames().filter( (name) => {
+                const item = this.uiState.vars[name] as VarType<T>;
+                return filter(item);
+            });
+            return filtered;
+        }
     }
 
     tick(elapsedTime: number) : void {
