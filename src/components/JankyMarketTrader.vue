@@ -39,7 +39,9 @@ import Swap from './Swap.vue';
           <GameVarView var-name="freeAccount"></GameVarView>
         </template>
         <template #after>
-          <GameVarView var-name="loggedIn"></GameVarView>
+          <div v-for="varName in ['loggedIn','reallyFree']">
+              <GameVarView :var-name="varName"></GameVarView>
+          </div>
         </template> 
       </Swap>
     </template>

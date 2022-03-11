@@ -1,33 +1,34 @@
-import { FunctionDef, FunctionDefManager } from "./FunctionDef";
+import { FunctionDefManager } from "./FunctionDef";
 
-import { ExtraVarFields, GameVarManager, MilestoneType, RequiredStateFields, UiStateMethods, VarType } from "./GameVarManager";
+import { ExtraVarFields, GameVarManager, RequiredMilestoneFields, RequiredStateFields, RequiredVarFields, UiStateMethods } from "./GameVarManager";
 import { displayFunction as mathDisplayFunction } from "./mathUtil";
 import { SaveManager } from "./SaveManager";
 import { GameMilestoneManager } from "./GameMilestoneManager";
 import { Action } from "./TickBuffer";
+import { UiStateWriter } from "./UiStateWriter";
 
 export type EngineCallbackMap = {
-    milestoneReached?: (milestoneName: string, storyPoint: string, milestoneVisible) => void
+    milestoneReached?: (milestoneName: string, storyPoint: string) => void
 }
 
 function ignore(...args: any[]) : void {}
 
-export class GameState<T extends RequiredStateFields> {
-
+export class GameState<S extends RequiredStateFields<V,M>, V extends RequiredVarFields, M extends RequiredMilestoneFields> {
     // must be called before any other method
-    static init<T extends RequiredStateFields>( uiState: T
-        , uiStateMethods: UiStateMethods<T>
-        , defaultVarExtra: ExtraVarFields<VarType<T>>
-        , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<T>) => void
+    static init<S extends RequiredStateFields<V,M>, V extends RequiredVarFields, M extends RequiredMilestoneFields>( 
+        uiState: S
+        , uiStateMethods: UiStateMethods<S,V,M>
+        , defaultVarExtra: ExtraVarFields<V>
+        , gameSetup: (vars: GameVarManager<S,V,M>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<M,V>) => void
         , callbacks: EngineCallbackMap
-        ): T { 
+        ): S { 
 
         GameState._instance = new GameState(uiState, uiStateMethods, defaultVarExtra, gameSetup, callbacks);
         return uiState;
     }
 
     // must call init first
-    static getInstance<T extends RequiredStateFields>(): GameState<T> {
+    static getInstance<S extends RequiredStateFields<V,M>, V extends RequiredVarFields, M extends RequiredMilestoneFields >(): GameState<S,V,M> {
         return GameState._instance;
     }
 
@@ -52,6 +53,10 @@ export class GameState<T extends RequiredStateFields> {
 
     }
 
+    milestoneReached(milestoneName: string) : boolean {
+        return this.uiStateMethods.milestoneGetter(this.uiState, milestoneName );
+    }
+
     getNameMap() {
         const ret = {};
         this.gameVarManager.getNames().forEach( (key) => 
@@ -61,13 +66,13 @@ export class GameState<T extends RequiredStateFields> {
         return ret;
     }
 
-    getNames( filter: (varField: VarType<T>) => boolean = null) : string[] {
+    getNames( filter: (varField: V) => boolean = null) : string[] {
         if (!filter) { 
             return this.gameVarManager.getNames();
         } else {
             const varFilter = filter;
             const filtered = this.gameVarManager.getNames().filter( (name) => {
-                const item = this.uiState.vars[name] as VarType<T>;
+                const item = this.uiState.vars[name];
                 return filter(item);
             });
             return filtered;
@@ -86,10 +91,6 @@ export class GameState<T extends RequiredStateFields> {
         if ( varName === "") { return "WTF!"; }
         return this.gameVarManager.get(varName).displayName; 
     } 
-
-    isVisible(varName: string) :  boolean {
-        return this.gameVarManager.get(varName).visible; 
-    }
 
     buy(varName: string) : void {
         this.gameVarManager.buy(varName);
@@ -175,42 +176,41 @@ export class GameState<T extends RequiredStateFields> {
             const cost = values.cost;
             const sellCost = values.cost;
             const total = values.total;
-            this.gameVarManager.setUiVarField(name, 'value', val);
-            this.gameVarManager.setUiVarField(name, 'cost', cost);
-            this.gameVarManager.setUiVarField(name, 'sellCost', sellCost);
-            this.gameVarManager.setUiVarField(name, 'total', total);
+            this.gameVarManager.setRequiredVarField(name, 'value', val);
+            this.gameVarManager.setRequiredVarField(name, 'cost', cost);
+            this.gameVarManager.setRequiredVarField(name, 'sellCost', sellCost);
+            this.gameVarManager.setRequiredVarField(name, 'total', total);
         });
         
         this.milestoneManager.getNames().forEach( (name) => {
-            this.milestoneManager.loadReached(name, (newMilestones[name]||{reached: false}).reached);
+            this.uiStateWriter.loadReached(name, (newMilestones[name]||{reached: false}).reached);
         });
 
         this.gameVarManager.setFromUIValues();
         this.canTick = true;
     }
     
-    private static _instance: GameState<any>;
+    private static _instance: GameState<any,any,any>;
     static get instance() { return GameState._instance; }
     
-    private readonly gameVarManager: GameVarManager<T>;
-    private readonly saveManager: SaveManager<T>;
-    private readonly milestoneManager: GameMilestoneManager<T>;
+    private readonly gameVarManager: GameVarManager<S,V,M>;
+    private readonly saveManager: SaveManager<S>;
+    private readonly milestoneManager: GameMilestoneManager<M,V>;
 
     /**
      * description
      * 
      * @category uiState
      */
-    private readonly uiState: T;
-    private readonly uiStateMethods: UiStateMethods<T>;
+    protected readonly uiState: S;
+    protected readonly uiStateMethods: UiStateMethods<S,V,M>;
+    private readonly uiStateWriter : UiStateWriter<S,V,M>;
 
-
-
-    private constructor
-    ( uiState: T
-    , uiStateMethods: UiStateMethods<T>
-    , defaultVarExtra: ExtraVarFields<VarType<T>>
-    , gameSetup: (vars: GameVarManager<T>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<T>) => void
+    protected constructor
+    ( uiState: S
+    , uiStateMethods: UiStateMethods<S,V,M>
+    , defaultVarExtra: ExtraVarFields<V>
+    , gameSetup: (vars: GameVarManager<S,V,M>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<M,V>) => void
     , callbacks: EngineCallbackMap
     ) {
         this.uiState = uiState;
@@ -221,21 +221,19 @@ export class GameState<T extends RequiredStateFields> {
             this.callbacks[key] ||= ignore;
         }
 
-        this.milestoneManager = new GameMilestoneManager<T>(
-            uiState, uiStateMethods
-        );
+        this.uiStateWriter = new UiStateWriter(uiState, uiStateMethods);
+        this.milestoneManager = new GameMilestoneManager<M,V>(this.uiStateWriter);
 
-        this.gameVarManager = new GameVarManager<T>(
-            uiState, uiStateMethods, defaultVarExtra, this.milestoneManager
+        this.gameVarManager = new GameVarManager<S,V,M>(
+            this.uiStateWriter, defaultVarExtra, this.milestoneManager
         );
 
         gameSetup(this.gameVarManager, FunctionDefManager, this.milestoneManager);
 
-        this.saveManager = new SaveManager( () => this.uiStateMethods.cloner(this.uiState) );
+       this.saveManager = new SaveManager( () => this.uiStateMethods.cloner(this.uiState) );
         
     }
 
 }
-
 
 

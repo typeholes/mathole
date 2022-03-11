@@ -4,10 +4,10 @@ import Vsplitter from './Vsplitter.vue';
 import GameVarView from './GameVarView.vue';
 import JankyMarketTrader from './JankyMarketTrader.vue';
 import { GameState } from '../js/GameState';
-import { Globals, UiState, uiState } from './uiUtil';
+import { Globals, UiGameState, UiState, uiState } from './uiUtil';
 import { ref } from 'vue';
 
-const gameState : GameState<UiState> = GameState.getInstance();
+const gameState : UiGameState = GameState.getInstance();
 
 const jankyCollapsed = ref (false);
 

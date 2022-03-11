@@ -2,7 +2,7 @@
 
 import { GameState } from '../js/GameState';
 import { formatNumber } from '../js/util';
-import { getCost, getSellCost, getValue, Globals, mainClick as labelClick, refreshGraph } from './uiUtil';
+import { getCost, getSellCost, getValue, Globals, mainClick as labelClick, refreshGraph, isVisible  } from './uiUtil';
 
 interface Props {
   varName: string,
@@ -72,7 +72,7 @@ function buy(varName: string) {
 </script>
 
 <template>
-    <div class="gamevar" v-if="forceVisible || gameState.isVisible(varName)">    
+    <div class="gamevar" v-if="forceVisible || isVisible(varName)">    
         <div v-if="gameState.isToggle(varName)" class="inline"> 
           <button @click="buy(varName)"> {{ gameState.getDisplayName(varName) }} </button>
         </div>

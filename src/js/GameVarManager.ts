@@ -1,18 +1,11 @@
 import { removeValuefromArray, unique } from "./util";
 import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
-import { setVariable as setMathVariable, getDependencies as getMathDependencies, replaceSymbols } from "./mathUtil";
+import { setVariable as setMathVariable, getDependencies as getMathDependencies, replaceSymbols, M } from "./mathUtil";
 import { GameTime, GameVar, GameBuyable, GameCalculation, GameVarPlain, GameToggle } from "./GameVar";
-import { GameMilestoneManager, MilestoneRewardAction } from "./GameMilestoneManager";
+import { GameMilestoneManager } from "./GameMilestoneManager";
+import { GameAction, NoGameAction } from "./GameAction";
 import { Action, TickBuffer } from "./TickBuffer";
-import { i } from "mathjs";
-
-export const defaultUiVarFields: RequiredVarFields = {
-    value: 0, cost: 0, sellCost: 0, total: 0
-};
-
-export const defaultUiMilestoneFields: RequiredMilestoneFields = {
-    reached: false
-}
+import { UiStateWriter } from "./UiStateWriter";
 
 export interface RequiredVarFields {
     value: number;
@@ -25,59 +18,56 @@ export interface RequiredMilestoneFields {
     reached: boolean;
 }
 
-export interface RequiredStateFields {
-    vars: {[any: string] : RequiredVarFields},
-    milestones: {[any: string] : RequiredMilestoneFields }
+export interface RequiredStateFields<V extends RequiredVarFields, M extends RequiredMilestoneFields> {
+    vars: {[any: string] : V},
+    milestones: {[any: string] : M }
 }
+export const defaultUiVarFields: RequiredVarFields = {
+    value: 0, cost: 0, sellCost: 0, total: 0
+};
+
+export const defaultUiMilestoneFields: RequiredMilestoneFields = {
+    reached: false
+}
+
 
 // I wish I could use this type but it always resolves to the never case when used in the generic class.  Either I'm doing something wrong or TS is too eager and shrinks T extends X to X. 
 //type Extra<Required, Full extends Required> = Required extends Full ? Record<string, never> : Omit<Full, keyof Required>;
 type Extra<Required, Full extends Required> = Omit<Full, keyof Required>;
 
 
-export type ExtraVarFields<T extends RequiredVarFields> = Extra<RequiredVarFields, T>;
+export type ExtraVarFields<V extends RequiredVarFields> = Extra<RequiredVarFields, V>;
 
-export type ExtraStateFields<T extends RequiredStateFields> = Extra<RequiredStateFields, T>;
+export type ExtraMilestoneFields<M extends RequiredMilestoneFields> = Extra<RequiredMilestoneFields, M>;
 
-export type ExtraMilestoneFields<T extends RequiredMilestoneFields> = Extra<RequiredMilestoneFields, T>;
-
-
-export type UIVarFieldKeys = 'value' | 'cost' | 'sellCost' | 'total';
-
-export type VarType<T extends RequiredStateFields> = T['vars'][any];
-export type MilestoneType<T extends RequiredStateFields> = T['milestones'][any];
- 
-export interface UiVar extends RequiredVarFields {
-    janky?: boolean
-  };
-
-export interface UiStateMethods<T extends RequiredStateFields> {
-    cloner: (state: any) => T; // make a fresh copy of the state for save/load
-    varAdder: (state: T, name: string, extra: ExtraVarFields<VarType<T>>) => void; 
-    varGetter: (state: T, name: string, key: string) => number;
-    varSetter: (state: T, name: string, key: string, value) => void;
-    milestoneAdder: (state: T, n: string, extra: ExtraMilestoneFields<MilestoneType<T>>) => void,
-    milestoneGetter: (state: T, name: string ) => boolean;
-    milestoneSetter: (state: T, name: string, gotten ) => void;
+export interface UiStateMethods<S extends RequiredStateFields<V,M>, V extends RequiredVarFields, M extends RequiredMilestoneFields> {
+    cloner: (state: any) => S; // make a fresh copy of the state for save/load
+    varAdder: (state: S, name: string, extra: ExtraVarFields<V>) => void; 
+    varGetter: (state: S, name: string, key: keyof V) => number;
+    varSetter: (state: S, name: string, key: keyof V, value) => void;
+    milestoneAdder: (state: S, n: string, extra: ExtraMilestoneFields<M>) => void,
+    milestoneGetter: (state: S, name: string ) => boolean;
+    milestoneSetter: (state: S, name: string, gotten ) => void;
 }
 
-type NewPlainArgs<T extends RequiredStateFields> = {
+type NewPlainArgs<V extends RequiredVarFields> = {
     name: string,
     displayName: string,
     visible: boolean,
     value: number,
-    extra: ExtraVarFields<VarType<T>>
+    extra: ExtraVarFields<V>
 };
 
-type NewToggleArgs<T extends RequiredStateFields> = {
+type NewToggleArgs<V extends RequiredVarFields> = {
     name: string,
     displayName: string,
     visible: boolean,
     reversible: boolean,
-    extra: ExtraVarFields<VarType<T>>
+    gameAction?: GameAction<V>,
+    extra: ExtraVarFields<V>
 };
 
-type NewBuyableArgs<T extends RequiredStateFields> = {
+type NewBuyableArgs<V extends RequiredVarFields> = {
     name: string,
     displayName: string,
     visible: boolean,
@@ -85,35 +75,32 @@ type NewBuyableArgs<T extends RequiredStateFields> = {
     args: argMap,
     currency: string,
     sellable: boolean,
-    extra: ExtraVarFields<VarType<T>>
+    extra: ExtraVarFields<V>
 }
 
-type NewCalculationArgs<T extends RequiredStateFields> = {
+type NewCalculationArgs<V extends RequiredVarFields> = {
     name: string,
     displayName: string,
     visible: boolean,
     fn: FunctionDef,
     args: argMap,
-    extra: ExtraVarFields<VarType<T>>
+    extra: ExtraVarFields<V>
 }
 
-export class GameVarManager<T extends RequiredStateFields> {
+export class GameVarManager<S extends RequiredStateFields<V,M>, V extends RequiredVarFields, M extends RequiredMilestoneFields> {
 
-    private readonly uiState: T;
-    private readonly uiStateMethods: UiStateMethods<T>;
-    private readonly milestoneManager: GameMilestoneManager<T>;
+    private readonly uiStateWriter: UiStateWriter<S,V,M>;
+    private readonly milestoneManager: GameMilestoneManager<M,V>;
 
-
-    constructor(uiState: T, uiStateMethods: UiStateMethods<T>, defaultVarExtra: ExtraVarFields<VarType<T>>, milestoneManager: GameMilestoneManager<T>) {
-        this.uiState = uiState;
-        this.uiStateMethods = uiStateMethods;
+    constructor(uiStateWriter: UiStateWriter<S,V,M>, defaultVarExtra: ExtraVarFields<V>, milestoneManager: GameMilestoneManager<M,V>) {
+        this.uiStateWriter = uiStateWriter;
         this.milestoneManager = milestoneManager;
 
         // debugger;
         this.add(GameTime.instance, defaultVarExtra);
     }
 
-    getUiVarField(from: string|GameVar, field: UIVarFieldKeys) {
+    getUiVarField(from: string|GameVar, field: keyof V) {
         const gameVar : GameVar = typeof from === 'string' ? this.get(from) : from;
         if ( field === 'value') { return gameVar.value; } 
         else if ( field === 'total' && gameVar instanceof GameBuyable) { return gameVar.totalBought; }
@@ -122,14 +109,14 @@ export class GameVarManager<T extends RequiredStateFields> {
         else { return NaN; }
     }
     
-    setUiVarField(from: string|GameVar, field: UIVarFieldKeys, value: number | 'dirty' = NaN) {
+    setRequiredVarField(from: string|GameVar, field: keyof RequiredVarFields, value: number | 'dirty' = NaN) {
         const gameVar : GameVar = typeof from === 'string' ? this.get(from) : from;
         if ( value === 'dirty') { this._dirty.push(gameVar.name);}
         let val = value;
-        if ( val  == 'dirty' || isNaN(val)) {
+        if ( val  == 'dirty' || isNaN(val as any)) {
             val = this.getUiVarField(gameVar, field);
         }
-         this.uiStateMethods.varSetter(this.uiState, gameVar.name, field, val);
+         this.uiStateWriter.setVarField(gameVar.name, field, val);
          if ( field === 'value' || field === 'total') { 
              setMathVariable(gameVar.name + ( field === 'total' ? '_total' : ''), val); 
              this.handleMilestoneUpdate(gameVar.name);
@@ -139,40 +126,40 @@ export class GameVarManager<T extends RequiredStateFields> {
     private setUiVarFields(from: string|GameVar, makeDirty: 'clean' | 'dirty' = 'clean') {
         const gameVar : GameVar = typeof from === 'string' ? this.get(from) : from;
         if ( makeDirty === 'dirty') { this._dirty.push(gameVar.name);}
-        this.setUiVarField(gameVar, 'cost');
-        this.setUiVarField(gameVar, 'sellCost');
-        this.setUiVarField(gameVar, 'value');
-        this.setUiVarField(gameVar, 'total');
+        this.setRequiredVarField(gameVar, 'cost');
+        this.setRequiredVarField(gameVar, 'sellCost');
+        this.setRequiredVarField(gameVar, 'value');
+        this.setRequiredVarField(gameVar, 'total');
     }
     
-    newCalculation( args: NewCalculationArgs<T> ): GameCalculation {
+    newCalculation( args: NewCalculationArgs<V> ): GameCalculation {
 
-        const ret = new GameCalculation(args.name, args.displayName, args.visible, args.fn, args.args);
+        const ret = new GameCalculation(args.name, args.displayName, args.fn, args.args);
         this.add(ret, args.extra);
         return ret;
     }
 
         
-    newPlain( args : NewPlainArgs<T> ) : GameVarPlain {
+    newPlain( args : NewPlainArgs<V> ) : GameVarPlain {
         
-        const ret = new GameVarPlain(args.name, args.displayName, args.visible);
+        const ret = new GameVarPlain(args.name, args.displayName);
         this.add(ret, args.extra);
         ret.spend(-1 * args.value);
         return ret;
     }
 
-    newToggle( args: NewToggleArgs<T>) : GameToggle {
-        const ret = new GameToggle(args.name, args.displayName, args.visible, args.reversible);
+    newToggle( args: NewToggleArgs<V>) : GameToggle<V> {
+        const ret = new GameToggle(args.name, args.displayName, args.reversible, args.gameAction || NoGameAction);
         this.add(ret, args.extra);
         
         return ret;
     }
 
-    newBuyable( args: NewBuyableArgs<T> ) : GameBuyable {
-        const ret = new GameBuyable(args.name, args.displayName, args.visible, args.fn, args.args, args.currency, args.sellable);
+    newBuyable( args: NewBuyableArgs<V> ) : GameBuyable {
+        const ret = new GameBuyable(args.name, args.displayName, args.fn, args.args, args.currency, args.sellable);
         this.add(ret, args.extra);
-        this.setUiVarField(ret,'value');
-        this.setUiVarField(ret,'cost');
+        this.setRequiredVarField(ret,'value');
+        this.setRequiredVarField(ret,'cost');
 
         const currencyVar = this._items[args.currency];
         if (currencyVar instanceof GameCalculation) {
@@ -181,19 +168,19 @@ export class GameVarManager<T extends RequiredStateFields> {
                 (body) => body + ' - ' + args.fn.callStr(args.args).replace(args.name, args.name + '_total') + ' + ' + args.fn.callStrEvaluatedArgs(args.args)
             );
         }
-        this.setUiVarField(currencyVar, "value", 'dirty');
+        this.setRequiredVarField(currencyVar, "value", 'dirty');
         return ret;
     }
 
-    add(g: GameVar, extra: ExtraVarFields<VarType<T>>) {
-        this.uiStateMethods.varAdder(this.uiState, g.name, extra);
+    add(g: GameVar, extra: ExtraVarFields<V>) {
+        this.uiStateWriter.addVar( g.name, extra);
 
         this._dependencies[g.name] = [];
         this._calculateDependencies(g);
         this._deepDependencies[g.name] = getMathDependencies(g.fn, g.args);
         this._order.push(g.name);
         this._items[g.name] = g;
-        this.setUiVarField(g, 'value', 'dirty');
+        this.setRequiredVarField(g, 'value', 'dirty');
     }
 
     private _calculateDependencies(tgt: GameVar): void {
@@ -227,7 +214,7 @@ export class GameVarManager<T extends RequiredStateFields> {
     tick(elapsedTime: number): void {
         const t = (this._items.t as GameTime);
         t.time += elapsedTime;
-        this.setUiVarField(t, 'value', t.time);
+        this.setRequiredVarField(t, 'value', t.time);
         this._dirty.push('t');
 
         for (let i = 0; i<2; i++) { // run through dirty twice so we process the fallout of the first pass
@@ -325,13 +312,15 @@ export class GameVarManager<T extends RequiredStateFields> {
         const cost = buyable.cost;
         if (cost > this.getUiVarField(currency, 'cost')) { return; }
 
-        buyable.buy();
+        const { gameAction, state } = buyable.buy();
         this.setUiVarFields(buyable, 'dirty');
 
         if (currency) { 
             currency.spend(cost);
             this.setUiVarFields(currency, 'dirty');
         }
+
+        this.handleAction( gameAction, state ); 
 
     }
 
@@ -341,54 +330,56 @@ export class GameVarManager<T extends RequiredStateFields> {
             const gameVar = this._items[varName];
             if (gameVar instanceof GameBuyable) {
                 gameVar.forceSetCounts(
-                    this.uiStateMethods.varGetter(this.uiState, varName, 'value'), 
-                    this.uiStateMethods.varGetter(this.uiState, varName, 'total')
+                    this.uiStateWriter.getVarField( varName, 'value'), 
+                    this.uiStateWriter.getVarField( varName, 'total')
                 );
             } else if (gameVar instanceof GameTime) {
-                gameVar.time = this.uiStateMethods.varGetter(this.uiState, varName, 'value');
+                gameVar.time = this.uiStateWriter.getVarField( varName, 'value');
             }
             this._dirty.push(varName);
-            setMathVariable(varName, this.uiStateMethods.varGetter(this.uiState, varName, 'value'));
-            setMathVariable(varName + '_total', this.uiStateMethods.varGetter(this.uiState, varName, 'value'));
+            setMathVariable(varName, this.uiStateWriter.getVarField( varName, 'value'));
+            setMathVariable(varName + '_total', this.uiStateWriter.getVarField( varName, 'value'));
             this.handleMilestoneUpdate(varName);
 
         });
     }
     
     handleMilestoneUpdate(varName: string) : void {
-        const actions: MilestoneRewardAction[] = this.milestoneManager.handleUpdate(varName);
-        actions.forEach( (action) => {
-            if ( action.setVisible ) {
-                for( let varName in action.setVisible) {
-                    const gameVar = this.get(varName);
-                    gameVar.visible = true;
+        const actions: GameAction<V>[] = this.milestoneManager.handleUpdate(varName);
+        actions.forEach( (action) => this.handleAction(action) );
+    }
+
+    handleAction(action: GameAction<V>, state = true) {
+        if ( action.setUiFields ) {
+            for( let varName in action.setUiFields) {
+                    this.uiStateWriter.setVarFields(varName, action.setUiFields[varName] as V);
+            }
+        }
+        if ( action.setBuyable ) {
+            for( let varName in action.setBuyable) {
+                const gameVar = this.get(varName);
+                if ( gameVar instanceof GameBuyable) { 
+                    gameVar.buyable = state;
+                } 
+            }
+        }
+        if ( action.setSellable ) {
+            for( let varName in action.setSellable) {
+                const gameVar = this.get(varName);
+                if ( gameVar instanceof GameBuyable) { 
+                    gameVar.sellable = state;
+                } 
+            }
+        }
+        if ( action.adjustFunctions ) {
+            if (! state) { throw "Undoing adjustFunction GameActions not implemented"; } //TODO
+            for( let varName in action.adjustFunctions) {
+                for ( let fnType in action.adjustFunctions[varName]) {
+                    const newBody = action.adjustFunctions[varName][fnType];
+                    this.adjustFnOf(varName, fnType, newBody, 'M' );
                 }
             }
-            if ( action.setBuyable ) {
-                for( let varName in action.setBuyable) {
-                    const gameVar = this.get(varName);
-                    if ( gameVar instanceof GameBuyable) { 
-                        gameVar.buyable = true;
-                    } 
-                }
-            }
-            if ( action.setSellable ) {
-                for( let varName in action.setSellable) {
-                    const gameVar = this.get(varName);
-                    if ( gameVar instanceof GameBuyable) { 
-                        gameVar.sellable = true;
-                    } 
-                }
-            }
-            if ( action.adjustFunctions ) {
-                for( let varName in action.adjustFunctions) {
-                    for ( let fnType in action.adjustFunctions[varName]) {
-                        const newBody = action.adjustFunctions[varName][fnType];
-                        this.adjustFnOf(varName, fnType, newBody, 'M' );
-                    }
-                }
-            }
-        });
+        }
     }
     
     private adjustFnOf(varName: string, fnType: string, newBody: string, suffix: string) {

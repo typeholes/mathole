@@ -3,7 +3,21 @@ import { GameState } from "../js/GameState";
 import { RequiredVarFields, UiStateMethods, defaultUiVarFields, ExtraVarFields, RequiredStateFields, RequiredMilestoneFields, ExtraMilestoneFields, defaultUiMilestoneFields } from "../js/GameVarManager";
 import { callEach } from "../js/util";
 
-export function init<T extends RequiredStateFields>( modeToComponentMap: ModeMap, initializedGameState: GameState<T>) {
+export interface UiVar extends RequiredVarFields {
+  visible?: boolean 
+  janky?: boolean
+};
+
+export type UiMilestone = RequiredMilestoneFields;
+
+export type UiState = { 
+    vars: { [any: string]: UiVar },
+    milestones: { [any: string]: { reached: boolean}}
+};
+
+export type UiGameState = GameState<UiState, UiVar, UiMilestone>;
+
+export function init( modeToComponentMap: ModeMap, initializedGameState: UiGameState) {
    modeMap = modeToComponentMap; 
    gameState = initializedGameState;
 }
@@ -13,7 +27,7 @@ export function onUiMounted() {
 }
 
 let modeMap : ModeMap = null; // init
-let gameState : GameState<any> = null; // init
+let gameState : UiGameState = null; // init
 
 export type ModeMap = 
   { 'Options' : any
@@ -70,20 +84,12 @@ export const Globals = reactive({
     helpKey: "",
 });
 
-export interface UiVar extends RequiredVarFields {
-  janky?: boolean
-};
-
-export type UiMilestone = RequiredMilestoneFields;
 
 export const defaultExtraVarFields = {
+  visible: true,
   janky: false
 }
 
-export type UiState = { 
-    vars: { [any: string]: UiVar },
-    milestones: { [any: string]: { reached: boolean}}
-};
 
 export const uiState: UiState = reactive( { vars: {}, milestones: {}} );
 
@@ -98,19 +104,27 @@ function cloneUiState(state: UiState) : UiState {
   return newState;
 }
 
-export const uiStateMethods : UiStateMethods<UiState> = {
+export const uiStateMethods : UiStateMethods<UiState, UiVar, UiMilestone> = {
     cloner: (m: UiState) => cloneUiState(m),
-    varAdder: (m: UiState, n: string, extra: ExtraVarFields<UiVar>) => m.vars[n] = reactive({...defaultUiVarFields, ...extra}),
+    varAdder: (m: UiState, n: string, extra: ExtraVarFields<UiVar>) => m.vars[n] = reactive({...defaultExtraVarFields, ...defaultUiVarFields, ...extra}),
     varGetter: (m: UiState, n: string, k: string) => m.vars[n][k],
     varSetter: (m: UiState, n: string, k: string, v: number) => m.vars[n][k]= v, 
-    milestoneAdder: (m: UiState, n: string, extra: ExtraMilestoneFields<UiMilestone>) => m.milestones[n] = reactive({...defaultUiMilestoneFields, ...extra}),
+    milestoneAdder: (m: UiState, n: string, extra: ExtraMilestoneFields<UiMilestone>) => m.milestones[n] = reactive({...defaultUiMilestoneFields, ...defaultUiMilestoneFields, ...extra}),
     milestoneGetter: (m: UiState, n: string) => m.milestones[n].reached,
     milestoneSetter: (m: UiState, n: string, v: boolean) => m.milestones[n].reached = v,
 }
 
+export function isVisible(varname: string) : boolean {
+  return uiState.vars[varname].visible;    
+}
 
 export function getValue(varName: string) {
   const val = uiState.vars[varName].value;
+  return val;
+}
+
+export function getTotal(varName: string) {
+  const val = uiState.vars[varName].total;
   return val;
 }
 
@@ -125,7 +139,7 @@ export function getCost(varName: string) {
 }
 
 export function milestoneReached(name: string) {
-    return uiState.milestones[name];
+    return (uiState.milestones[name]||{}).reached;
 }
 
 
@@ -202,8 +216,7 @@ export function mainClick(varName: string) {
      engineCallbacks[callback][1].push(handler)
   }
     
-  function onMilestoneReached(milestoneName: string, storyPoint: string, milestoneVisible: boolean) {
-    if ( ! milestoneVisible ) { return; }
+  function onMilestoneReached(milestoneName: string, storyPoint: string ) {
 
     gameState.schedule( () => {
       setMode('Story')

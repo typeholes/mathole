@@ -1,11 +1,12 @@
 import { argMap, FunctionDef, FunctionDefManager } from "./FunctionDef";
+import { GameAction, NoGameAction } from "./GameAction";
+import { RequiredVarFields } from "./GameVarManager";
 
 import { parser } from "./mathUtil";
 
 export abstract class GameVar { 
     readonly name: string;
     readonly displayName: string;
-    visible: boolean;
     fn: FunctionDef;
     readonly args: argMap;
 
@@ -22,13 +23,11 @@ export abstract class GameVar {
     constructor(
         name: string,
         displayName: string,
-        visible: boolean,
         fn: FunctionDef,
         args: argMap
     ) {
         this.name = name;
         this.displayName = displayName;
-        this.visible = visible;
         this.fn = fn;
         this.args = args;
     }
@@ -44,7 +43,7 @@ export class GameTime extends GameVar {
     time: number = 0;
 
     private constructor () {
-        super( 't', 'Time', false, FunctionDefManager.get('id'), {'x': 't'});
+        super( 't', 'Time', FunctionDefManager.get('id'), {'x': 't'});
     }
 
     get value(): number {
@@ -72,7 +71,6 @@ export class GameBuyable extends GameVar {
     constructor(
         name: string,
         displayName: string,
-        visible: boolean,
         fn: FunctionDef,
         args: argMap,
         currency: string, 
@@ -81,7 +79,7 @@ export class GameBuyable extends GameVar {
         sellArgs: argMap = args,
         buyable: boolean = true
     ) {
-        super(name, displayName, visible, fn, args);
+        super(name, displayName, fn, args);
         this.currency = currency;
         this.sellable = sellable;
         this.buyable = buyable;
@@ -107,9 +105,10 @@ export class GameBuyable extends GameVar {
         return this._totalBought;
     }
 
-    buy(): void {
+    buy() : { gameAction: GameAction<any>, state:boolean } {
         this._cntBought++;
         this._totalBought++;
+        return { gameAction: NoGameAction, state: false}
     }
 
     spend(cnt: number): void {
@@ -122,40 +121,44 @@ export class GameVarPlain extends GameBuyable {
     constructor(
         name: string,
         displayName: string,
-        visible: boolean
     ) {
         const id = FunctionDefManager.get('id');
         const args = {x: name};
 
-        super(name, displayName, visible, id, args, "", false, id, args, false); // TODO replace with id after providing builtin functionDefs
+        super(name, displayName, id, args, "", false, id, args, false); // TODO replace with id after providing builtin functionDefs
     }
 }
 
-export class GameToggle extends GameBuyable {
+export class GameToggle<V extends RequiredVarFields> extends GameBuyable {
     reversible: boolean;
+    gameAction: GameAction<V>;
 
     constructor(
         name: string,
         displayName: string,
-        visible: boolean,
-        reversible: boolean
+        reversible: boolean,
+        gameAction: GameAction<V>
     ) {
         const id = FunctionDefManager.get('id');
         const args = {x: '0'};
 
-        super(name, displayName, visible, id, args, "", false, id, args, false); // TODO replace with id after providing builtin functionDefs
+        super(name, displayName, id, args, "", false, id, args, false); // TODO replace with id after providing builtin functionDefs
         
         this.reversible = reversible
+        this.gameAction = gameAction;
     }
     
-    buy() : void { 
+    buy() : { gameAction: GameAction<V>, state:boolean } { 
         if ( this._cntBought == 0 ) {
             this._cntBought = 1;
             this._totalBought = 1;
-            if (! this.reversible) { this.visible = false; }
+            return { gameAction: this.gameAction, state: true};
         } else {
             if ( this.reversible ) {
                 this._cntBought = 0;
+                return { gameAction: this.gameAction, state: false };
+            } else {
+                return { gameAction: NoGameAction, state: false };
             }
         }
     }

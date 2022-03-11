@@ -1,13 +1,13 @@
-import { FunctionDef } from "./FunctionDef";
-import { MilestoneRewardAction } from "./GameMilestoneManager";
+import { RequiredVarFields} from "./GameVarManager";
+import { GameAction } from "./GameAction";
 import { runString } from "./mathUtil";
 
-export class GameMilestone {
+export class GameMilestone<V extends RequiredVarFields> {
     readonly name: string;
     readonly displayName: string;
     readonly rewardtext: string
     readonly condition: string; // to be evaluated by mathjs parser
-    readonly rewardAction: MilestoneRewardAction;
+    readonly rewardAction: GameAction<V>;
     readonly visible: boolean;
 
     constructor( 
@@ -16,7 +16,7 @@ export class GameMilestone {
         condition: string,
         visible: boolean,
         rewardText: string = "",
-        rewardAction: MilestoneRewardAction = {}
+        rewardAction: GameAction<V> = {}
         ) {
         this.name = name;
         this.displayName = displayName;

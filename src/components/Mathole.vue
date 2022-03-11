@@ -1,10 +1,12 @@
 
 <script setup lang="ts">
-import VsplitterVue from './Vsplitter.vue';
 
 
 import Vsplitter from './Vsplitter.vue';
+import Hsplitter from './Hsplitter.vue';
+
 import Game from './Game.vue';
+import Debug from './Debug.vue';
 
 import { GameState } from '../js/GameState';
 
@@ -114,11 +116,14 @@ function doExport() {
 }
 
 const gameCollapsed = ref ( false );
+const debugCollapsed = ref ( true );
 
 </script>
 
 <template>
   <div class="mathole">
+  <Hsplitter top-col-spec="minmax(contents,1fr)" bottom-col-spec="50px" v-model:collapsed="debugCollapsed">
+    <template #top>
     <Vsplitter left-col-spec="1fr" right-col-spec="300px" v-model:collapsed="gameCollapsed">
       <template #left>
         <Game></Game>
@@ -140,6 +145,11 @@ const gameCollapsed = ref ( false );
         </div>
       </template>
     </Vsplitter>
+    </template>
+    <template #bottom>
+      <Debug></Debug>
+    </template>
+    </Hsplitter>
 
   </div>
 

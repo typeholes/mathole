@@ -1,9 +1,9 @@
-import { UiState } from "../components/uiUtil";
+import { UiState, UiVar, UiMilestone } from "../components/uiUtil";
 import { FunctionDefManager } from "./FunctionDef";
 import { GameMilestoneManager } from "./GameMilestoneManager";
 import { GameVarManager} from "./GameVarManager";
 
-export function gameSetup ( vars: GameVarManager<UiState>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<UiState>) {
+export function gameSetup ( vars: GameVarManager<UiState, UiVar, UiMilestone>, functions: typeof FunctionDefManager, milestones: GameMilestoneManager<UiMilestone, UiVar>) {
 
 
 const id = functions.get('id');
@@ -56,7 +56,7 @@ vars.newBuyable({
 })
 
 vars.newToggle({
-    name: 'reallyFree', displayName: "Yes I'm sure", visible: true, reversible: false, extra: {janky: true}
+    name: 'reallyFree', displayName: "Yes I'm sure", visible: true, reversible: false, extra: {janky: true}, gameAction: { setUiFields: { loggedIn: {visible: true}, reallyFree: {visible: false} } }
 })
 
 vars.newToggle({
@@ -64,7 +64,7 @@ vars.newToggle({
 })
 
 vars.newToggle({
-    name: 'loggedIn', displayName: 'Log In', visible: true, reversible: false, extra: {janky: true}
+    name: 'loggedIn', displayName: 'Log In', visible: false, reversible: false, extra: {janky: true, visible: false}
 })
 
 
