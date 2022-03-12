@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "skipLibCheck": true,
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
@@ -8,11 +9,8 @@
     "noEmit": true,
     "experimentalDecorators": true,
     "esModuleInterop": true
-   // , "noImplicitAny": true
-    , "noImplicitThis": true
-    , "strictFunctionTypes": true
-    , "strictNullChecks": true
-//    , "strictPropertyInitialization": true
-
+    , "noImplicitAny": false
+    , "strict": true
+    , "alwaysStrict": true
   }
 }

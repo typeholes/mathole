@@ -3,6 +3,7 @@ import { GameState } from "../js/GameState";
 import { RequiredVarFields, UiStateMethods, defaultUiVarFields, ExtraVarFields, RequiredStateFields, RequiredMilestoneFields, ExtraMilestoneFields, defaultUiMilestoneFields } from "../js/GameVarManager";
 
 import { gameSetup } from "../js/MarketGame";
+import { defined, defaulted } from "../js/util";
 
 export interface UiVar extends RequiredVarFields {
   visible?: boolean 
@@ -127,8 +128,7 @@ export const uiStateMethods : UiStateMethods<UiState, UiVar, UiMilestone> = {
 
 export function isVisible(varname: string) : boolean {
   const visible = uiState.vars[varname].visible ;    
-  if (typeof visible === 'undefined') { return true;}
-  return visible;
+  return defaulted(visible, true);
 }
 
 export function getValue(varName: string) {

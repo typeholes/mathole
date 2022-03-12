@@ -7,8 +7,7 @@ import { addHandlers, createHovers } from './mathHovers';
 import { plot } from './plot';
 
 import {FunctionDef, FunctionDefManager} from './FunctionDef';
-import { isInteger } from 'mathjs';
-import { unique } from './util';
+import { unique, defined } from './util';
 
 export default displayExpr;
 export { displayExpr,  runDefinition, runString, setVariable, M, expand, getDerivative, displayFunction, updateVar, getDependencies, getDependenciesFromString };
@@ -35,7 +34,7 @@ function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap 
     node.content = expand(node.content, replaceConstants, localScope, maxDepth, depth+1);
     return node;
   }
-  if (node.op) {  // OperatorNode2
+  if (node.op && defined(node.args)) {  // OperatorNode2
     node.args = node.args.map( (a)=> {
       const newArg = expand(a, replaceConstants, localScope, maxDepth, depth+1) 
       return newArg;
@@ -43,9 +42,9 @@ function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap 
     return node;
   }
 
-  if (node.fn) { // FunctionNode2 
+  if (node.fn && defined(node.args) ) { // FunctionNode2 
     let def = FunctionDefManager.get(node.fn);
-    if (typeof def == 'undefined' || depth > maxDepth) { 
+    if ( !defined(def) || depth > maxDepth ) { 
       node.args = node.args.map( (a)=> 
       expand(a, replaceConstants, localScope, maxDepth, depth) 
       );     
@@ -69,7 +68,7 @@ function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap 
   if (node.name) { // SymbolNode2    
     const localValue = localScope[node.name];
     const value = replaceConstants ? localValue || parser.get(node.name) : localValue;
-    if (typeof value == 'undefined') { 
+    if ( !defined(value) ) { 
       try {
         const result = node.evaluate();
         if ( typeof result === 'number') {
@@ -104,22 +103,22 @@ function updateVar(name: string, value: string | number) {
 function runDefinition(str) { 
   var result = 'Valid';
   var fn = null;
-  try {
+//  try {
     fn = parser.evaluate(str); 
-  } catch(err) {
-    result = err;
-  }
+  // } catch(err) {
+  //   result = err;
+  // }
   return {result,fn};
 }
 
 function runString(str) { 
 //  debugger;
   var result = 'Not Run';
-  try {
+  // try {
     result = parser.evaluate(str); 
-  } catch(err) {
-    result = err;
-  }
+  // } catch(err) {
+  //   result = err;
+  // }
   return result;
 }
 
@@ -154,7 +153,7 @@ function getDependenciesFromString( expr: string, args = {} ) : string[] {
   const expanded = expand(M.parse(expr), false, args);
   
   const filtered = expanded.filter(function (node) {
-    return node.isSymbolNode && typeof parser.get(node.name) !== 'undefined'
+    return node.isSymbolNode && defined(parser.get(node.name));
   });
 
   const dependencies = unique(filtered.map( (x) => x.name));
@@ -165,7 +164,7 @@ function getDependenciesFromString( expr: string, args = {} ) : string[] {
 
 function displayFunction(functionDef: FunctionDef, elementIdPrefix="", graphId="", graphTitle="", nameMap : {[any:string]: string}, args={}) {
 
-  if ( typeof elementIdPrefix !== 'undefined' && elementIdPrefix !== "") {
+  if ( defined(elementIdPrefix) && elementIdPrefix !== "") {
     displayExpr( functionDef.body, 'x', elementIdPrefix, args);
   }
 
@@ -173,7 +172,7 @@ function displayFunction(functionDef: FunctionDef, elementIdPrefix="", graphId="
   const expanded = expand(M.parse(expr), true, args);
   
   const filtered = expanded.filter(function (node) {
-    return node.isSymbolNode && typeof parser.get(node.name) !== 'undefined'
+    return node.isSymbolNode && defined(parser.get(node.name));
   });
 
   const freeVars = unique(filtered.map( (x) => x.name));
@@ -221,7 +220,7 @@ function displayExpr(expr, selectedVar, elementIdPrefix="", args={}) {
 export function replaceSymbols(expr: string, replacements: {[any: string]: string}) {
   const node = M.parse(expr);
   const replaced = node.transform(function (node, path, parent) {
-    if (node.isSymbolNode && replacements[node.name] ) {
+    if (node.isSymbolNode && defined(node.name) && replacements[node.name] ) {
       return M.parse( '"' + replacements[node.name] + '"');
     }
     else {

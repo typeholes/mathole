@@ -3,6 +3,7 @@ import { GameAction, NoGameAction } from "./GameAction";
 import { RequiredVarFields } from "./GameVarManager";
 
 import { parser } from "./mathUtil";
+import { defined } from "./util";
 
 export abstract class GameVar { 
     readonly name: string;
@@ -34,7 +35,8 @@ export abstract class GameVar {
 
     dependsOn(name: string): boolean {
         const found = Object.values(this.args).find( (argValue) => typeof argValue === 'string' && argValue.split(/[^a-zA-Z]/).includes(name));
-        return ! (typeof found === 'undefined');
+        
+        return defined(found);
     }
 }       
 

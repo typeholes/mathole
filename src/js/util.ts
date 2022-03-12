@@ -86,4 +86,11 @@ type A = {
 //   type Diff<From, Minus> = {
 //     [Property in keyof From as (Property in keyof Minus) ? never : Property;
 //   }
-  
+
+export function defined<T>(x: T | undefined): x is T {
+    return !(typeof x === 'undefined');
+}
+
+export function defaulted<T>(x: T | undefined, dfault: T) : T {
+    return defined(x) ? x : dfault;
+}

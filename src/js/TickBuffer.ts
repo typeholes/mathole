@@ -19,7 +19,7 @@ export class TickBuffer {
         }
 
         if (this.buffer.length < 1) { return; }
-        const { actions, delay } = this.buffer.shift();
+        const { actions, delay } = this.buffer.shift() || emptyStep();
         this.delay = delay;
         
         actions.forEach( (a) => a() );

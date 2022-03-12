@@ -8,7 +8,6 @@ export class GameMilestone<V extends RequiredVarFields> {
     readonly rewardtext: string
     readonly condition: string; // to be evaluated by mathjs parser
     readonly rewardAction: GameAction<V>;
-    readonly visible: boolean;
 
     constructor( 
         name: string, 
