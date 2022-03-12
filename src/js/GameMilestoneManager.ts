@@ -37,7 +37,8 @@ export class GameMilestoneManager<M extends RequiredMilestoneFields, V extends R
             if ( milestone.check() ) { 
                 this.uiStateWriter.setReached(dep); 
                 actions.push( milestone.rewardAction);
-                GameState.instance.callbacks.milestoneReached(milestone.name, milestone.rewardAction.storyPoint);
+                const callbacks = GameState.instance.callbacks.milestoneReached;
+                if ( callbacks ) { callbacks.forEach( (f) => f(milestone.name, milestone.rewardAction.storyPoint || "") ); }
             }
         })
         

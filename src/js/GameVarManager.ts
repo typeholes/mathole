@@ -274,7 +274,7 @@ export class GameVarManager<S extends RequiredStateFields<V,M>, V extends Requir
 
     getCurrency(varName: string): GameVar {
         const buyable = this.get(varName);
-        if (!(buyable instanceof GameBuyable)) { return; }
+        if (!(buyable instanceof GameBuyable)) { throw varName + ' does not have a currency'; }
 
         return this.get(buyable.currency);
     };

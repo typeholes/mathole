@@ -12,9 +12,8 @@ import { GameState } from '../js/GameState';
 
 import { onMounted, ref } from 'vue';
 
-import { gameSetup } from "../js/MarketGame";
 
-import { init as UiInit, onUiMounted, uiState, uiStateMethods, sidebarComponent, Globals, setMode, gotoPriorMode, engineCallbacks, showHelp, defaultExtraVarFields } from './uiUtil';
+import { init as UiInit, onUiMounted, gameState, sidebarComponent, Globals, setMode, gotoPriorMode, showHelp } from './uiUtil';
 
 import Options from './Options.vue';
 import Dependencies from './Dependencies.vue';
@@ -24,9 +23,7 @@ import Story from './Story.vue';
 import Sidebars from './Sidebars.vue';
 import Help from './Help.vue';
 
-GameState.init ( uiState , uiStateMethods, defaultExtraVarFields, gameSetup, engineCallbacks);
 
-const gameState = GameState.getInstance();
 
 UiInit( {
   Options: Options,
@@ -37,6 +34,7 @@ UiInit( {
   Sidebars : Sidebars,
   Help : Help
 }, gameState);
+
 
 let priorTime = 0;
 function loop(elapsedTime) {

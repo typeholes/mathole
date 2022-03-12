@@ -1,8 +1,9 @@
 <script setup lang="ts">
 
 import { GameState } from '../js/GameState';
+import { ExtraVarFields } from '../js/GameVarManager';
 import { formatNumber } from '../js/util';
-import { getCost, getTotal, getSellCost, getValue, Globals, mainClick as labelClick, refreshGraph } from './uiUtil';
+import { getCost, getTotal, getSellCost, getValue, Globals, mainClick as labelClick, refreshGraph, uiState, UiVar } from './uiUtil';
 
 interface Props {
   varName: string,
@@ -12,6 +13,19 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const gameState = GameState.getInstance();
+
+function otherFields(varName: string) {
+  const fields = {... uiState.vars[varName]} as {[any: string]: any};
+  
+  delete fields.value; 
+  delete fields.cost;
+  delete fields.total;
+  delete fields.sellCost;
+  
+
+
+  return fields;
+}
 
 </script>
 
@@ -23,6 +37,7 @@ const gameState = GameState.getInstance();
             <td>{{ formatNumber(getCost(varName)) }}         </td>
             <td>{{ formatNumber(getSellCost(varName)) }}         </td>
             <td>{{ gameState.getDisplayName(varName) }} </td>
+            <td> {{ otherFields(varName) }} </td>
             <br>
     </tr>
 </template>

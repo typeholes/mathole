@@ -8,7 +8,7 @@ import { Action } from "./TickBuffer";
 import { UiStateWriter } from "./UiStateWriter";
 
 export type EngineCallbackMap = {
-    milestoneReached?: (milestoneName: string, storyPoint: string) => void
+    milestoneReached?: ((milestoneName: string, storyPoint: string) => void)[]
 }
 
 function ignore(...args: any[]) : void {}
@@ -66,7 +66,7 @@ export class GameState<S extends RequiredStateFields<V,M>, V extends RequiredVar
         return ret;
     }
 
-    getNames( filter: (varField: V) => boolean = null) : string[] {
+    getNames( filter: false | ((varField: V) => boolean) = false) : string[] {
         if (!filter) { 
             return this.gameVarManager.getNames();
         } else {

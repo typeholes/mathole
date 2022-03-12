@@ -1,7 +1,8 @@
 import { reactive } from "vue";
 import { GameState } from "../js/GameState";
 import { RequiredVarFields, UiStateMethods, defaultUiVarFields, ExtraVarFields, RequiredStateFields, RequiredMilestoneFields, ExtraMilestoneFields, defaultUiMilestoneFields } from "../js/GameVarManager";
-import { callEach } from "../js/util";
+
+import { gameSetup } from "../js/MarketGame";
 
 export interface UiVar extends RequiredVarFields {
   visible?: boolean 
@@ -19,15 +20,14 @@ export type UiGameState = GameState<UiState, UiVar, UiMilestone>;
 
 export function init( modeToComponentMap: ModeMap, initializedGameState: UiGameState) {
    modeMap = modeToComponentMap; 
-   gameState = initializedGameState;
 }
 
 export function onUiMounted() {
   gameState.start();
 }
 
-let modeMap : ModeMap = null; // init
-let gameState : UiGameState = null; // init
+// @ts-expect-error Yeah this is bad, but I have to delay assignment since I can't get the vue types outside of a .vue file.  need to document that we have to call init before anything else
+let modeMap : ModeMap = null; // call init before using
 
 export type ModeMap = 
   { 'Options' : any
@@ -59,8 +59,9 @@ function getMode(modeStr: SidebarModesT) : any {
 
 let priorModes : SidebarModesT[] = ['Sidebars'];
 export function gotoPriorMode() : void {
-  if ( priorModes.length == 0) { setMode('Sidebars', false); return;}
-  setMode(priorModes.pop(), false);
+  const prior = priorModes.pop();
+  if ( !prior ) { setMode('Sidebars', false); return;} 
+  setMode(prior, false);
 }
 
 export function setMode(modeStr: SidebarModesT, setPrior = true, setHelp = true) : void {
@@ -75,12 +76,21 @@ export function popupStory() {
   Globals.sidebarMode = 'Story';
 }
 
-export const Globals = reactive({
+type GlobalsT = {
+    graphedVarName : string
+    selectedVarName : string
+    dependencies : string[], 
+    dependents : string[],
+    sidebarMode : SidebarModesT,
+    helpKey: SidebarModesT | ""
+}
+
+export const Globals : GlobalsT = reactive({
     graphedVarName : "",
     selectedVarName : "",
-    dependencies : [],
+    dependencies : [], 
     dependents : [],
-    sidebarMode : 'Story' as SidebarModesT,
+    sidebarMode : 'Story', 
     helpKey: "",
 });
 
@@ -88,7 +98,8 @@ export const Globals = reactive({
 export const defaultExtraVarFields = {
   visible: true,
   janky: false
-}
+} as const;
+
 
 
 export const uiState: UiState = reactive( { vars: {}, milestones: {}} );
@@ -115,7 +126,9 @@ export const uiStateMethods : UiStateMethods<UiState, UiVar, UiMilestone> = {
 }
 
 export function isVisible(varname: string) : boolean {
-  return uiState.vars[varname].visible;    
+  const visible = uiState.vars[varname].visible ;    
+  if (typeof visible === 'undefined') { return true;}
+  return visible;
 }
 
 export function getValue(varName: string) {
@@ -184,26 +197,10 @@ export function mainClick(varName: string) {
     }
   }
   
-  function engineCallbackRunner( callback: EngineCallback ) {
-    return (...args) => {
-      const [ fn1, fns ] = engineCallbacks[callback];
-      const runner = callEach( fn1, ...fns);
-      runner( ...args);
-    }
-  }
 
-  const engineCallbacks : Record<string, [ handler: any, otherHandlers: any[]]> = {
-    milestoneReached: [onMilestoneReached, []],
-    something: [(n: number) => {}, []]
-  }
-
-  export { engineCallbackUI as engineCallbacks };
-  let engineCallbackUI = buildEngineCallbackUI();
-  
-  function buildEngineCallbackUI() {
-    const entries = Object.keys(engineCallbacks).map( (key) => [key, engineCallbackRunner(key)]);
-    
-    return Object.fromEntries(entries);
+export  const engineCallbacks : Record<string, any[]> = {
+    milestoneReached: [onMilestoneReached],
+    something: [(n: number) => {}]
   }
 
   export type EngineCallback = keyof typeof engineCallbacks;
@@ -213,7 +210,7 @@ export function mainClick(varName: string) {
     callback : EngineCallback, 
     handler,
     ) : void {
-     engineCallbacks[callback][1].push(handler)
+     engineCallbacks[callback].push(handler)
   }
     
   function onMilestoneReached(milestoneName: string, storyPoint: string ) {
@@ -229,5 +226,8 @@ export function mainClick(varName: string) {
   }
   
 
+GameState.init ( uiState , uiStateMethods, defaultExtraVarFields, gameSetup, engineCallbacks);
+
+export const gameState : UiGameState = GameState.instance; 
 
   
