@@ -44,10 +44,10 @@ export interface UiStateMethods<S extends RequiredStateFields<V,M>, V extends Re
     cloner: (state: any) => S; // make a fresh copy of the state for save/load
     varAdder: (state: S, name: string, extra: ExtraVarFields<V>) => void; 
     varGetter: (state: S, name: string, key: keyof V) => number;
-    varSetter: (state: S, name: string, key: keyof V, value) => void;
+    varSetter: (state: S, name: string, key: keyof V, value: any) => void; // TODO fix any
     milestoneAdder: (state: S, n: string, extra: ExtraMilestoneFields<M>) => void,
     milestoneGetter: (state: S, name: string ) => boolean;
-    milestoneSetter: (state: S, name: string, gotten ) => void;
+    milestoneSetter: (state: S, name: string, gotten: boolean ) => void; // TODO propable need to be able to set extra milestone fields
 }
 
 type NewPlainArgs<V extends RequiredVarFields> = {
@@ -237,17 +237,17 @@ export class GameVarManager<S extends RequiredStateFields<V,M>, V extends Requir
         this._tickBuffer.tick();
     }
 
-    isBuyable(varName) {
+    isBuyable(varName: string) {
         const gameVar = this.get(varName);
         return gameVar instanceof GameBuyable && gameVar.buyable;
     }
 
-    isToggle(varName) {
+    isToggle(varName: string) {
         const gameVar = this.get(varName);
         return gameVar instanceof GameToggle;
     }
 
-    isSellable(varName) {
+    isSellable(varName: string) {
         const gameVar = this.get(varName);
         return gameVar instanceof GameBuyable && gameVar.sellable;
     }
@@ -279,7 +279,7 @@ export class GameVarManager<S extends RequiredStateFields<V,M>, V extends Requir
         return this.get(buyable.currency);
     };
 
-    getCurrencyName(varName) {
+    getCurrencyName(varName: string) {
         const currency = this.getCurrency(varName);
         if (!currency) { return ""; }
         return currency.name;
@@ -374,7 +374,7 @@ export class GameVarManager<S extends RequiredStateFields<V,M>, V extends Requir
         if ( action.adjustFunctions ) {
             if (! state) { throw "Undoing adjustFunction GameActions not implemented"; } //TODO
             for( let varName in action.adjustFunctions) {
-                for ( let fnType in action.adjustFunctions[varName]) {
+                for ( const fnType in action.adjustFunctions[varName]) {
                     const newBody = action.adjustFunctions[varName][fnType];
                     this.adjustFnOf(varName, fnType, newBody, 'M' );
                 }

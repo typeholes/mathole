@@ -1,5 +1,5 @@
 import { reactive } from "vue";
-import { GameState } from "../js/GameState";
+import { EngineCallbackMap, GameState } from "../js/GameState";
 import { RequiredVarFields, UiStateMethods, defaultUiVarFields, ExtraVarFields, RequiredStateFields, RequiredMilestoneFields, ExtraMilestoneFields, defaultUiMilestoneFields } from "../js/GameVarManager";
 
 import { gameSetup } from "../js/MarketGame";
@@ -198,9 +198,9 @@ export function mainClick(varName: string) {
   }
   
 
-export  const engineCallbacks : Record<string, any[]> = {
+export  const engineCallbacks : EngineCallbackMap = {
     milestoneReached: [onMilestoneReached],
-    something: [(n: number) => {}]
+//    something: [(n: number) => {}]
   }
 
   export type EngineCallback = keyof typeof engineCallbacks;
@@ -208,7 +208,7 @@ export  const engineCallbacks : Record<string, any[]> = {
 
   export function onEngineCallback( 
     callback : EngineCallback, 
-    handler,
+    handler: (...args: any[]) => void,
     ) : void {
      engineCallbacks[callback].push(handler)
   }

@@ -5,18 +5,10 @@ export function removeValuefromArray<T>(arr: T[], value: T) : void {
     arr.splice(idx,1);
 }
 
-export function *zip (...iterables){
-    let iterators = iterables.map(i => i[Symbol.iterator]() )
-    while (true) {
-        let results = iterators.map(iter => iter.next() )
-        if (results.some(res => res.done) ) return
-        else yield results.map(res => res.value )
-    }
-}
 
 
-export function unique(arr: any[]) : any[] {
-    const check = (value, index, self) => self.indexOf(value) === index;
+export function unique<T>(arr: T[]) : T[] {
+    const check = (value: T, index: number, self: T[]) => self.indexOf(value) === index;
     return arr.filter(check);
 }
 
@@ -66,27 +58,6 @@ export function objMap<ObjT extends Record<string, From>, From,To>(obj: ObjT, f:
    ) as Choose<ObjT, Record<keyof ObjT, To>>
 };
 
-let i = objMap( { x:1 }, (x:number)=>'a');
-    
-let z = (f) => objMap( {x:3},f);
-
-
-type A = {
-    a : number,
-    b : number,
-    c : number,
-    d : number
-  }
-  
-  type B = {
-    b : number,
-    d : number
-  }
-  
-//   type Diff<From, Minus> = {
-//     [Property in keyof From as (Property in keyof Minus) ? never : Property;
-//   }
-
 export function defined<T>(x: T | undefined): x is T {
     return !(typeof x === 'undefined');
 }
@@ -94,3 +65,7 @@ export function defined<T>(x: T | undefined): x is T {
 export function defaulted<T>(x: T | undefined, dfault: T) : T {
     return defined(x) ? x : dfault;
 }
+
+export function iskey<ObjectType extends Record<PropertyKey, unknown>>( property: PropertyKey, object: ObjectType ): property is keyof ObjectType {
+        return Object.prototype.hasOwnProperty.call(object, property);
+};

@@ -1,4 +1,5 @@
 import { runDefinition as mathRunDefinition, runString } from "./mathUtil";
+import { iskey } from "./util";
 
 export type argMap = {[index: string]: string | number};
 
@@ -48,6 +49,24 @@ export class FunctionDef {
 
 }
 
+const digitMap = {
+        1: 'a',
+        2: 'b',
+        3: 'c',
+        4: 'd',
+        5: 'e',
+        6: 'f',
+        7: 'g',
+        8: 'h',
+        9: 'i',
+        0: 'j',
+        '.': 'k',
+        '+': 'l',
+        '-': 'm',
+        ',': 'n',
+        e: 'o'
+    } as const;
+
 export class FunctionDefManager {
     private static readonly _instance: FunctionDefManager = new FunctionDefManager();
 
@@ -73,27 +92,10 @@ export class FunctionDefManager {
     }
    
     private static uniqCnt=0;
-    private static digitMap = {
-        1: 'a',
-        2: 'b',
-        3: 'c',
-        4: 'd',
-        5: 'e',
-        6: 'f',
-        7: 'g',
-        8: 'h',
-        9: 'i',
-        0: 'j',
-        '.': 'k',
-        '+': 'l',
-        '-': 'm',
-        ',': 'n',
-        e: 'o'
-    };
        
     static makeUniqueSuffix() {
         this.uniqCnt++;
-        const unique = this.uniqCnt.toString().split('').map( (c) => this.digitMap[c]).join('');
+        const unique = this.uniqCnt.toString().split('').map( (c) => iskey(c, digitMap) ? digitMap[c] : "" ).join("");
         return unique + '_';
     }
 

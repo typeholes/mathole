@@ -28,7 +28,7 @@ function getDerivative(node: M.MathNode, by: string, args: argMap = {}) : M.Math
   return derived;
 }
 
-function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap = {}, maxDepth=Number.MAX_SAFE_INTEGER, depth=1) {    
+function expand(node: M.MathNode, replaceConstants: boolean, localScope: argMap = {}, maxDepth=Number.MAX_SAFE_INTEGER, depth=1) : M.MathNode {    
 
   if ( node.content) { // Parenthesis 
     node.content = expand(node.content, replaceConstants, localScope, maxDepth, depth+1);
@@ -100,7 +100,7 @@ function updateVar(name: string, value: string | number) {
   parser.set(name, value); 
 }
 
-function runDefinition(str) { 
+function runDefinition(str: string) { 
   var result = 'Valid';
   var fn = null;
 //  try {
@@ -111,18 +111,18 @@ function runDefinition(str) {
   return {result,fn};
 }
 
-function runString(str) { 
+function runString(str: string | number) { 
 //  debugger;
   var result = 'Not Run';
   // try {
-    result = parser.evaluate(str); 
+    result = parser.evaluate( (typeof str === 'string' ? str : str.toString())); 
   // } catch(err) {
   //   result = err;
   // }
   return result;
 }
 
-function texExpr(expr, doExpand, replaceConstants, args={}) {
+function texExpr(expr: string, doExpand: boolean, replaceConstants: boolean, args={}) {
   let parenthesis = 'keep';
   let implicit = 'hide';  
 
@@ -134,17 +134,18 @@ function texExpr(expr, doExpand, replaceConstants, args={}) {
   };
 }
 
-function texDerivative(expr, selectedVar, args={}) {
+function texDerivative(expr: string, selectedVar: string, args={}) {
   let parenthesis = 'keep';
   let implicit = 'hide';  
   return function() { 
-    let derivative = getDerivative(expr, selectedVar, args);
+    const node = M.parse(expr);
+    let derivative = getDerivative(node, selectedVar, args);
     return derivative.transform(addHandlers).toTex({ parenthesis: parenthesis, implicit: implicit }); 
   };
 
 }
 
-function getDependencies(functionDef: FunctionDef, args) : string[] {
+function getDependencies(functionDef: FunctionDef, args = {}) : string[] {
   if (!functionDef) { return []; }
   return getDependenciesFromString( functionDef.body, args);
 }
@@ -153,10 +154,10 @@ function getDependenciesFromString( expr: string, args = {} ) : string[] {
   const expanded = expand(M.parse(expr), false, args);
   
   const filtered = expanded.filter(function (node) {
-    return node.isSymbolNode && defined(parser.get(node.name));
+    return node.isSymbolNode && defined(node.name) && defined(parser.get(node.name));
   });
 
-  const dependencies = unique(filtered.map( (x) => x.name));
+  const dependencies = unique(filtered.map( (x) => x.name ?? ""));
   
   return dependencies;
   
@@ -172,7 +173,7 @@ function displayFunction(functionDef: FunctionDef, elementIdPrefix="", graphId="
   const expanded = expand(M.parse(expr), true, args);
   
   const filtered = expanded.filter(function (node) {
-    return node.isSymbolNode && defined(parser.get(node.name));
+    return node.isSymbolNode && defined(node.name) && defined(parser.get(node.name));
   });
 
   const freeVars = unique(filtered.map( (x) => x.name));
@@ -180,7 +181,7 @@ function displayFunction(functionDef: FunctionDef, elementIdPrefix="", graphId="
     throw "too many free variables in " + functionDef.name + ": " + freeVars.join(', ')
   }
   
-  const free = freeVars[0];
+  const free = freeVars[0] ?? "t";
 
   const makeX = free === 'x' ? '' : free + '=x;';
 
@@ -189,7 +190,7 @@ function displayFunction(functionDef: FunctionDef, elementIdPrefix="", graphId="
     
 }   
 
-function displayExpr(expr, selectedVar, elementIdPrefix="", args={}) {
+function displayExpr(expr: string, selectedVar: string, elementIdPrefix="", args={}) {
 
 
   const parts = [

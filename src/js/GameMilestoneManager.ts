@@ -49,7 +49,7 @@ export class GameMilestoneManager<M extends RequiredMilestoneFields, V extends R
         return Object.keys(this.milestoneMap);
     }
    
-    get(name) : GameMilestone<V> {
+    get(name: string) : GameMilestone<V> {
         return this.milestoneMap[name];
     }
 

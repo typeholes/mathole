@@ -6,10 +6,11 @@ import { SaveManager } from "./SaveManager";
 import { GameMilestoneManager } from "./GameMilestoneManager";
 import { Action } from "./TickBuffer";
 import { UiStateWriter } from "./UiStateWriter";
+import { iskey } from "./util";
 
 export type EngineCallbackMap = {
-    milestoneReached?: ((milestoneName: string, storyPoint: string) => void)[]
-}
+    milestoneReached: ((milestoneName: string, storyPoint: string) => void)[]
+} 
 
 function ignore(...args: any[]) : void {}
 
@@ -58,7 +59,7 @@ export class GameState<S extends RequiredStateFields<V,M>, V extends RequiredVar
     }
 
     getNameMap() {
-        const ret = {};
+        const ret: {[any: string]: string} = {};
         this.gameVarManager.getNames().forEach( (key) => 
             ret[key] = this.getDisplayName(key)
         );
@@ -217,8 +218,8 @@ export class GameState<S extends RequiredStateFields<V,M>, V extends RequiredVar
         this.uiStateMethods = uiStateMethods;
         this.callbacks = callbacks;
         
-        for(let key in callbacks) {
-            this.callbacks[key] ||= ignore;
+        for(const key in callbacks) {
+            if (iskey( key, this.callbacks) ) { this.callbacks[key] ||= [ignore]; }
         }
 
         this.uiStateWriter = new UiStateWriter(uiState, uiStateMethods);
