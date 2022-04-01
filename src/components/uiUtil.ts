@@ -5,6 +5,7 @@ import { RequiredVarFields, UiStateMethods, defaultUiVarFields, ExtraVarFields, 
 import { gameSetup } from "../js/MarketGame";
 import { defined, defaulted } from "../js/util";
 
+
 export interface UiVar extends RequiredVarFields {
   visible?: boolean 
   janky?: boolean
