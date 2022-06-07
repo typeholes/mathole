@@ -73,12 +73,13 @@ function buy(varName: string) {
 
 <template>
     <div class="gamevar" v-if="forceVisible || isVisible(varName)">    
-        <div v-if="gameState.isToggle(varName)" class="inline"> 
+        <template v-if="gameState.isToggle(varName)" > 
           <button @click="buy(varName)"> {{ gameState.getDisplayName(varName) }} </button>
-        </div>
-        <div v-else class="inline">
+        </template>
+        <template v-else>
           <div :class="labelClass(varName)">
-            <span> {{ varName === Globals.selectedVarName ? "&#8860" : "&#8658" }} </span></div>
+            <span> {{ varName === Globals.selectedVarName ? "&#8860" : "&#8658" }} </span>
+          </div>
           <div class="label">
             <span  @click="labelClick(varName)">{{ gameState.getDisplayName(varName) }}: </span> 
           </div>
@@ -93,7 +94,7 @@ function buy(varName: string) {
           <div class="sell">
             <button @click="sell(varName)" v-if="gameState.isSellable(varName)" :disabled="!canSell(varName)">Sell: {{ formatNumber(getSellCost(varName)) }} {{ gameState.getCurrencyDisplayName(varName) }}</button> 
           </div>
-        </div>
+        </template>
     </div>
 </template>
 
@@ -105,9 +106,6 @@ button.selected {
  background-color: #9342b9;
 }
 
-.inline {
-  display: inline-block;
-}
 .dependent {
  color: #6cf5de;
  transform: rotateY(.5turn)
@@ -132,31 +130,28 @@ button.selected {
 }
 
 .label {
-  display: block;
   grid-column: 2;
   justify-self: end;
 }
 
 .value {
-  display: block;
   grid-column: 3;
   justify-self: start;
 }
 
 .buy {
-  display: block;
   grid-column: 4;
   justify-self: start;
 }
 
 .sell {
-  display: block;
   grid-column: 5;
   justify-self: start;
 }
 
 .gamevar {
-  display: contents
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
 }
 
 
